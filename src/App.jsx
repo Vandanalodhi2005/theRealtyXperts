@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import About from './pages/About';
 import Properties from './pages/Properties';
@@ -42,8 +43,9 @@ const PublicLayout = () => {
 function App() {
   return (
     <Router>
-      <Routes>
-        {/* Admin Routes */}
+      <ErrorBoundary>
+        <Routes>
+          {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
@@ -72,6 +74,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
         </Route>
       </Routes>
+      </ErrorBoundary>
     </Router>
   );
 }
