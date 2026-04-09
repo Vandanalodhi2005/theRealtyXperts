@@ -5,25 +5,36 @@ function Contact() {
         window.scrollTo(0, 0);
     }, []);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const newInquiry = {
-            id: Date.now(),
             name: `${formData.get('first_name')} ${formData.get('last_name')}`,
             email: formData.get('email'),
+            phone: formData.get('phone'),
             subject: formData.get('subject'),
             message: formData.get('message'),
-            time: new Date().toLocaleString(),
-            status: 'unread',
-            initials: formData.get('first_name').charAt(0).toUpperCase()
         };
 
-        const existing = JSON.parse(localStorage.getItem('trx_inquiries') || '[]');
-        localStorage.setItem('trx_inquiries', JSON.stringify([newInquiry, ...existing]));
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newInquiry),
+            });
 
-        alert("Thank you for reaching out! Your inquiry has been sent to our experts.");
-        e.target.reset();
+            if (response.ok) {
+                alert("Thank you for reaching out! Your inquiry has been sent to our experts.");
+                e.target.reset();
+            } else {
+                alert("Failed to send message. Please try again later.");
+            }
+        } catch (error) {
+            console.error('Error submitting contact form:', error);
+            alert("Error sending message. Please check your connection.");
+        }
     };
 
     return (
@@ -98,6 +109,13 @@ function Contact() {
                                     type="email" 
                                     name="email"
                                     placeholder="Your Email Address" 
+                                    required 
+                                    style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
+                                />
+                                <input 
+                                    type="tel" 
+                                    name="phone"
+                                    placeholder="Your Phone Number" 
                                     required 
                                     style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
                                 />

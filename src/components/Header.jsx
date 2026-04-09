@@ -19,6 +19,8 @@ function Header() {
     };
 
     return (
+        <>
+        <div style={{ height: '80px' }}></div>
         <header className={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar">
             <div className="container nav-content">
                 <Link to="/" className="logo-container">
@@ -46,6 +48,7 @@ function Header() {
                 </div>
             </div>
         </header>
+        </>
     );
 }
 

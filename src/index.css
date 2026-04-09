@@ -1,6 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 /* ==========================================================================
    CSS Variables & Typography
    ========================================================================== */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
    :root {
     /* Brand Colors - Extracted from Logo Requirements */
     --color-navy: #0A1C3A; /* Dark blue from TRX */
