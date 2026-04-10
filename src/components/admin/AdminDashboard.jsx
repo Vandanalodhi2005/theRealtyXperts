@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import {
@@ -20,9 +20,15 @@ import {
   HiTrendingUp,
   HiUser,
   HiGlobe,
-  HiClipboardList
+  HiClipboardList,
+  HiX,
+  HiViewGrid,
+  HiCheckCircle,
+  HiAdjustments,
+  HiLockClosed,
+  HiQuestionMarkCircle,
+  HiDownload
 } from 'react-icons/hi';
-import sunriseLogo from '../../assets/sunrise_logo.png';
 import AddPropertyForm from './AddPropertyForm';
 
 const AdminDashboard = () => {
@@ -49,21 +55,19 @@ const AdminDashboard = () => {
   const [submissions, setSubmissions] = useState([]);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
 
+  // Fetch functions are consolidated here for clarity and reliability
   const fetchDashboardData = useCallback(async () => {
     try {
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/dashboard`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-
       if (response.ok) {
         const data = await response.json();
         setDashboardData(data.data);
-      } else {
+      } else if (response.status === 401) {
         localStorage.removeItem('adminToken');
-        navigate(`/admin/login`);
+        navigate('/admin/login');
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -77,11 +81,8 @@ const AdminDashboard = () => {
       setPropertiesLoading(true);
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-
       if (response.ok) {
         const data = await response.json();
         setProperties(data);
@@ -98,11 +99,8 @@ const AdminDashboard = () => {
       setContactsLoading(true);
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-
       if (response.ok) {
         const data = await response.json();
         setContacts(data);
@@ -182,188 +180,15 @@ const AdminDashboard = () => {
     fetchSubmissions();
   }, [fetchDashboardData, fetchProperties, fetchContacts, fetchInvestments, fetchProjectsList, fetchSubmissions, navigate, isAuthenticated]);
 
-  const updateContactStatus = async (contactId, status) => {
-    console.log('updateContactStatus called with:', { contactId, status, type: typeof contactId });
-
-    if (!contactId) {
-      toast.error('Invalid inquiry ID');
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem('adminToken');
-      console.log('Token from localStorage:', token);
-
-      if (!token) {
-        toast.error('Authentication token missing. Please log in again.');
-        navigate('/admin/login');
-        return;
-      }
-
-      // console.log('Making API call to:', `/api/contact/${contactId}/status`);
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact/${contactId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status }),
-      });
-
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-
-      if (response.ok) {
-        const updatedContact = await response.json();
-        console.log('Inquiry updated successfully:', updatedContact);
-        // Update local state
-        setContacts(contacts.map(contact =>
-          contact._id === contactId ? { ...contact, status } : contact
-        ));
-        toast.success('Inquiry status updated successfully!');
-      } else {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        console.error('Failed to update inquiry status:', response.status, errorData);
-        toast.error(`Failed to update inquiry status: ${errorData.message || response.statusText}`);
-      }
-    } catch (error) {
-      console.error('Error updating inquiry status:', error);
-      toast.error('Error updating inquiry status: ' + error.message);
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     navigate('/admin/login');
   };
 
-  const handleDeleteProperty = async (propertyId) => {
-    if (!confirm('Are you sure you want to delete this property?')) return;
-
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties/${propertyId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        toast.success('Property deleted successfully!');
-        fetchProperties(); // Refresh the list
-        fetchDashboardData(); // Update dashboard stats
-      } else {
-        toast.error('Failed to delete property');
-      }
-    } catch (error) {
-      console.error('Error deleting property:', error);
-      toast.error('Error deleting property');
-    }
-  };
-
-  const handleViewProperty = (property) => {
-    setSelectedProperty(property);
-    setShowPropertyModal(true);
-  };
-
-  const handleEditProperty = (property) => {
-    setEditingProperty(property);
-    setShowEditProperty(true);
-  };
-
   const handleUpdateContactStatus = async (contactId, status) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact/${contactId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status }),
-      });
-
-      if (response.ok) {
-        toast.success('Contact status updated');
-        fetchContacts(); // Refresh the list
-        fetchDashboardData(); // Update dashboard stats
-      } else {
-        toast.error('Failed to update contact status');
-      }
-    } catch (error) {
-      console.error('Error updating contact status:', error);
-      toast.error('Error updating contact status');
-    }
-  };
-
-  const handleDeleteInvestment = async (id) => {
-    if (!confirm('Are you sure you want to delete this investment?')) return;
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (response.ok) {
-        toast.success('Investment deleted successfully!');
-        fetchInvestments();
-        fetchDashboardData();
-      } else {
-        toast.error('Failed to delete investment');
-      }
-    } catch (error) {
-      console.error('Error deleting investment:', error);
-      toast.error('Error deleting investment');
-    }
-  };
-
-  const handleDeleteProject = async (id) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (response.ok) {
-        toast.success('Project deleted successfully!');
-        fetchProjectsList();
-        fetchDashboardData();
-      } else {
-        toast.error('Failed to delete project');
-      }
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      toast.error('Error deleting project');
-    }
-  };
-
-  const handleDeleteSubmission = async (id) => {
-    if (!confirm('Are you sure you want to delete this submission?')) return;
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/submitted-properties/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (response.ok) {
-        toast.success('Submission deleted successfully!');
-        fetchSubmissions();
-        fetchDashboardData();
-      } else {
-        toast.error('Failed to delete submission');
-      }
-    } catch (error) {
-      console.error('Error deleting submission:', error);
-      toast.error('Error deleting submission');
-    }
-  };
-
-  const handleUpdateSubmissionStatus = async (id, status) => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/submitted-properties/${id}/status`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact/${contactId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -372,1014 +197,500 @@ const AdminDashboard = () => {
         body: JSON.stringify({ status }),
       });
       if (response.ok) {
-        toast.success('Submission status updated');
-        fetchSubmissions();
+        toast.success('Inquiry updated successfully!');
+        fetchContacts();
       } else {
-        toast.error('Failed to update submission status');
+        toast.error('Failed to update inquiry status');
       }
     } catch (error) {
-      console.error('Error updating submission status:', error);
-      toast.error('Error updating submission status');
+      console.error('Error updating status:', error);
+      toast.error('System error during update');
     }
   };
 
-  const handleAddInvestment = async (formDataToSend) => {
+  const handleDeleteProperty = async (id) => {
+    if (!confirm('Are you sure you want to delete this listing?')) return;
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments`, {
-        method: 'POST',
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties/${id}`, {
+        method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
-        body: formDataToSend,
       });
       if (response.ok) {
-        toast.success('Investment added successfully!');
-        setShowAddInvestment(false);
-        fetchInvestments();
+        toast.success('Property removed successfully!');
+        fetchProperties();
         fetchDashboardData();
-      } else {
-        toast.error('Failed to add investment');
       }
     } catch (error) {
-      console.error('Error adding investment:', error);
-      toast.error('Error adding investment');
-    }
-  };
-
-  const handleAddProject = async (formDataToSend) => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formDataToSend,
-      });
-      if (response.ok) {
-        toast.success('Project added successfully!');
-        setShowAddProject(false);
-        fetchProjectsList();
-        fetchDashboardData();
-      } else {
-        toast.error('Failed to add project');
-      }
-    } catch (error) {
-      console.error('Error adding project:', error);
-      toast.error('Error adding project');
+      toast.error('Failed to delete property');
     }
   };
 
   const menuItems = [
     { id: 'overview', label: 'Dashboard', icon: HiHome },
-    { id: 'properties', label: 'Properties', icon: HiOfficeBuilding },
-    { id: 'investments', label: 'Investments', icon: HiGlobe },
-    { id: 'projects', label: 'Projects', icon: HiClipboardList },
-    { id: 'inquiries', label: 'Inquiries', icon: HiMail },
-    { id: 'submissions', label: 'Submissions', icon: HiDocumentText },
-    { id: 'analytics', label: 'Analytics', icon: HiChartBar },
-    { id: 'settings', label: 'Settings', icon: HiCog },
+    { id: 'properties', label: 'Inventory', icon: HiOfficeBuilding },
+    { id: 'investments', label: 'Land Bank', icon: HiGlobe },
+    { id: 'projects', label: 'New Ventures', icon: HiClipboardList },
+    { id: 'inquiries', label: 'Leads Inbox', icon: HiMail },
+    { id: 'submissions', label: 'Pending Apps', icon: HiDocumentText },
+    { id: 'analytics', label: 'System Intel', icon: HiChartBar },
+    { id: 'settings', label: 'Parameters', icon: HiCog },
   ];
 
   const renderContent = () => {
-    if (loading) {
-      return (
-        <div className="flex justify-center items-center h-96">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-slate-600">Loading dashboard...</p>
-          </div>
-        </div>
-      );
-    }
+    if (loading) return (
+      <div className="flex flex-col items-center justify-center h-96 gap-4">
+        <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="text-slate-400 font-bold tracking-widest uppercase text-xs">Decrypting Workspace...</p>
+      </div>
+    );
 
     switch (activeTab) {
       case 'overview':
         return (
-          <div className="space-y-8">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Properties</p>
-                    <p className="text-3xl font-bold text-slate-900">{dashboardData?.totalProperties || 0}</p>
-                  </div>
-                  <div className="p-3 rounded-full bg-blue-100">
-                    <HiOfficeBuilding className="w-6 h-6 text-blue-600" />
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center text-sm">
-                  <HiTrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                  <span className="text-green-600">{dashboardData?.recentProperties || 0} added this month</span>
+          <div className="space-y-8 animate-fade-in">
+            <div className="flex justify-between items-end">
+              <div>
+                <h2 className="text-4xl font-black text-[#1e293b] tracking-tight">Executive Control</h2>
+                <p className="text-slate-500 mt-1 font-medium italic">Synchronized overview of all real estate operations.</p>
+              </div>
+              <div className="hidden md:flex gap-3">
+                <div className="px-5 py-2.5 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-2">
+                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">System Live</span>
                 </div>
               </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Available Properties</p>
-                    <p className="text-3xl font-bold text-slate-900">{dashboardData?.availableProperties || 0}</p>
-                  </div>
-                  <div className="p-3 rounded-full bg-blue-100">
-                    <HiOfficeBuilding className="w-6 h-6 text-blue-600" />
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center text-sm">
-                  <HiTrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                  <span className="text-green-600">Ready for sale/rent</span>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Inquiries</p>
-                    <p className="text-3xl font-bold text-slate-900">{dashboardData?.totalContacts || 0}</p>
-                  </div>
-                  <div className="p-3 rounded-full bg-green-100">
-                    <HiMail className="w-6 h-6 text-green-600" />
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center text-sm">
-                  <HiTrendingUp className="w-4 h-4 text-red-500 mr-1" />
-                  <span className="text-red-600">{dashboardData?.unreadContacts || 0} unread</span>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Land Investments</p>
-                    <p className="text-3xl font-bold text-slate-900">{dashboardData?.totalInvestments || 0}</p>
-                  </div>
-                  <div className="p-3 rounded-full bg-purple-100">
-                    <HiGlobe className="w-6 h-6 text-purple-600" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-indigo-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Projects</p>
-                    <p className="text-3xl font-bold text-slate-900">{dashboardData?.totalProjects || 0}</p>
-                  </div>
-                  <div className="p-3 rounded-full bg-indigo-100">
-                    <HiClipboardList className="w-6 h-6 text-indigo-600" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Submissions</p>
-                    <p className="text-3xl font-bold text-slate-900">{dashboardData?.totalSubmissions || 0}</p>
-                  </div>
-                  <div className="p-3 rounded-full bg-red-100">
-                    <HiDocumentText className="w-6 h-6 text-red-600" />
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center text-sm">
-                  <span className="text-blue-600">{dashboardData?.pendingSubmissions || 0} pending review</span>
-                </div>
-              </div>
-
             </div>
 
-            {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Properties</h3>
-                <div className="space-y-4">
-                  {properties.slice(0, 3).map((property) => (
-                    <div key={property._id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-slate-50">
-                      <div className="w-12 h-12 bg-slate-200 rounded-lg flex items-center justify-center">
-                        <HiOfficeBuilding className="w-6 h-6 text-slate-600" />
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { label: 'Active Listings', value: dashboardData?.totalProperties || 0, icon: HiOfficeBuilding, color: 'blue', trend: '+12% this week' },
+                { label: 'Inquiry Pipeline', value: dashboardData?.totalContacts || 0, icon: HiMail, color: 'teal', trend: 'Response Required' },
+                { label: 'Land Assets', value: dashboardData?.totalInvestments || 0, icon: HiGlobe, color: 'amber', trend: 'Expanding' },
+                { label: 'Project Queue', value: projects.length, icon: HiTrendingUp, color: 'indigo', trend: 'On Schedule' }
+              ].map((stat, i) => (
+                <div key={i} className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group overflow-hidden relative">
+                   <div className={`absolute top-0 right-0 w-32 h-32 bg-${stat.color}-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700`}></div>
+                   <div className="relative z-10">
+                      <div className={`w-14 h-14 rounded-2xl bg-${stat.color}-50 text-${stat.color}-600 flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 group-hover:bg-${stat.color}-600 group-hover:text-white transition-all`}>
+                        <stat.icon size={28} />
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">
-                          {property.propertyName || `${property.bedroom || ''} BHK ${property.propertyType}`}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          Added {new Date(property.createdAt).toLocaleDateString()}
-                        </p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">{stat.label}</p>
+                      <div className="flex items-baseline gap-3">
+                         <h3 className="text-4xl font-black text-[#1e293b]">{stat.value}</h3>
+                         <span className={`text-[10px] font-bold text-${stat.color}-500 bg-${stat.color}-50 px-2 py-0.5 rounded-lg`}>{stat.trend}</span>
                       </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => {
-                            setSelectedProperty(property);
-                            setShowPropertyModal(true);
-                          }}
-                          className="p-1 text-slate-400 hover:text-blue-600"
-                        >
-                          <HiEye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingProperty(property);
-                            setShowEditProperty(true);
-                          }}
-                          className="p-1 text-slate-400 hover:text-blue-600"
-                        >
-                          <HiPencil className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  {properties.length === 0 && !propertiesLoading && (
-                    <p className="text-center text-slate-500 py-4">No properties found</p>
-                  )}
+                   </div>
                 </div>
-                <button
-                  onClick={() => setActiveTab('properties')}
-                  className="w-full mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  View All Properties
-                </button>
-              </div>
+              ))}
+            </div>
 
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Inquiries</h3>
-                <div className="space-y-4">
-                  {contacts.slice(0, 3).map((contact) => (
-                    <div key={contact._id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-slate-50">
-                      <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center">
-                        <HiUser className="w-6 h-6 text-slate-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">{contact.name}</p>
-                        <p className="text-xs text-slate-500">
-                          {contact.message.length > 30 ? `${contact.message.substring(0, 30)}...` : contact.message}
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end space-y-1">
-                        <select
-                          value={contact.status || 'unread'}
-                          onChange={(e) => updateContactStatus(contact._id, e.target.value)}
-                          className={`px-2 py-1 text-xs rounded-full border-0 ${
-                            contact.status === 'read' ? 'bg-green-100 text-green-800' :
-                            contact.status === 'responded' ? 'bg-blue-100 text-blue-800' :
-                            'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          <option value="unread">Unread</option>
-                          <option value="read">Read</option>
-                          <option value="responded">Replied</option>
-                        </select>
-                        <span className="text-xs text-slate-400">
-                          {new Date(contact.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                  {contacts.length === 0 && !contactsLoading && (
-                    <p className="text-center text-slate-500 py-4">No inquiries found</p>
-                  )}
-                </div>
-                <button
-                  onClick={() => setActiveTab('inquiries')}
-                  className="w-full mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  View All Inquiries
-                </button>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+               {/* Quick Table */}
+               <div className="lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+                  <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between">
+                     <h3 className="text-xl font-black text-[#1e293b]">Recent Acquisitions</h3>
+                     <button onClick={() => setActiveTab('properties')} className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline">Full Database</button>
+                  </div>
+                  <div className="flex-1 overflow-x-auto">
+                     <table className="w-full">
+                        <thead className="bg-slate-50/50">
+                           <tr>
+                              <th className="px-10 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-left">Entity</th>
+                              <th className="px-10 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Location</th>
+                              <th className="px-10 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Valuation</th>
+                           </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                           {properties.slice(0, 5).map(prop => (
+                             <tr key={prop._id} className="hover:bg-slate-50/50 transition-colors group">
+                                <td className="px-10 py-5">
+                                   <div className="flex items-center gap-4">
+                                      <div className="w-10 h-10 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
+                                         {prop.images?.[0] ? <img src={prop.images[0]} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><HiHome /></div>}
+                                      </div>
+                                      <span className="text-sm font-black text-slate-800">{prop.propertyName || 'Unnamed Asset'}</span>
+                                   </div>
+                                </td>
+                                <td className="px-10 py-5 text-center">
+                                   <span className="text-xs font-bold text-slate-500 italic">{prop.location}</span>
+                                </td>
+                                <td className="px-10 py-5 text-right font-black text-blue-600 text-sm">
+                                   ₹{prop.price?.toLocaleString()}
+                                </td>
+                             </tr>
+                           ))}
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+
+               {/* Activity Feed */}
+               <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-10 flex flex-col">
+                  <h3 className="text-xl font-black text-[#1e293b] mb-8">Inbound Activity</h3>
+                  <div className="space-y-8 flex-1">
+                     {contacts.slice(0, 4).map(contact => (
+                       <div key={contact._id} className="flex gap-4 relative">
+                          <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center flex-shrink-0 font-black border border-teal-100">
+                             {contact.name[0].toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                             <div className="flex justify-between items-start">
+                                <p className="text-sm font-black text-slate-800 truncate">{contact.name}</p>
+                                <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">{new Date(contact.createdAt).toLocaleDateString()}</span>
+                             </div>
+                             <p className="text-xs text-slate-500 mt-1 line-clamp-1 italic font-medium">"{contact.message}"</p>
+                             <div className={`inline-block mt-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                                contact.status === 'unread' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
+                             }`}>
+                                {contact.status}
+                             </div>
+                          </div>
+                       </div>
+                     ))}
+                  </div>
+                  <button onClick={() => setActiveTab('inquiries')} className="mt-10 py-4 w-full bg-slate-50 text-slate-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-colors">Access Communication HUB</button>
+               </div>
             </div>
           </div>
         );
 
       case 'properties':
-        if (showAddProperty) {
-          return <AddPropertyForm onCancel={() => setShowAddProperty(false)} onSuccess={() => {
-            setShowAddProperty(false);
-            fetchProperties(); // Refresh the properties list
-            fetchDashboardData(); // Update dashboard stats
-          }} />;
-        }
+        if (showAddProperty) return <AddPropertyForm onClose={(success) => { setShowAddProperty(false); if (success) fetchProperties(); }} />;
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-slate-900">Property Management</h2>
-              <button 
-                onClick={() => setShowAddProperty(true)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
-              >
-                <HiPlus className="w-4 h-4" />
-                Add New Property
+          <div className="space-y-8 animate-fade-in text-[#1e293b]">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 className="text-4xl font-black text-[#1e293b] tracking-tight">Inventory Engine</h2>
+                <p className="text-slate-500 mt-1 font-medium italic">High-precision management of all listed assets.</p>
+              </div>
+              <button onClick={() => setShowAddProperty(true)} className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-8 py-4 rounded-[1.5rem] font-black hover:shadow-2xl hover:shadow-blue-500/30 transition-all flex items-center gap-3">
+                <HiPlus size={20} />
+                <span className="uppercase tracking-widest text-xs">Append New Listing</span>
               </button>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-200">
-                <h3 className="text-lg font-semibold text-slate-900">All Properties</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Property</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Location</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Price</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-slate-200">
-                    {propertiesLoading ? (
-                      <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-slate-500">
-                          Loading properties...
-                        </td>
-                      </tr>
-                    ) : properties.length === 0 ? (
-                      <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-slate-500">
-                          No properties found. Add your first property!
-                        </td>
-                      </tr>
-                    ) : (
-                      properties.map((property) => (
-                        <tr key={property._id} className="hover:bg-slate-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className="w-10 h-10 bg-slate-200 rounded-lg flex items-center justify-center mr-3">
-                                {property.images && property.images.length > 0 ? (
-                                  <img
-                                    src={property.images[0]}
-                                    alt={property.propertyName || 'Property'}
-                                    className="w-10 h-10 object-cover rounded-lg"
-                                  />
-                                ) : (
-                                  <HiOfficeBuilding className="w-5 h-5 text-slate-600" />
-                                )}
-                              </div>
-                              <div>
-                                <div className="text-sm font-medium text-slate-900">
-                                  {property.propertyName || `${property.bedroom || ''} BHK ${property.propertyType || 'Property'}`}
-                                </div>
-                                <div className="text-sm text-slate-500">{property.propertyType}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center text-sm text-slate-900">
-                              <HiLocationMarker className="w-4 h-4 mr-1 text-slate-400" />
-                              {property.location}, {property.city}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                            ₹{property.price?.toLocaleString()}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              property.status === 'available'
-                                ? 'bg-green-100 text-green-800'
-                                : property.status === 'sold'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-blue-100 text-blue-800'
-                            }`}>
-                              {property.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => handleViewProperty(property)}
-                                className="text-blue-600 hover:text-blue-900"
-                                title="View Details"
-                              >
-                                <HiEye className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleEditProperty(property)}
-                                className="text-blue-600 hover:text-blue-900"
-                                title="Edit Property"
-                              >
-                                <HiPencil className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteProperty(property._id)}
-                                className="text-red-600 hover:text-red-900"
-                                title="Delete Property"
-                              >
-                                <HiTrash className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+               <div className="px-10 py-6 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center text-[#1e293b]">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Total Synchronized: {properties.length}</h3>
+                  <div className="flex gap-4">
+                     <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 cursor-pointer hover:bg-slate-50 transition-colors"><HiAdjustments /></div>
+                  </div>
+               </div>
+               <div className="overflow-x-auto">
+                 <table className="w-full text-left">
+                   <thead>
+                     <tr className="bg-slate-50/20">
+                       <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Asset Details</th>
+                       <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Geographical Node</th>
+                       <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Valuation</th>
+                       <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">State</th>
+                       <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Commands</th>
+                     </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-50">
+                     {propertiesLoading ? (
+                       <tr><td colSpan="5" className="px-10 py-24 text-center">
+                          <div className="flex flex-col items-center gap-4">
+                             <div className="w-10 h-10 border-2 border-blue-500/20 border-t-blue-600 rounded-full animate-spin"></div>
+                             <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase italic">Streaming Data...</span>
+                          </div>
+                       </td></tr>
+                     ) : properties.map(prop => (
+                       <tr key={prop._id} className="hover:bg-blue-50/20 transition-all group">
+                         <td className="px-10 py-6">
+                           <div className="flex items-center gap-5">
+                             <div className="w-16 h-16 bg-slate-100 rounded-2xl overflow-hidden shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+                               {prop.images?.[0] ? <img src={prop.images[0]} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><HiOfficeBuilding size={24} /></div>}
+                             </div>
+                             <div>
+                               <div className="text-sm font-black text-slate-800 leading-tight mb-1">{prop.propertyName || `${prop.bedroom || 'N/A'} BHK ${prop.propertyType}`}</div>
+                               <div className="text-[10px] font-black text-blue-500 uppercase tracking-widest opacity-70">{prop.propertyType}</div>
+                             </div>
+                           </div>
+                         </td>
+                         <td className="px-10 py-6 text-center">
+                           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 border border-slate-100 rounded-2xl text-[11px] font-bold text-slate-600">
+                             <HiLocationMarker className="text-slate-400" />
+                             {prop.location}, {prop.city}
+                           </div>
+                         </td>
+                         <td className="px-10 py-6 text-center font-black text-slate-900 text-sm">
+                           ₹{prop.price?.toLocaleString()}
+                         </td>
+                         <td className="px-10 py-6 text-center">
+                           <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm ${
+                             prop.status === 'available' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                             prop.status === 'sold' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                             'bg-amber-50 text-amber-600 border-amber-100'
+                           }`}>
+                             {prop.status}
+                           </span>
+                         </td>
+                         <td className="px-10 py-6">
+                           <div className="flex justify-end gap-3">
+                             <button onClick={() => { setSelectedProperty(prop); setShowPropertyModal(true); }} className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center shadow-sm"><HiEye /></button>
+                             <button onClick={() => { setEditingProperty(prop); setShowEditProperty(true); }} className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-600 hover:text-white transition-all flex items-center justify-center shadow-sm"><HiPencil /></button>
+                             <button onClick={() => handleDeleteProperty(prop._id)} className="w-10 h-10 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-600 hover:text-white transition-all flex items-center justify-center shadow-sm"><HiTrash /></button>
+                           </div>
+                         </td>
+                       </tr>
+                     ))}
+                   </tbody>
+                 </table>
+               </div>
             </div>
           </div>
         );
 
       case 'inquiries':
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-slate-900">Customer Inquiries</h2>
-              <div className="flex gap-2">
-                <button className="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 transition-colors">
-                  Export
-                </button>
+          <div className="space-y-8 animate-fade-in text-[#1e293b]">
+            <div className="flex justify-between items-end">
+              <div>
+                <h2 className="text-4xl font-black text-[#1e293b] tracking-tight">Communication HUB</h2>
+                <p className="text-slate-500 mt-1 font-medium italic">Centralized inquiry processing and response queue.</p>
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Inquiries</p>
-                    <p className="text-2xl font-bold text-slate-900">{contacts.length}</p>
-                  </div>
-                  <HiMail className="w-8 h-8 text-blue-500" />
-                </div>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Unread</p>
-                    <p className="text-2xl font-bold text-slate-900">{contacts.filter(c => c.status === 'unread').length}</p>
-                  </div>
-                  <HiCalendar className="w-8 h-8 text-green-500" />
-                </div>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Responded</p>
-                    <p className="text-2xl font-bold text-slate-900">{contacts.filter(c => c.status === 'responded').length}</p>
-                  </div>
-                  <HiDocumentText className="w-8 h-8 text-blue-500" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-200">
-                <h3 className="text-lg font-semibold text-slate-900">Recent Inquiries</h3>
-              </div>
-              <div className="divide-y divide-slate-200">
-                {contactsLoading ? (
-                  <div className="px-6 py-4 text-center text-slate-500">Loading inquiries...</div>
-                ) : contacts.length === 0 ? (
-                  <div className="px-6 py-4 text-center text-slate-500">No inquiries found</div>
-                ) : (
-                  contacts.map((contact) => (
-                    <div key={contact._id} className="px-6 py-4 hover:bg-slate-50">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
-                            <HiUser className="w-5 h-5 text-slate-600" />
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
+               {contacts.length === 0 ? (
+                 <div className="py-32 text-center text-slate-400 font-black uppercase tracking-[0.3em] text-[10px] italic">Protocol: No Pending Data Found</div>
+               ) : contacts.map(contact => (
+                 <div key={contact._id} className="p-10 hover:bg-slate-50/50 transition-all group">
+                    <div className="flex items-start justify-between">
+                       <div className="flex items-start gap-6">
+                          <div className="w-16 h-16 bg-gradient-to-tr from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center text-slate-400 shadow-inner border border-white group-hover:scale-110 transition-transform">
+                             <HiUser size={32} />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-slate-900">{contact.name}</p>
-                            <p className="text-sm text-slate-500">{contact.email} • {contact.phone}</p>
+                             <div className="flex items-center gap-4">
+                                <h4 className="text-xl font-black text-[#1e293b]">{contact.name}</h4>
+                                <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm ${
+                                  contact.status === 'unread' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                  contact.status === 'read' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                  'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                }`}>
+                                  {contact.status}
+                                </span>
+                             </div>
+                             <p className="text-sm font-bold text-blue-600 mt-1 flex items-center gap-4">
+                                <span>{contact.email}</span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
+                                <span>{contact.phone}</span>
+                             </p>
+                             <p className="text-[10px] text-slate-400 mt-2 font-black uppercase tracking-widest">Received: {new Date(contact.createdAt).toLocaleString()}</p>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <select
-                            value={contact.status}
-                            onChange={(e) => handleUpdateContactStatus(contact._id, e.target.value)}
-                            className={`px-2 py-1 text-xs rounded-full border-0 mb-1 block ${
-                              contact.status === 'unread'
-                                ? 'bg-red-100 text-red-800'
-                                : contact.status === 'read'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-green-100 text-green-800'
-                            }`}
-                          >
-                            <option value="unread">Unread</option>
-                            <option value="read">Read</option>
-                            <option value="responded">Responded</option>
-                          </select>
-                          <p className="text-xs text-slate-500">{new Date(contact.createdAt).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                      <div className="mt-3">
-                        <p className="text-sm text-slate-700">{contact.message}</p>
-                      </div>
-                      <div className="mt-3 flex justify-end space-x-2">
-                        <button
-                          onClick={() => alert(`Full Details:\n\nName: ${contact.name}\nEmail: ${contact.email}\nPhone: ${contact.phone}\nMessage: ${contact.message}\nDate: ${new Date(contact.createdAt).toLocaleString()}`)}
-                          className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
-                        >
-                          View Details
-                        </button>
-                      </div>
+                       </div>
+                       <select 
+                         value={contact.status} 
+                         onChange={(e) => handleUpdateContactStatus(contact._id, e.target.value)}
+                         className="px-5 py-3 bg-white border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 focus:ring-4 focus:ring-blue-500/10 outline-none cursor-pointer hover:border-blue-400 transition-all"
+                       >
+                         <option value="unread">Pending Review</option>
+                         <option value="read">Archived State</option>
+                         <option value="responded">Execution Done</option>
+                       </select>
                     </div>
-                  ))
-                )}
-              </div>
+                    <div className="mt-8 bg-slate-50 rounded-[2rem] p-8 border border-slate-100 italic text-slate-600 text-sm leading-relaxed relative overflow-hidden group-hover:bg-white group-hover:shadow-md transition-all">
+                       <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500/10"></div>
+                       "{contact.message}"
+                    </div>
+                 </div>
+               ))}
             </div>
           </div>
         );
 
       case 'investments':
-        if (showAddInvestment) {
-          return (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-slate-900">Add New Investment</h2>
-                <button onClick={() => setShowAddInvestment(false)} className="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 transition-colors">Cancel</button>
-              </div>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const fd = new FormData(e.target);
-                handleAddInvestment(fd);
-              }} className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Title *</label>
-                    <input type="text" name="title" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Land Title" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Land Type *</label>
-                    <select name="landType" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                      <option value="">Select Type</option>
-                      <option value="agricultural">Agricultural</option>
-                      <option value="residential">Residential</option>
-                      <option value="commercial">Commercial</option>
-                      <option value="industrial">Industrial</option>
-                      <option value="mixed">Mixed</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Status *</label>
-                    <select name="status" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                      <option value="available">Available</option>
-                      <option value="sold">Sold</option>
-                      <option value="upcoming">Upcoming</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Total Price (₹) *</label>
-                    <input type="number" name="totalPrice" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Total Price" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Area *</label>
-                    <input type="number" name="area" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Area" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Area Unit</label>
-                    <select name="areaUnit" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                      <option value="sq.ft">Sq.ft</option>
-                      <option value="sq.yard">Sq.yard</option>
-                      <option value="acre">Acre</option>
-                      <option value="hectare">Hectare</option>
-                      <option value="bigha">Bigha</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Price Per Unit (₹)</label>
-                    <input type="number" name="pricePerUnit" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Price per unit" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Location *</label>
-                    <input type="text" name="location" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Location/Area" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">City *</label>
-                    <input type="text" name="city" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="City" defaultValue="Bhopal" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Description *</label>
-                  <textarea name="description" required rows={3} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Land description" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Highlights (comma separated)</label>
-                  <input type="text" name="highlights" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Near highway, RERA approved, Clear title" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Nearby Places</label>
-                  <input type="text" name="nearbyPlaces" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Schools, Hospitals, Markets" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Map URL</label>
-                  <input type="url" name="mapUrl" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Google Maps URL" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Images</label>
-                  <input type="file" name="images" multiple accept="image/*" className="w-full px-3 py-2 border border-slate-300 rounded-lg" />
-                </div>
-                <div className="flex justify-end space-x-4">
-                  <button type="button" onClick={() => setShowAddInvestment(false)} className="px-6 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-colors">Cancel</button>
-                  <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Add Investment</button>
-                </div>
-              </form>
-            </div>
-          );
-        }
         return (
-          <div className="space-y-6">
+          <div className="space-y-8 animate-fade-in text-[#1e293b]">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-slate-900">Land Investments</h2>
-              <button onClick={() => setShowAddInvestment(true)} className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2">
-                <HiPlus className="w-4 h-4" /> Add Investment
+              <div>
+                <h2 className="text-4xl font-black text-[#1e293b] tracking-tight">Land Portfolio</h2>
+                <p className="text-slate-500 mt-1 font-medium italic">Agricultural and high-yield land bank monitoring.</p>
+              </div>
+              <button className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-2 hover:bg-indigo-700 transition-colors shadow-lg shadow-blue-500/20">
+                <HiPlus /> New Listing
               </button>
             </div>
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50">
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+               <table className="w-full text-left">
+                  <thead className="bg-slate-50/50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Title</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Location</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Price</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase text-slate-400">Asset Title</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase text-slate-400 text-center">Land Type</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase text-slate-400 text-center">Status</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase text-slate-400 text-right">Value</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-slate-200">
-                    {investmentsLoading ? (
-                      <tr><td colSpan="6" className="px-6 py-4 text-center text-slate-500">Loading investments...</td></tr>
-                    ) : investments.length === 0 ? (
-                      <tr><td colSpan="6" className="px-6 py-4 text-center text-slate-500">No investments found. Add your first investment!</td></tr>
-                    ) : (
-                      investments.map((inv) => (
-                        <tr key={inv._id} className="hover:bg-slate-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{inv.title}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{inv.location}, {inv.city}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 capitalize">{inv.landType}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">₹{inv.totalPrice?.toLocaleString()}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              inv.status === 'available' ? 'bg-green-100 text-green-800' :
-                              inv.status === 'upcoming' ? 'bg-blue-100 text-blue-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>{inv.status}</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onClick={() => handleDeleteInvestment(inv._id)} className="text-red-600 hover:text-red-900" title="Delete">
-                              <HiTrash className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                  <tbody className="divide-y divide-slate-50">
+                    {investments.map(inv => (
+                      <tr key={inv._id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-10 py-6 font-black text-slate-800">{inv.title}</td>
+                        <td className="px-10 py-6 text-center text-xs font-bold text-slate-500 uppercase italic">{inv.landType}</td>
+                        <td className="px-10 py-6 text-center">
+                           <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[9px] font-black uppercase">{inv.status}</span>
+                        </td>
+                        <td className="px-10 py-6 text-right font-black text-sm text-[#1e293b]">₹{inv.totalPrice?.toLocaleString()}</td>
+                      </tr>
+                    ))}
                   </tbody>
-                </table>
-              </div>
+               </table>
             </div>
           </div>
         );
 
       case 'projects':
-        if (showAddProject) {
-          return (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-slate-900">Add New Project</h2>
-                <button onClick={() => setShowAddProject(false)} className="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 transition-colors">Cancel</button>
-              </div>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const fd = new FormData(e.target);
-                handleAddProject(fd);
-              }} className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Title *</label>
-                    <input type="text" name="title" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Project Title" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Type *</label>
-                    <select name="type" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                      <option value="">Select Type</option>
-                      <option value="residential">Residential</option>
-                      <option value="commercial">Commercial</option>
-                      <option value="mixed">Mixed</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Status *</label>
-                    <select name="status" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                      <option value="upcoming">Upcoming</option>
-                      <option value="under-construction">Under Construction</option>
-                      <option value="ready-to-move">Ready to Move</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Price (Starting from) *</label>
-                    <input type="text" name="price" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="₹45,00,000" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Location *</label>
-                    <input type="text" name="location" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Location/Area" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">City *</label>
-                    <input type="text" name="city" required className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="City" defaultValue="Bhopal" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Description *</label>
-                  <textarea name="description" required rows={3} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Project description" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Highlights (comma separated)</label>
-                  <input type="text" name="highlights" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Green campus, Gated community, Smart homes" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Amenities (comma separated)</label>
-                  <input type="text" name="amenities" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Swimming Pool, Gym, Clubhouse" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">YouTube URL</label>
-                  <input type="url" name="youtubeUrl" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://youtube.com/watch?v=..." />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Images</label>
-                  <input type="file" name="images" multiple accept="image/*" className="w-full px-3 py-2 border border-slate-300 rounded-lg" />
-                </div>
-                <div className="flex justify-end space-x-4">
-                  <button type="button" onClick={() => setShowAddProject(false)} className="px-6 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-colors">Cancel</button>
-                  <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Add Project</button>
-                </div>
-              </form>
-            </div>
-          );
-        }
         return (
-          <div className="space-y-6">
+          <div className="space-y-8 animate-fade-in text-[#1e293b]">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-slate-900">Projects Management</h2>
-              <button onClick={() => setShowAddProject(true)} className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2">
-                <HiPlus className="w-4 h-4" /> Add Project
-              </button>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Title</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Location</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Price</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-slate-200">
-                    {projectsLoading ? (
-                      <tr><td colSpan="6" className="px-6 py-4 text-center text-slate-500">Loading projects...</td></tr>
-                    ) : projects.length === 0 ? (
-                      <tr><td colSpan="6" className="px-6 py-4 text-center text-slate-500">No projects found. Add your first project!</td></tr>
-                    ) : (
-                      projects.map((proj) => (
-                        <tr key={proj._id} className="hover:bg-slate-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{proj.title}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{proj.location}, {proj.city}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 capitalize">{proj.type}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{proj.price}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              proj.status === 'ready-to-move' ? 'bg-green-100 text-green-800' :
-                              proj.status === 'under-construction' ? 'bg-yellow-100 text-yellow-800' :
-                              proj.status === 'upcoming' ? 'bg-blue-100 text-blue-800' :
-                              'bg-slate-100 text-slate-800'
-                            }`}>{proj.status}</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onClick={() => handleDeleteProject(proj._id)} className="text-red-600 hover:text-red-900" title="Delete">
-                              <HiTrash className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+              <div>
+                <h2 className="text-4xl font-black text-[#1e293b] tracking-tight">Strategic Projects</h2>
+                <p className="text-slate-500 mt-1 font-medium italic">Ongoing and upcoming urban development ventures.</p>
               </div>
+              <button className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-indigo-500/20 hover:scale-105 transition-all">Launch Venture</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+               {projects.map(proj => (
+                 <div key={proj._id} className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm hover:shadow-xl transition-all group">
+                    <div className="w-full aspect-video bg-slate-100 rounded-2xl mb-6 overflow-hidden relative">
+                       {proj.images?.[0] ? <img src={proj.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><HiGlobe size={40} /></div>}
+                       <div className="absolute top-4 left-4 px-4 py-1.5 bg-white/90 backdrop-blur-md rounded-xl text-[9px] font-black uppercase tracking-widest text-indigo-600 shadow-sm">{proj.status}</div>
+                    </div>
+                    <h4 className="text-lg font-black text-[#1e293b] mb-2">{proj.title}</h4>
+                    <p className="text-xs text-slate-400 font-bold flex items-center gap-2 mb-6 uppercase tracking-wider line-clamp-1"><HiLocationMarker /> {proj.location}, {proj.city}</p>
+                    <div className="flex justify-between items-center pt-6 border-t border-slate-50">
+                       <span className="text-sm font-black text-indigo-600">{proj.price}</span>
+                       <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all"><HiArrowRight /></button>
+                    </div>
+                 </div>
+               ))}
             </div>
           </div>
         );
 
       case 'submissions':
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-slate-900">Property Submissions</h2>
-              <div className="flex gap-2 items-center">
-                <span className="text-sm text-slate-600">{submissions.filter(s => s.status === 'pending').length} pending</span>
-              </div>
+          <div className="space-y-8 animate-fade-in text-[#1e293b]">
+            <div>
+              <h2 className="text-4xl font-black text-[#1e293b] tracking-tight">Review Pipeline</h2>
+              <p className="text-slate-500 mt-1 font-medium italic">Validating incoming user property applications.</p>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <div className="bg-white rounded-xl shadow-lg p-4">
-                <p className="text-sm text-slate-600">Total</p>
-                <p className="text-2xl font-bold text-slate-900">{submissions.length}</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-4">
-                <p className="text-sm text-slate-600">Pending</p>
-                <p className="text-2xl font-bold text-blue-600">{submissions.filter(s => s.status === 'pending').length}</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-4">
-                <p className="text-sm text-slate-600">Approved</p>
-                <p className="text-2xl font-bold text-green-600">{submissions.filter(s => s.status === 'approved').length}</p>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-4">
-                <p className="text-sm text-slate-600">Rejected</p>
-                <p className="text-2xl font-bold text-red-600">{submissions.filter(s => s.status === 'rejected').length}</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="divide-y divide-slate-200">
-                {submissionsLoading ? (
-                  <div className="px-6 py-4 text-center text-slate-500">Loading submissions...</div>
-                ) : submissions.length === 0 ? (
-                  <div className="px-6 py-4 text-center text-slate-500">No property submissions yet</div>
-                ) : (
-                  submissions.map((sub) => (
-                    <div key={sub._id} className="px-6 py-4 hover:bg-slate-50">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-900">{sub.title}</h4>
-                          <p className="text-xs text-slate-500">{sub.contactName} • {sub.contactEmail} • {sub.contactPhone}</p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <select
-                            value={sub.status}
-                            onChange={(e) => handleUpdateSubmissionStatus(sub._id, e.target.value)}
-                            className={`px-2 py-1 text-xs rounded-full border-0 ${
-                              sub.status === 'pending' ? 'bg-blue-100 text-blue-800' :
-                              sub.status === 'reviewed' ? 'bg-blue-100 text-blue-800' :
-                              sub.status === 'approved' ? 'bg-green-100 text-green-800' :
-                              'bg-red-100 text-red-800'
-                            }`}
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="reviewed">Reviewed</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                          </select>
-                          <button onClick={() => handleDeleteSubmission(sub._id)} className="text-red-500 hover:text-red-700">
-                            <HiTrash className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-slate-600 mt-2">
-                        <span><strong>Category:</strong> {sub.category}</span>
-                        <span><strong>Type:</strong> {sub.type}</span>
-                        <span><strong>Price:</strong> ₹{sub.price?.toLocaleString()}</span>
-                        <span><strong>Location:</strong> {sub.location}</span>
-                        {sub.bedrooms && <span><strong>Bedrooms:</strong> {sub.bedrooms}</span>}
-                        {sub.area && <span><strong>Area:</strong> {sub.area} sq.ft</span>}
-                      </div>
-                      <p className="text-xs text-slate-500 mt-2 line-clamp-2">{sub.description}</p>
-                      <p className="text-xs text-slate-400 mt-1">Submitted: {new Date(sub.createdAt).toLocaleDateString()}</p>
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
+               {submissions.length === 0 ? (
+                 <div className="py-32 text-center text-slate-400 font-black tracking-widest text-[10px] uppercase">Zero Pending Assets</div>
+               ) : submissions.map(sub => (
+                 <div key={sub._id} className="p-10 flex flex-col md:flex-row gap-8 items-start group">
+                    <div className="w-full md:w-64 aspect-[4/3] bg-slate-100 rounded-3xl flex-shrink-0 overflow-hidden shadow-inner flex items-center justify-center text-slate-300">
+                       {/* Images usually not available for user submissions unless stored */}
+                       <HiClipboardList size={48} />
                     </div>
-                  ))
-                )}
-              </div>
+                    <div className="flex-1">
+                       <div className="flex justify-between items-start">
+                          <div>
+                             <h4 className="text-xl font-black text-[#1e293b]">{sub.title || 'Untitled Submission'}</h4>
+                             <p className="text-sm font-bold text-blue-600 flex items-center gap-2 mt-1 italic"><HiLocationMarker /> {sub.location}</p>
+                          </div>
+                          <span className="px-4 py-1.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-full text-[9px] font-black uppercase tracking-widest">{sub.status}</span>
+                       </div>
+                       <p className="text-sm text-slate-500 mt-6 leading-relaxed line-clamp-3">"{sub.description}"</p>
+                       <div className="mt-8 flex flex-wrap gap-4 items-center">
+                          <div className="flex items-center gap-4 bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100">
+                             <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 shadow-sm"><HiUser /></div>
+                             <div>
+                                <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Submitter</p>
+                                <p className="text-xs font-black text-slate-700">{sub.contactName}</p>
+                             </div>
+                          </div>
+                          <button className="px-8 py-3 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all ml-auto">Initiate Approval</button>
+                       </div>
+                    </div>
+                 </div>
+               ))}
             </div>
           </div>
         );
 
       case 'analytics':
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-900">Analytics & Reports</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Website Traffic</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Today</span>
-                    <span className="text-sm font-medium">1,234</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">This Week</span>
-                    <span className="text-sm font-medium">8,654</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">This Month</span>
-                    <span className="text-sm font-medium">32,456</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Popular Properties</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">3 BHK Apartment</span>
-                    <span className="text-sm font-medium">234 views</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Commercial Space</span>
-                    <span className="text-sm font-medium">189 views</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Villa</span>
-                    <span className="text-sm font-medium">156 views</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Lead Sources</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Direct</span>
-                    <span className="text-sm font-medium">45%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Google</span>
-                    <span className="text-sm font-medium">32%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Social Media</span>
-                    <span className="text-sm font-medium">23%</span>
-                  </div>
-                </div>
-              </div>
+          <div className="space-y-8 animate-fade-in text-[#1e293b]">
+            <div>
+              <h2 className="text-4xl font-black text-[#1e293b] tracking-tight">Market Intelligence</h2>
+              <p className="text-slate-500 mt-1 font-medium italic">Statistical analysis and performance analytics.</p>
             </div>
-
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Monthly Performance</h3>
-              <div className="h-64 bg-slate-100 rounded-lg flex items-center justify-center">
-                <p className="text-slate-500">Chart visualization would go here</p>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+               <div className="lg:col-span-2 aspect-[21/9] bg-white rounded-[2.5rem] border border-slate-100 p-10 flex flex-col items-center justify-center text-slate-400 shadow-sm relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-5 pointer-events-none">
+                     <div className="grid grid-cols-10 grid-rows-10 h-full w-full">
+                        {Array.from({length: 100}).map((_, i) => <div key={i} className="border border-slate-900/10"></div>)}
+                     </div>
+                  </div>
+                  <HiChartBar size={64} className="mb-4 opacity-50" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.5em] italic">Rendering Dynamic Visualizations...</p>
+               </div>
+               <div className="bg-[#1e293b] text-white rounded-[2.5rem] p-10 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-20 -mt-20"></div>
+                  <div>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-8">System Health</h3>
+                    <div className="space-y-6">
+                       {[
+                         { l: 'Server Latency', v: '24ms', c: 'teal' },
+                         { l: 'Database Sync', v: '99.9%', c: 'teal' },
+                         { l: 'Network Load', v: 'Low', c: 'amber' },
+                         { l: 'Asset Security', v: 'Optimal', c: 'teal' }
+                       ].map((n, i) => (
+                         <div key={i} className="flex justify-between items-center group">
+                            <span className="text-xs font-bold text-slate-500">{n.l}</span>
+                            <span className={`text-xs font-black text-${n.c}-400 group-hover:scale-110 transition-transform`}>{n.v}</span>
+                         </div>
+                       ))}
+                    </div>
+                  </div>
+                  <div className="mt-12 p-6 bg-slate-900/50 rounded-2xl border border-white/5">
+                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Build Identifier</p>
+                     <p className="text-xs font-mono text-teal-400 truncate">v1.2.0-STABLE.XPERTS</p>
+                  </div>
+               </div>
             </div>
           </div>
         );
 
       case 'settings':
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-900">Settings</h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">General Settings</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Company Name</label>
-                    <input
-                      type="text"
-                      defaultValue="SunRise Properties"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+          <div className="space-y-8 animate-fade-in text-[#1e293b]">
+            <div>
+              <h2 className="text-4xl font-black text-[#1e293b] tracking-tight">Security & Parameters</h2>
+              <p className="text-slate-500 mt-1 font-medium italic">Global configuration and administrative preferences.</p>
+            </div>
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-12 max-w-2xl shadow-sm">
+               <div className="space-y-10">
+                  <div className="space-y-4">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Administrative Profile</label>
+                     <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
+                        <div className="w-16 h-16 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-lg">A</div>
+                        <div>
+                           <p className="text-sm font-black text-slate-800">Global Administrator</p>
+                           <p className="text-xs font-bold text-slate-400">master_admin_xperts</p>
+                        </div>
+                        <button className="ml-auto px-5 py-2 bg-white text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-100 hover:shadow-md transition-all">Modify</button>
+                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Contact Email</label>
-                    <input
-                      type="email"
-                      defaultValue="info@sunriseproperties.com"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                  <div className="space-y-4">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Authentication Persistence</label>
+                     <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-6">
+                        <div className="flex justify-between items-center pb-6 border-b border-slate-100">
+                           <span className="text-xs font-black text-slate-700">Two-Factor Encryption</span>
+                           <div className="w-12 h-6 bg-blue-600 rounded-full flex items-center px-1"><div className="w-4 h-4 bg-white rounded-full ml-auto"></div></div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                           <span className="text-xs font-black text-slate-700">Session Auto-Expiry (24h)</span>
+                           <div className="w-12 h-6 bg-slate-300 rounded-full flex items-center px-1"><div className="w-4 h-4 bg-white rounded-full"></div></div>
+                        </div>
+                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
-                    <input
-                      type="tel"
-                      defaultValue="+91-9826098008"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-                <button className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
-                  Save Changes
-                </button>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Security Settings</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Current Password</label>
-                    <input
-                      type="password"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">New Password</label>
-                    <input
-                      type="password"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Confirm New Password</label>
-                    <input
-                      type="password"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-                <button className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
-                  Update Password
-                </button>
-              </div>
+                  <button className="w-full py-5 bg-[#1e293b] text-white rounded-[2rem] text-xs font-black uppercase tracking-widest shadow-2xl shadow-slate-900/20 active:scale-95 transition-all">Commit Global Parameters</button>
+               </div>
             </div>
           </div>
         );
@@ -1390,381 +701,231 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <img src={'/logo/logo.png'} alt="RealityEx Properties" className="h-10 w-auto" />
-              <div>
-                <p className="text-sm text-slate-500">Admin Dashboard</p>
-              </div>
-            </div>
+    <div className="flex h-screen bg-[#f8fafc] overflow-hidden font-sans text-slate-900">
+      {/* Sidebar Layout */}
+      <aside className="w-72 bg-[#001529] text-white flex-shrink-0 relative z-20 shadow-2xl flex flex-col hidden md:flex">
+         <div className="p-10 border-b border-white/5">
+            <Link to="/" className="flex items-center group">
+               <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mr-4 group-hover:bg-blue-600 transition-colors">
+                  <HiOfficeBuilding size={24} className="text-blue-400 group-hover:text-white" />
+               </div>
+               <div>
+                  <h1 className="text-sm font-black tracking-widest uppercase">The Realty</h1>
+                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.3em]">Xperts Admin</p>
+               </div>
+            </Link>
+         </div>
+
+         <nav className="flex-1 px-6 py-10 space-y-3 overflow-y-auto">
+            {menuItems.map((item) => {
+               const Icon = item.icon;
+               const isActive = activeTab === item.id;
+               return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center gap-5 px-6 py-4 rounded-3xl text-left transition-all duration-300 group ${
+                      isActive 
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-600/20' 
+                        : 'text-slate-500 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                     <Icon size={20} className={isActive ? 'text-white' : 'text-slate-500 group-hover:text-blue-400 transition-colors'} />
+                     <span className="text-[11px] font-black uppercase tracking-widest">{item.label}</span>
+                     {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-300 animate-pulse"></div>}
+                  </button>
+               );
+            })}
+         </nav>
+
+         <div className="p-8 mt-auto">
             <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+               onClick={handleLogout}
+               className="w-full flex items-center justify-center gap-3 bg-rose-500/10 text-rose-400 border border-rose-500/10 py-4 rounded-3xl hover:bg-rose-500 hover:text-white transition-all duration-500 font-black text-[10px] uppercase tracking-widest"
             >
-              <HiLogout size={18} />
-              Logout
+               <HiLogout size={18} />
+               Terminate Session
             </button>
-          </div>
-        </div>
-      </header>
+         </div>
+      </aside>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <div className="lg:w-64">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <nav className="space-y-2">
-                {menuItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                        activeTab === item.id
-                          ? 'bg-blue-100 text-blue-700 border-r-4 border-blue-500'
-                          : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <Icon size={20} />
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </nav>
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col min-w-0">
+         <header className="h-24 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-12 flex-shrink-0 z-10 sticky top-0">
+            <div className="flex items-center gap-4">
+               <div className="md:hidden w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-800">
+                  <HiViewGrid />
+               </div>
+               <div className="flex items-center gap-3">
+                  <span className="px-3 py-1 bg-slate-100 rounded-lg text-[9px] font-black uppercase text-slate-400 tracking-widest">Portal</span>
+                  <HiX className="text-slate-300 rotate-45" size={10} />
+                  <span className="text-sm font-black text-slate-900 capitalize tracking-tight">{activeTab}</span>
+               </div>
             </div>
-            
-            {/* Contact Details from Footer */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
-              <h3 className="text-sm font-semibold text-slate-900 mb-3 border-b pb-2">Admin Support</h3>
-              <ul className="text-xs text-slate-600 space-y-3">
-                  <li className="flex items-center gap-2">
-                      <i className="fas fa-user text-blue-500 w-4"></i> Sameer Tiwari
-                  </li>
-                  <li className="flex items-center gap-2">
-                      <i className="fas fa-phone-alt text-blue-500 w-4"></i> 926-417-5587
-                  </li>
-                  <li className="flex items-center gap-2">
-                      <i className="fas fa-envelope text-blue-500 w-4"></i> Emailtotre@gmail.com
-                  </li>
-              </ul>
+
+            <div className="flex items-center gap-8">
+               <div className="text-right hidden sm:block">
+                  <p className="text-xs font-black text-slate-900 tracking-tight">Executive Admin</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Master Clearance</p>
+               </div>
+               <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-slate-100 to-slate-200 border border-white shadow-inner flex items-center justify-center text-slate-400 relative group cursor-pointer hover:shadow-xl transition-all">
+                  <HiUser size={28} />
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+               </div>
             </div>
-          </div>
+         </header>
 
-          {/* Main Content */}
-          <div className="flex-1">
-            {renderContent()}
-          </div>
-        </div>
-      </div>
+         <section className="flex-1 overflow-y-auto p-12 bg-[#f8fafc]/50">
+            <div className="max-w-7xl mx-auto">
+               {renderContent()}
+            </div>
+         </section>
+      </main>
 
-      {/* Property Details Modal */}
+      {/* Modals Container */}
       {showPropertyModal && selectedProperty && (
         <PropertyDetailsModal
           property={selectedProperty}
-          onClose={() => {
-            setShowPropertyModal(false);
-            setSelectedProperty(null);
-          }}
+          onClose={() => { setShowPropertyModal(false); setSelectedProperty(null); }}
         />
       )}
 
-      {/* Edit Property Modal */}
       {showEditProperty && editingProperty && (
         <EditPropertyModal
           property={editingProperty}
-          onClose={() => {
-            setShowEditProperty(false);
-            setEditingProperty(null);
-          }}
-          onSuccess={() => {
-            setShowEditProperty(false);
-            setEditingProperty(null);
-            fetchProperties();
-            fetchDashboardData();
-          }}
+          onClose={() => { setShowEditProperty(false); setEditingProperty(null); }}
+          onSuccess={() => { setShowEditProperty(false); setEditingProperty(null); fetchProperties(); fetchDashboardData(); }}
         />
       )}
     </div>
   );
 };
 
-// Property Details Modal Component
+/* --- SUB-COMPONENTS (MODALS) --- */
+
 const PropertyDetailsModal = ({ property, onClose }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">Property Details</h2>
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 text-2xl"
-            >
-              ×
-            </button>
+    <div className="fixed inset-0 bg-[#001529]/60 backdrop-blur-xl flex items-center justify-center z-[100] p-6 animate-fade-in">
+      <div className="bg-white rounded-[3.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-scale-in">
+        <div className="px-12 py-10 border-b border-slate-50 flex justify-between items-center bg-white/50 backdrop-blur-md sticky top-0 z-10">
+          <div>
+            <div className="flex items-center gap-4">
+               <h2 className="text-4xl font-black text-[#1e293b] tracking-tighter">{property.propertyName || 'Technical Analysis'}</h2>
+               <span className={`px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-sm ${
+                  property.status === 'available' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'
+               }`}>{property.status}</span>
+            </div>
+            <p className="text-slate-400 font-bold mt-2 flex items-center gap-2 text-sm italic"><HiLocationMarker /> {property.location}, {property.city}</p>
           </div>
+          <button onClick={onClose} className="w-16 h-16 rounded-3xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center text-2xl shadow-sm">
+            <HiX />
+          </button>
+        </div>
 
-          {/* Property Images */}
-          <div className="mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {property.images && property.images.length > 0 ? (
-                <>
-                  <div className="aspect-video bg-slate-100 rounded-lg overflow-hidden">
-                    <img
-                      src={property.images[0]}
-                      alt="Main property"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {property.images.slice(1, 5).map((image, index) => (
-                      <div key={index} className="aspect-square bg-slate-100 rounded-lg overflow-hidden">
-                        <img
-                          src={image}
-                          alt={`Property ${index + 2}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="aspect-video bg-slate-100 rounded-lg flex items-center justify-center">
-                  <HiHome className="w-16 h-16 text-slate-400" />
-                </div>
-              )}
+        <div className="flex-1 overflow-y-auto p-12 space-y-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div className="lg:col-span-2 aspect-[16/9] bg-slate-100 rounded-[2.5rem] overflow-hidden shadow-2xl group relative">
+               {property.images?.[0] ? (
+                 <img src={property.images[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt="Main" />
+               ) : (
+                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                   <HiHome size={80} className="mb-4 opacity-50" />
+                   <div className="text-[10px] font-black uppercase tracking-[0.5em] italic">Visual Asset Cryptographic Failure</div>
+                 </div>
+               )}
+            </div>
+            <div className="grid grid-cols-2 gap-6 h-full">
+               {[1, 2, 3, 4].map(idx => (
+                 <div key={idx} className="bg-slate-50 rounded-[2rem] overflow-hidden shadow-sm aspect-square border border-slate-100 group relative">
+                    {property.images?.[idx] ? (
+                       <img src={property.images[idx]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={`View ${idx}`} />
+                    ) : (
+                       <div className="w-full h-full flex items-center justify-center text-slate-200 opacity-30"><HiOfficeBuilding size={32} /></div>
+                    )}
+                 </div>
+               ))}
             </div>
           </div>
 
-          {/* Property Info */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4">Basic Information</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Property Name:</span>
-                  <span className="font-medium">{property.propertyName || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Type:</span>
-                  <span className="font-medium capitalize">{property.propertyType}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Status:</span>
-                  <span className={`font-medium capitalize px-2 py-1 rounded text-sm ${
-                    property.status === 'available' ? 'bg-green-100 text-green-800' :
-                    property.status === 'sold' ? 'bg-red-100 text-red-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {property.status}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Price:</span>
-                  <span className="font-medium text-blue-600">₹{property.price?.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Area:</span>
-                  <span className="font-medium">{property.area} sq.ft</span>
-                </div>
-                {property.plotArea && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Plot Area:</span>
-                    <span className="font-medium">{property.plotArea} sq.ft</span>
-                  </div>
-                )}
-                {property.bedroom && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Bedrooms:</span>
-                    <span className="font-medium">{property.bedroom}</span>
-                  </div>
-                )}
-                {property.transaction && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Transaction:</span>
-                    <span className="font-medium capitalize">{property.transaction}</span>
-                  </div>
-                )}
-                {property.furnishing && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Furnishing:</span>
-                    <span className="font-medium capitalize">{property.furnishing}</span>
-                  </div>
-                )}
-                {property.propertyAge && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Property Age:</span>
-                    <span className="font-medium">{property.propertyAge}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4">Location Details</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">City:</span>
-                  <span className="font-medium">{property.city}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Location:</span>
-                  <span className="font-medium">{property.location}</span>
-                </div>
-                {property.flatNo && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Flat No:</span>
-                    <span className="font-medium">{property.flatNo}</span>
-                  </div>
-                )}
-                {property.buildingName && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Building:</span>
-                    <span className="font-medium">{property.buildingName}</span>
-                  </div>
-                )}
-                {property.street && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Street:</span>
-                    <span className="font-medium">{property.street}</span>
-                  </div>
-                )}
-                {property.landmark && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Landmark:</span>
-                    <span className="font-medium">{property.landmark}</span>
-                  </div>
-                )}
-                {property.pinCode && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Pin Code:</span>
-                    <span className="font-medium">{property.pinCode}</span>
-                  </div>
-                )}
-                {property.address && (
-                  <div>
-                    <span className="text-slate-600 block mb-1">Full Address:</span>
-                    <span className="font-medium">{property.address}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+             {[
+                { i: HiHome, l: 'Category', v: property.propertyType, c: 'blue' },
+                { i: HiCurrencyRupee, l: 'Valuation', v: `₹${property.price?.toLocaleString()}`, c: 'emerald' },
+                { i: HiViewGrid, l: 'Area', v: `${property.area} sq.ft`, c: 'indigo' },
+                { i: HiUserGroup, l: 'Configuration', v: property.bedroom ? `${property.bedroom} BHK` : 'Studio', c: 'teal' }
+             ].map((s, i) => (
+               <div key={i} className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-slate-100 transition-all group">
+                  <div className={`w-12 h-12 rounded-2xl bg-${s.c}-50 text-${s.c}-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-${s.c}-600 group-hover:text-white transition-all`}><s.i size={24} /></div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{s.l}</p>
+                  <p className="text-xl font-black text-[#1e293b] capitalize">{s.v}</p>
+               </div>
+             ))}
           </div>
 
-          {/* Description */}
-          {property.propertyDescription && (
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">Description</h3>
-              <p className="text-slate-700 leading-relaxed">{property.propertyDescription}</p>
-            </div>
-          )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+             <div className="lg:col-span-2 space-y-12">
+                <div className="bg-white rounded-[3rem] p-12 border border-slate-50 shadow-sm relative overflow-hidden">
+                   <div className="absolute top-0 left-0 w-2 h-full bg-blue-600/50"></div>
+                   <h3 className="text-xl font-black text-[#1e293b] mb-6 tracking-tight">Conceptual Narrative</h3>
+                   <p className="text-slate-500 leading-[2.2] text-sm font-medium">{property.propertyDescription || 'Internal documentation pending for this acquisition.'}</p>
+                </div>
 
-          {/* Detailed Information */}
-          {property.detailedInformation && (
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">Detailed Information</h3>
-              <p className="text-slate-700 leading-relaxed">{property.detailedInformation}</p>
-            </div>
-          )}
+                <div>
+                   <h3 className="text-xl font-black text-[#1e293b] mb-8">Infrastructure Stack</h3>
+                   <div className="flex flex-wrap gap-4">
+                      {property.amenities?.map((am, i) => (
+                        <div key={i} className="px-6 py-4 bg-slate-50 text-slate-600 rounded-3xl text-[10px] font-black uppercase tracking-widest border border-slate-100 flex items-center gap-3 hover:bg-white hover:shadow-xl transition-all h-14">
+                           <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                           {am}
+                        </div>
+                      ))}
+                   </div>
+                </div>
+             </div>
 
-          {/* Amenities */}
-          {property.amenities && property.amenities.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">Amenities</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {property.amenities.map((amenity, index) => (
-                  <div key={index} className="flex items-center text-sm text-slate-700 bg-slate-50 px-3 py-2 rounded">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                    {amenity}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* YouTube URL */}
-          {property.youtubeUrl && (
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">Video</h3>
-              <a
-                href={property.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline"
-              >
-                View Property Video
-              </a>
-            </div>
-          )}
-
-          {/* Property Metadata */}
-          <div className="border-t pt-4">
-            <div className="grid grid-cols-2 gap-4 text-sm text-slate-600">
-              <div>
-                <span className="font-medium">Property ID:</span> {property._id?.slice(-8)}
-              </div>
-              <div>
-                <span className="font-medium">Listed:</span> {new Date(property.createdAt).toLocaleDateString()}
-              </div>
-            </div>
+             <div className="space-y-8">
+                <div className="bg-[#1e293b] text-white rounded-[3rem] p-10 shadow-2xl relative overflow-hidden">
+                   <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full"></div>
+                   <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-10">Technical Schematics</h4>
+                   <div className="space-y-8">
+                      {[
+                        { label: 'Furnishing', val: property.furnishing || 'Standard' },
+                        { label: 'Transaction', val: property.transaction || 'Direct' },
+                        { label: 'Age', val: property.propertyAge || 'Fresh' },
+                        { label: 'Log ID', val: property.flatNo || 'RE-X-99' }
+                      ].map((row, i) => (
+                        <div key={i} className="flex justify-between items-center pb-6 border-b border-white/5 last:border-0 last:pb-0">
+                           <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest">{row.label}</span>
+                           <span className="font-black text-sm capitalize text-white">{row.val}</span>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+                {property.youtubeUrl && (
+                  <a href={property.youtubeUrl} target="_blank" rel="noreferrer" className="block w-full py-6 bg-rose-50 text-rose-600 rounded-[2rem] text-center font-black uppercase tracking-widest text-[10px] border border-rose-100 hover:bg-rose-600 hover:text-white transition-all shadow-lg shadow-rose-500/10">
+                    Visual Deployment Ready
+                  </a>
+                )}
+             </div>
           </div>
+        </div>
+
+        <div className="px-12 py-10 bg-slate-50/50 border-t border-slate-50 flex justify-between items-center backdrop-blur-md">
+           <p className="text-[10px] font-black uppercase text-slate-400 tracking-tighter italic">Authorized Access Only • System Entropy: Low • {new Date(property.createdAt).toLocaleString()}</p>
+           <button onClick={onClose} className="px-12 py-5 bg-[#1e293b] text-white rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all">Dismiss Parameters</button>
         </div>
       </div>
     </div>
   );
 };
 
-// Edit Property Modal Component
 const EditPropertyModal = ({ property, onClose, onSuccess }) => {
-  const [formData, setFormData] = useState({
-    status: property.status || 'available',
-    propertyType: property.propertyType || 'apartment',
-    price: property.price || '',
-    area: property.area || '',
-    plotArea: property.plotArea || '',
-    bedroom: property.bedroom || '',
-    transaction: property.transaction || '',
-    furnishing: property.furnishing || '',
-    propertyAge: property.propertyAge || '',
-    flatNo: property.flatNo || '',
-    propertyName: property.propertyName || '',
-    buildingName: property.buildingName || '',
-    street: property.street || '',
-    landmark: property.landmark || '',
-    pinCode: property.pinCode || '',
-    address: property.address || '',
-    city: property.city || '',
-    location: property.location || '',
-    propertyDescription: property.propertyDescription || '',
-    detailedInformation: property.detailedInformation || '',
-    amenities: property.amenities || [],
-    youtubeUrl: property.youtubeUrl || '',
-  });
+  const [formData, setFormData] = useState({ ...property });
   const [loading, setLoading] = useState(false);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleAmenityChange = (amenity) => {
-    setFormData(prev => ({
-      ...prev,
-      amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter(a => a !== amenity)
-        : [...prev.amenities, amenity]
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties/${property._id}`, {
@@ -1775,354 +936,86 @@ const EditPropertyModal = ({ property, onClose, onSuccess }) => {
         },
         body: JSON.stringify(formData),
       });
-
       if (response.ok) {
-        toast.success('Property updated successfully!');
+        toast.success('Core state updated!');
         onSuccess();
       } else {
-        toast.error('Failed to update property');
+        toast.error('Sync failure');
       }
-    } catch (error) {
-      console.error('Error updating property:', error);
-      toast.error('Error updating property');
-    } finally {
-      setLoading(false);
-    }
+    } catch (e) { toast.error('System error'); } finally { setLoading(false); }
   };
 
-  const amenitiesList = [
-    'Water Softener', 'Kids Play Area', 'Volleyball Court', 'Badminton Court', 'Cricket Pitch', 'Wifi',
-    'Dining Table', 'Curtains', 'Chimney', 'Microwave', 'Stove', 'Water Purifier', 'Washing Machine',
-    'Fans', 'Lights', 'Exhaust Fan', 'Sofa', 'Wardrobe', 'T.V', 'Geysers', 'Modular Kitchen', 'Air Condition',
-    'Refrigerator', 'Earthquake Resistant', 'Landscaped Garden', 'Indoor Games', 'Jogging park', 'Yoga centre',
-    'Amphitheatre', 'Poolside Party Deck', 'Sklandscaping Party Lawns', 'Sky Lounge', 'Cabana cafe', 'Astro deck',
-    'Herbal garden', 'Sky Walkway', 'Yoga Pads', 'UPS', 'Conference Room', 'Cafeteria', 'Garden', 'Terrace',
-    'Lawn', 'Intercom', 'Reserved Park', 'CCTV', 'PlayArea', 'Balcony', 'Servant Quarters', 'Gym', 'Internet Connection',
-    'Security', 'Parking', 'Swimming Pool', 'Gas Connection', 'Power Backup', 'Rain Water Harvesting', 'Clubhouse',
-    'Lift', 'Vaastu', 'Air Conditioning', 'Large Windows/Natural Light', 'Stainless Steel Appliances', 'Laundry'
-  ];
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">Edit Property</h2>
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 text-2xl"
-            >
-              ×
-            </button>
+    <div className="fixed inset-0 bg-[#001529]/60 backdrop-blur-xl flex items-center justify-center z-[100] p-6 animate-fade-in shadow-2xl">
+      <div className="bg-white rounded-[3.5rem] shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-scale-in">
+        <div className="px-12 py-10 border-b border-slate-50 flex justify-between items-center bg-white/80 sticky top-0 z-10 backdrop-blur-md">
+          <div>
+            <h2 className="text-3xl font-black text-[#1e293b] tracking-tighter">Modification Protocol</h2>
+            <p className="text-slate-400 font-black uppercase text-[9px] tracking-[0.5em] mt-2">Target Node: {property._id?.slice(-12).toUpperCase()}</p>
           </div>
+          <button onClick={onClose} className="w-16 h-16 rounded-[2rem] bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center shadow-sm">
+            <HiX size={24} />
+          </button>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Property Information */}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Property Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Status *</label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-12 space-y-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Asset Status</label>
+                  <select 
+                    value={formData.status} 
+                    onChange={e => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] outline-none font-bold text-sm focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all"
                   >
                     <option value="available">Available</option>
-                    <option value="sold">Sold</option>
-                    <option value="rented">Rented</option>
+                    <option value="sold">Decommissioned (Sold)</option>
+                    <option value="rented">Leased State</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Property Type *</label>
-                  <select
-                    name="propertyType"
-                    value={formData.propertyType}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="apartment">Apartment</option>
-                    <option value="villa">Villa</option>
-                    <option value="plot">Plot</option>
-                    <option value="commercial">Commercial</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Price *</label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter price"
-                    required
+               </div>
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Asset Alias</label>
+                  <input 
+                    type="text" 
+                    value={formData.propertyName} 
+                    onChange={e => setFormData({ ...formData, propertyName: e.target.value })}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-sm outline-none focus:bg-white transition-all"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Area (Sq.ft) *</label>
-                  <input
-                    type="number"
-                    name="area"
-                    value={formData.area}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter area"
-                    required
+               </div>
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Market Valuation</label>
+                  <input 
+                    type="number" 
+                    value={formData.price} 
+                    onChange={e => setFormData({ ...formData, price: e.target.value })}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-sm outline-none focus:bg-white transition-all"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Plot Area (Sq.ft)</label>
-                  <input
-                    type="number"
-                    name="plotArea"
-                    value={formData.plotArea}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter plot area"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Bedroom</label>
-                  <input
-                    type="number"
-                    name="bedroom"
-                    value={formData.bedroom}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Number of bedrooms"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Transaction</label>
-                  <select
-                    name="transaction"
-                    value={formData.transaction}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Transaction</option>
-                    <option value="sale">Sale</option>
-                    <option value="rent">Rent</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Furnishing</label>
-                  <select
-                    name="furnishing"
-                    value={formData.furnishing}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Furnishing</option>
-                    <option value="furnished">Furnished</option>
-                    <option value="semi-furnished">Semi-Furnished</option>
-                    <option value="unfurnished">Unfurnished</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Property Age</label>
-                  <input
-                    type="text"
-                    name="propertyAge"
-                    value={formData.propertyAge}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., 2 years old"
-                  />
-                </div>
-              </div>
+               </div>
             </div>
 
-            {/* Location Information */}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Location Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Flat No./Unit No.</label>
-                  <input
-                    type="text"
-                    name="flatNo"
-                    value={formData.flatNo}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Flat/Unit number"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Property Name</label>
-                  <input
-                    type="text"
-                    name="propertyName"
-                    value={formData.propertyName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Property name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Building Name</label>
-                  <input
-                    type="text"
-                    name="buildingName"
-                    value={formData.buildingName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Building name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Street</label>
-                  <input
-                    type="text"
-                    name="street"
-                    value={formData.street}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Street name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Landmark</label>
-                  <input
-                    type="text"
-                    name="landmark"
-                    value={formData.landmark}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Nearby landmark"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Pin Code</label>
-                  <input
-                    type="text"
-                    name="pinCode"
-                    value={formData.pinCode}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Pin code"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
-                  <textarea
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Full address"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">City *</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="City"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Location *</label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Location/Area"
-                    required
-                  />
-                </div>
-              </div>
+            <div className="space-y-3">
+               <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Geographical Parameters</label>
+               <div className="grid grid-cols-2 gap-4">
+                  <input type="text" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} placeholder="Location Sector" className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-sm outline-none" />
+                  <input type="text" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} placeholder="City Node" className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-sm outline-none" />
+               </div>
             </div>
 
-            {/* Property Description */}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Property Description</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                  <textarea
-                    name="propertyDescription"
-                    value={formData.propertyDescription}
-                    onChange={handleInputChange}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Detailed property description"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Detailed Information</label>
-                  <textarea
-                    name="detailedInformation"
-                    value={formData.detailedInformation}
-                    onChange={handleInputChange}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Additional detailed information"
-                  />
-                </div>
-              </div>
+            <div className="space-y-3">
+               <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Deep Description</label>
+               <textarea 
+                  value={formData.propertyDescription} 
+                  onChange={e => setFormData({ ...formData, propertyDescription: e.target.value })}
+                  rows={6}
+                  className="w-full px-8 py-6 bg-slate-50 border border-slate-100 rounded-[2.5rem] font-medium text-sm outline-none focus:bg-white transition-all leading-relaxed"
+               />
             </div>
+        </form>
 
-            {/* Amenities */}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Amenities</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {amenitiesList.map((amenity) => (
-                  <label key={amenity} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.amenities.includes(amenity)}
-                      onChange={() => handleAmenityChange(amenity)}
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-slate-700">{amenity}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* YouTube URL */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">YouTube URL</label>
-              <input
-                type="url"
-                name="youtubeUrl"
-                value={formData.youtubeUrl}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="https://youtube.com/watch?v=..."
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex justify-end space-x-4 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-6 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Updating Property...' : 'Update Property'}
-              </button>
-            </div>
-          </form>
+        <div className="px-12 py-10 bg-slate-50 border-t border-slate-100 flex justify-end gap-6 items-center">
+           <button type="button" onClick={onClose} className="px-10 py-5 bg-white text-slate-500 rounded-3xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all">Discard Changes</button>
+           <button onClick={handleSubmit} disabled={loading} className="px-14 py-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl shadow-blue-500/30 active:scale-95 transition-all flex items-center gap-4">
+              {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : 'Commit modifications'}
+           </button>
         </div>
       </div>
     </div>

@@ -81,7 +81,7 @@ const Properties = ({ category = 'all' }) => {
         if (property.propertyType !== 'commercial') return false;
       }
     }
-    
+
     if (filters.propertyType !== 'all' && property.propertyType !== filters.propertyType) return false;
     if (filters.minPrice && property.price < parseInt(filters.minPrice)) return false;
     if (filters.maxPrice && property.price > parseInt(filters.maxPrice)) return false;
@@ -90,79 +90,51 @@ const Properties = ({ category = 'all' }) => {
     if (filters.status !== 'all' && property.status !== filters.status) return false;
     if (filters.bedroom !== 'all' && property.bedroom?.toString() !== filters.bedroom) return false;
     if (filters.furnishing !== 'all' && property.furnishing !== filters.furnishing) return false;
-    
+
     return true;
   });
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
+      <main style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', paddingTop: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '40px', height: '40px', border: '3px solid var(--color-gray)', borderTopColor: 'var(--color-navy)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-7xl mx-auto">
+    <main style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', paddingTop: '80px' }}>
+      <section className="section-padding">
+        <div className="container">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-6">
+          <div className="section-header text-center fade-in-up">
+            <span className="subtitle">Real Estate Portfolio</span>
+            <h2>
               {category === 'residential' ? 'Residential Properties' : category === 'commercial' ? 'Commercial Properties' : 'All Properties'}
-            </h1>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Discover your perfect property from our extensive collection of residential and commercial spaces.
+            </h2>
+            <div className="divider mx-auto"></div>
+            <p className="section-desc">
+              Discover your perfect property from our extensive collection of residential and commercial spaces defined by excellence.
             </p>
           </div>
 
-          {/* Filters */}
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-slate-100">
-            <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-2">
-                <HiFilter className="text-blue-500 w-6 h-6" />
-                <h3 className="text-xl font-bold text-slate-800">Filter Properties</h3>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                {hasActiveFilters && (
-                  <button 
-                    onClick={clearFilters}
-                    className="text-sm font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
-                  >
-                    Clear All
-                  </button>
-                )}
-                {/* Mobile Filter Toggle Button */}
-                <button 
-                  onClick={() => setShowMobileFilters(!showMobileFilters)}
-                  className="md:hidden flex items-center justify-center p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
-                >
-                  {showMobileFilters ? <HiX className="w-6 h-6" /> : <HiFilter className="w-6 h-6" />}
+          {/* Filters (Modified to match search-bar-container logic) */}
+          <div className="search-bar-container mx-auto fade-in-up" style={{ marginBottom: '40px', maxWidth: '1000px', animationDelay: '0.1s' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--color-gray)', paddingBottom: '10px' }}>
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--color-navy)' }}><i className="fas fa-filter text-gold" style={{ marginRight: '8px' }}></i> Filter Search</h3>
+              {hasActiveFilters && (
+                <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer', fontWeight: 'bold' }}>
+                  Clear All
                 </button>
-              </div>
+              )}
             </div>
 
-            {hasActiveFilters && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {Object.entries(filters).map(([key, value]) => {
-                  if (value === 'all' || value === '') return null;
-                  const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
-                  return (
-                    <span key={key} className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full border border-blue-200">
-                      <span className="text-blue-900 mr-1">{label.trim()}:</span> {value}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-
-            <div className={`${showMobileFilters ? 'block' : 'hidden md:grid'} grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-fade-in`}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
               <select
                 name="category"
                 value={filters.category}
                 onChange={handleFilterChange}
-                className="px-4 py-3 border border-slate-200 bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-slate-700 transition-all"
+                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
               >
                 <option value="all">All Categories</option>
                 <option value="residential">Residential</option>
@@ -173,7 +145,7 @@ const Properties = ({ category = 'all' }) => {
                 name="propertyType"
                 value={filters.propertyType}
                 onChange={handleFilterChange}
-                className="px-4 py-3 border border-slate-200 bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-slate-700 transition-all"
+                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
               >
                 <option value="all">All Types</option>
                 <option value="apartment">Apartment</option>
@@ -186,7 +158,7 @@ const Properties = ({ category = 'all' }) => {
                 name="transaction"
                 value={filters.transaction}
                 onChange={handleFilterChange}
-                className="px-4 py-3 border border-slate-200 bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-slate-700 transition-all"
+                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
               >
                 <option value="all">Sale / Rent</option>
                 <option value="sale">For Sale</option>
@@ -197,7 +169,7 @@ const Properties = ({ category = 'all' }) => {
                 name="status"
                 value={filters.status}
                 onChange={handleFilterChange}
-                className="px-4 py-3 border border-slate-200 bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-slate-700 transition-all"
+                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
               >
                 <option value="all">Any Status</option>
                 <option value="available">Available</option>
@@ -209,7 +181,7 @@ const Properties = ({ category = 'all' }) => {
                 name="bedroom"
                 value={filters.bedroom}
                 onChange={handleFilterChange}
-                className="px-4 py-3 border border-slate-200 bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-slate-700 transition-all"
+                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
                 disabled={filters.category === 'commercial' || filters.propertyType === 'plot' || filters.propertyType === 'commercial'}
               >
                 <option value="all">Bedrooms (Any)</option>
@@ -224,7 +196,7 @@ const Properties = ({ category = 'all' }) => {
                 name="furnishing"
                 value={filters.furnishing}
                 onChange={handleFilterChange}
-                className="px-4 py-3 border border-slate-200 bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-slate-700 transition-all"
+                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
               >
                 <option value="all">Furnishing (Any)</option>
                 <option value="furnished">Furnished</option>
@@ -238,7 +210,7 @@ const Properties = ({ category = 'all' }) => {
                 placeholder="Min Price (₹)"
                 value={filters.minPrice}
                 onChange={handleFilterChange}
-                className="px-4 py-3 border border-slate-200 bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-slate-700 transition-all"
+                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
               />
               <input
                 type="number"
@@ -246,36 +218,39 @@ const Properties = ({ category = 'all' }) => {
                 placeholder="Max Price (₹)"
                 value={filters.maxPrice}
                 onChange={handleFilterChange}
-                className="px-4 py-3 border border-slate-200 bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-slate-700 transition-all"
+                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
               />
+
+            </div>
+            <div style={{ marginTop: '15px' }}>
               <input
                 type="text"
                 name="location"
                 placeholder="Search Location..."
                 value={filters.location}
                 onChange={handleFilterChange}
-                className="px-4 py-3 border border-slate-200 bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-slate-700 transition-all lg:col-span-1 md:col-span-3"
+                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
               />
             </div>
           </div>
 
           {/* Properties Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="property-grid">
             {filteredProperties.map((property) => (
               <PropertyCard key={property._id} property={property} />
             ))}
           </div>
 
           {filteredProperties.length === 0 && (
-            <div className="text-center py-12">
-              <HiOfficeBuilding className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-slate-600 mb-2">No properties found</h3>
-              <p className="text-slate-500">Try adjusting your filters or check back later for new listings.</p>
+            <div className="text-center section-padding fade-in-up">
+              <i className="fas fa-building" style={{ fontSize: '4rem', color: 'var(--color-gray)', marginBottom: '20px' }}></i>
+              <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '10px' }}>No properties found</h3>
+              <p className="text-slate-500">Try adjusting your filters or check back later for new premium listings.</p>
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 
