@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'
 
 function About() {
     useEffect(() => {
@@ -37,7 +37,7 @@ function About() {
             }}>
                 <div className="container" style={{ opacity: 0 }} className="animate-on-scroll">
                     <span className="subtitle" style={{ color: 'var(--color-gold)', letterSpacing: '6px' }}>ESTABLISHED 2016</span>
-                    <h1 style={{ fontSize: '4rem', fontWeight: '900', marginBottom: '1rem' }}>Our Legacy of Trust</h1>
+                    <h1 style={{ fontSize: '4rem', fontWeight: '900',color: 'white', marginBottom: '1rem' }}>Our Legacy of Trust</h1>
                     <div className="divider mx-auto" style={{ background: 'var(--color-gold)' }}></div>
                 </div>
             </section>
@@ -155,7 +155,7 @@ function About() {
                                     textAlign: 'center',
                                     backdropFilter: 'blur(5px)'
                                 }}>
-                                    <h3 style={{ fontSize: '1.4rem', marginBottom: '2px' }}>Mr. Sanjeev Kumar</h3>
+                                    <h3 style={{ fontSize: '1.4rem',color: 'white', marginBottom: '2px' }}>Mr. Sanjeev Kumar</h3>
                                     <p style={{ color: 'var(--color-gold)', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase' }}>CMD, The Realty Xperts</p>
                                 </div>
                             </div>
