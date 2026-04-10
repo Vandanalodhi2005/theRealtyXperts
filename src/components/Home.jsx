@@ -195,6 +195,55 @@ function Home() {
                 link="/investment" 
             />
 
+            {/* About TRX Section */}
+            <section className="section-padding" style={{ backgroundColor: 'white' }}>
+                <div className="container">
+                    <div className="about-highlights-grid">
+                        <div className="about-image-side section-header">
+                            <div className="premium-image-container">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2071&auto=format&fit=crop" 
+                                    alt="Luxury Real Estate" 
+                                    className="about-main-img"
+                                    onError={(e) => { e.target.src = '/assets/images/about_trx.png' }}
+                                />
+                                <div className="experience-badge">
+                                    <h4>8+</h4>
+                                    <p>Years of Excellence</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="about-content-side section-header">
+                            <span className="subtitle" style={{ letterSpacing: '4px' }}>ABOUT REALTY XPERTS</span>
+                            <h2 className="about-title">
+                                Congruence | Consistency | Curator
+                            </h2>
+                            <h3 className="about-tagline">
+                                Building Better Lives With Every Home
+                            </h3>
+                            <div className="divider"></div>
+                            
+                            <div className="about-text" style={{ textAlign: 'justify' }}>
+                                <p>
+                                    At <strong className="text-navy">The Realty Xperts</strong>, our zeal is to create milestones that meet universal eminence, exemplify the esteem of our organization, and are crafted on a legacy of belief traversed over centuries. We are steered by our foresightedness of <strong className="text-teal">‘Creating a better living’</strong> and trust that real estate transfigures lives. Any place you buy is a springboard for the desire and dreams, for living a flourishing and persuasive life.
+                                </p>
+                                <p>
+                                    We have the adroitness to deliver both attribute and commitment, at an inimitable swiftness. By forging the magnificent worldwide confederation, and deploying the finest people and procedures, we generate the best benefits for our consumers beyond landscapes, markets, and customer tranche.
+                                </p>
+                                <p>
+                                    As a family which makes presumably the long-lasting impact to our surroundings and the lives of our compeer, we perpetrate to act in the concern of each one of our peer. We are <strong>‘Creating a better living’</strong> in exceptionally furthermore mechanism than anyone can envisage.
+                                </p>
+                            </div>
+                            
+                            <div style={{ marginTop: '2.5rem' }}>
+                                <Link to="/about" className="btn btn-primary">Learn Our Legacy</Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Welcome/Bottom Section */}
             <section className="section-padding" style={{textAlign: 'center', backgroundColor: '#f8f9fa'}}>
                 <div className="container">

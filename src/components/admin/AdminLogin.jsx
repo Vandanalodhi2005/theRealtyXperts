@@ -10,17 +10,9 @@ const AdminLogin = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     dispatch(clearError());
-
     const result = await dispatch(loginAdmin(credentials));
     if (loginAdmin.fulfilled.match(result)) {
       if (result.payload.token) {
@@ -30,106 +22,90 @@ const AdminLogin = () => {
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '16px 20px 16px 50px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '12px',
+    color: 'white',
+    outline: 'none',
+    fontSize: '14px',
+    transition: 'all 0.3s'
+  };
+
   return (
-    <div className="min-h-screen bg-[#001529] relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden font-sans">
-      {/* Background Orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-      
-      <div className="max-w-md w-full relative z-10 animate-fade-in">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2.5rem] bg-gradient-to-tr from-blue-600 to-indigo-700 shadow-2xl shadow-blue-500/20 mb-6 group hover:scale-110 transition-transform duration-500">
-             <HiShieldCheck size={48} className="text-white" />
-          </div>
-          <h2 className="text-3xl font-black text-white tracking-tighter uppercase mb-2">Command Center</h2>
-          <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.4em] opacity-80">The Realty Xperts • Internal Access Only</p>
-        </div>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', position: 'relative', overflow: 'hidden' }}>
+        {/* Glows */}
+        <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '500px', height: '500px', background: 'var(--color-gold)', borderRadius: '50%', filter: 'blur(150px)', opacity: 0.1 }}></div>
+        <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '500px', height: '500px', background: 'var(--color-teal)', borderRadius: '50%', filter: 'blur(150px)', opacity: 0.1 }}></div>
 
-        {/* Login Card */}
-        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[3rem] p-12 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
-          
-          <form className="space-y-8" onSubmit={handleSubmit}>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Identity Identifier</label>
-                <div className="relative group/input">
-                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                    <HiUser className="h-5 w-5 text-slate-500 group-focus-within/input:text-blue-400 transition-colors" />
-                  </div>
-                  <input
-                    id="username"
-                    name="username"
-                    type="text"
-                    required
-                    className="block w-full pl-14 pr-6 py-5 bg-white/5 border border-white/10 rounded-3xl text-white font-bold text-sm outline-none focus:bg-white/10 focus:border-blue-500/50 transition-all placeholder:text-slate-600"
-                    placeholder="Enter user identity"
-                    value={credentials.username}
-                    onChange={handleChange}
-                  />
+        <div style={{ maxWidth: '450px', width: '100%', position: 'relative', zIndex: 10 }}>
+            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                <div style={{ width: '80px', height: '80px', background: 'var(--color-gold)', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', boxShadow: '0 10px 30px rgba(198, 156, 109, 0.3)' }}>
+                    <HiShieldCheck size={40} style={{ color: 'var(--color-navy)' }} />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Security Keyphrase</label>
-                <div className="relative group/input">
-                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                    <HiLockClosed className="h-5 w-5 text-slate-500 group-focus-within/input:text-blue-400 transition-colors" />
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    className="block w-full pl-14 pr-6 py-5 bg-white/5 border border-white/10 rounded-3xl text-white font-bold text-sm outline-none focus:bg-white/10 focus:border-blue-500/50 transition-all placeholder:text-slate-600"
-                    placeholder="Enter clearance key"
-                    value={credentials.password}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
+                <h2 style={{ color: 'white', fontSize: '2rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>Admin Access</h2>
+                <p style={{ color: 'var(--color-gold)', fontSize: '9px', fontWeight: 'bold', letterSpacing: '4px', marginTop: '5px', opacity: 0.6 }}>REALTY XPERTS MANAGEMENT</p>
             </div>
 
-            {error && (
-              <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 animate-shake">
-                <p className="text-xs font-black text-rose-400 text-center uppercase tracking-widest">Protocol Failure: {error}</p>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full relative group/btn"
-            >
-               <div className="absolute inset-0 bg-blue-600 rounded-3xl blur-xl group-hover/btn:blur-2xl opacity-20 transition-all"></div>
-               <div className="relative flex items-center justify-center w-full py-5 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl text-white font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-[0.98] transition-all">
-                  {loading ? (
-                    <div className="flex items-center gap-3">
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"></div>
-                      <span>Authenticating...</span>
+            <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '32px', padding: '40px', backdropFilter: 'blur(20px)' }}>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                    <div style={{ position: 'relative' }}>
+                        <HiUser size={18} style={{ position: 'absolute', left: '20px', top: '20px', color: 'rgba(255,255,255,0.3)' }} />
+                        <input
+                            type="text"
+                            placeholder="Username"
+                            value={credentials.username}
+                            onChange={(e) => setCredentials({...credentials, username: e.target.value})}
+                            style={inputStyle}
+                            required
+                        />
                     </div>
-                  ) : (
-                    'Initiate Access'
-                  )}
-               </div>
-            </button>
-          </form>
 
-          {/* System Footer info */}
-          <div className="mt-12 pt-8 border-t border-white/5 text-center">
-             <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">System Entropy: Nominal • Secure Channel Established</p>
-          </div>
-        </div>
+                    <div style={{ position: 'relative' }}>
+                        <HiLockClosed size={18} style={{ position: 'absolute', left: '20px', top: '20px', color: 'rgba(255,255,255,0.3)' }} />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={credentials.password}
+                            onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+                            style={inputStyle}
+                            required
+                        />
+                    </div>
 
-        {/* Demo Credentials Reveal */}
-        <div className="mt-10 text-center opacity-40 hover:opacity-100 transition-opacity duration-700">
-           <div className="inline-flex items-center gap-6 px-8 py-3 bg-white/3 border border-white/5 rounded-full">
-              <span className="text-[10px] font-mono text-blue-400"><strong>U:</strong> admin</span>
-              <span className="w-1 h-1 rounded-full bg-slate-700"></span>
-              <span className="text-[10px] font-mono text-blue-400"><strong>P:</strong> admin123</span>
-           </div>
+                    {error && <div style={{ color: '#ff4d4d', fontSize: '12px', textAlign: 'center', fontWeight: 'bold' }}>{error}</div>}
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        style={{
+                            padding: '18px',
+                            backgroundColor: 'var(--color-gold)',
+                            color: 'var(--color-navy)',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontWeight: 'bold',
+                            fontSize: '12px',
+                            letterSpacing: '2px',
+                            cursor: 'pointer',
+                            marginTop: '10px',
+                            transition: 'transform 0.2s',
+                            boxShadow: '0 10px 30px rgba(198, 156, 109, 0.2)'
+                        }}
+                        onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                        onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                    >
+                        {loading ? 'AUTHENTICATING...' : 'ENTER MANAGEMENT'}
+                    </button>
+                </form>
+
+                <div style={{ marginTop: '40px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '30px' }}>
+                    <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '8px', fontWeight: 'bold', letterSpacing: '2px' }}>© 2026 THE REALTY XPERTS • SECURE SYSTEM</p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
   );
 };

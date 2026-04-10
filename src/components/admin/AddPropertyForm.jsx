@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import toast from 'react-hot-toast';
+import { HiPlus, HiX, HiCloudUpload, HiInformationCircle, HiLocationMarker, HiViewGrid, HiCheckCircle } from 'react-icons/hi';
 
 const AddPropertyForm = ({ onCancel, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -26,6 +28,7 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
     amenities: [],
     youtubeUrl: '',
   });
+  
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -62,7 +65,6 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
       const token = localStorage.getItem('adminToken');
       const formDataToSend = new FormData();
 
-      // Add all form fields
       Object.keys(formData).forEach(key => {
         if (key === 'amenities') {
           formDataToSend.append(key, formData[key].join(','));
@@ -71,27 +73,25 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
         }
       });
 
-      // Add images
       images.forEach((image) => {
         formDataToSend.append('images', image);
       });
 
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formDataToSend,
       });
 
       if (response.ok) {
+        toast.success('Property added successfully!');
         onSuccess();
       } else {
         const data = await response.json();
-        setError(data.message || 'Failed to add property');
+        setError(data.message || 'Error processing request');
       }
-    } catch {
-      setError('Network error. Please try again.');
+    } catch (err) {
+      setError('System connection error');
     } finally {
       setLoading(false);
     }
@@ -102,70 +102,44 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
     'Dining Table', 'Curtains', 'Chimney', 'Microwave', 'Stove', 'Water Purifier', 'Washing Machine',
     'Fans', 'Lights', 'Exhaust Fan', 'Sofa', 'Wardrobe', 'T.V', 'Geysers', 'Modular Kitchen', 'Air Condition',
     'Refrigerator', 'Earthquake Resistant', 'Landscaped Garden', 'Indoor Games', 'Jogging park', 'Yoga centre',
-    'Amphitheatre', 'Poolside Party Deck', 'Sklandscaping Party Lawns', 'Sky Lounge', 'Cabana cafe', 'Astro deck',
+    'Amphitre', 'Poolside Party Deck', 'Sklandscaping Party Lawns', 'Sky Lounge', 'Cabana cafe', 'Astro deck',
     'Herbal garden', 'Sky Walkway', 'Yoga Pads', 'UPS', 'Conference Room', 'Cafeteria', 'Garden', 'Terrace',
     'Lawn', 'Intercom', 'Reserved Park', 'CCTV', 'PlayArea', 'Balcony', 'Servant Quarters', 'Gym', 'Internet Connection',
     'Security', 'Parking', 'Swimming Pool', 'Gas Connection', 'Power Backup', 'Rain Water Harvesting', 'Clubhouse',
     'Lift', 'Vaastu', 'Air Conditioning', 'Large Windows/Natural Light', 'Stainless Steel Appliances', 'Laundry'
   ];
 
+  const sectionHeaderStyle = { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', fontWeight: '800', color: 'var(--color-navy)', marginBottom: '30px', paddingBottom: '10px', borderBottom: '2px solid #F0F0F0' };
+  const inputGroupStyle = { display: 'flex', flexDirection: 'column', gap: '8px' };
+  const labelStyle = { fontSize: '12px', fontWeight: '700', color: '#607D8B', textTransform: 'uppercase' };
+  const inputStyle = { width: '100%', padding: '12px 15px', borderRadius: '10px', border: '1px solid #E6E9EF', backgroundColor: '#F8F9FA', fontSize: '14px', outline: 'none', transition: 'border-color 0.2s' };
+
   return (
-    <div className="max-w-5xl mx-auto pb-20 fade-in-up">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h2 className="text-3xl font-black text-[#1e293b]">Add New Property</h2>
-          <p className="text-slate-500 mt-1">Fill in the details to list a new property on Realty Xperts.</p>
-        </div>
-        <button
-          onClick={onCancel}
-          className="px-6 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center gap-2"
-        >
-          <i className="fas fa-times"></i> Cancel
-        </button>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', animateOnScroll: 'fade-in-up' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <h2 style={{ fontSize: '28px', fontWeight: '900', color: 'var(--color-navy)' }}>Add Property Listing</h2>
+        <button onClick={onCancel} style={{ background: '#ECEFF1', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', color: '#455A64' }}>Cancel</button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-10">
-        {error && (
-          <div className="bg-rose-50 border border-rose-100 text-rose-600 px-6 py-4 rounded-2xl font-semibold flex items-center gap-3 animate-shake">
-            <i className="fas fa-exclamation-circle text-lg"></i>
-            {error}
-          </div>
-        )}
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+        {error && <div style={{ background: '#FFEBEE', color: '#F44336', padding: '15px', borderRadius: '10px', fontWeight: 'bold', fontSize: '14px' }}>{error}</div>}
 
-        {/* Section 1: Core Information */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
-          <h3 className="text-xl font-bold text-[#1e293b] mb-8 flex items-center gap-3">
-             <span className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i className="fas fa-info-circle"></i></span>
-             Basic Information
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Current Status *</label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                required
-              >
+        {/* Section 1: Property Information */}
+        <div style={cardStyle}>
+          <h3 style={sectionHeaderStyle}><HiPlus color="var(--color-gold)" /> Property Information</h3>
+          <div style={formGridStyle}>
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Status *</label>
+              <select name="status" value={formData.status} onChange={handleInputChange} style={inputStyle} required>
                 <option value="">Select Status</option>
                 <option value="available">Available</option>
                 <option value="sold">Sold</option>
                 <option value="rented">Rented</option>
               </select>
             </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Property Type *</label>
-              <select
-                name="propertyType"
-                value={formData.propertyType}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                required
-              >
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Property Type *</label>
+              <select name="propertyType" value={formData.propertyType} onChange={handleInputChange} style={inputStyle} required>
                 <option value="">Select Type</option>
                 <option value="apartment">Apartment</option>
                 <option value="villa">Villa</option>
@@ -173,249 +147,134 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
                 <option value="commercial">Commercial</option>
               </select>
             </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Market Price (₹) *</label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                placeholder="Ex: 4500000"
-                required
-              />
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Price *</label>
+              <input type="number" name="price" value={formData.price} onChange={handleInputChange} style={inputStyle} placeholder="Enter price" required />
             </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Carpet Area (Sq.ft) *</label>
-              <input
-                type="number"
-                name="area"
-                value={formData.area}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                placeholder="Ex: 1250"
-                required
-              />
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Area (Sq.ft) *</label>
+              <input type="number" name="area" value={formData.area} onChange={handleInputChange} style={inputStyle} placeholder="Enter area" required />
             </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Bedrooms / Configuration</label>
-              <input
-                type="number"
-                name="bedroom"
-                value={formData.bedroom}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                placeholder="Ex: 3"
-              />
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Plot Area (Sq.ft)</label>
+              <input type="number" name="plotArea" value={formData.plotArea} onChange={handleInputChange} style={inputStyle} placeholder="Enter plot area" />
             </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Furnishing Status</label>
-              <select
-                name="furnishing"
-                value={formData.furnishing}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-              >
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Bedroom</label>
+              <input type="number" name="bedroom" value={formData.bedroom} onChange={handleInputChange} style={inputStyle} placeholder="Number of bedrooms" />
+            </div>
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Transaction</label>
+              <select name="transaction" value={formData.transaction} onChange={handleInputChange} style={inputStyle}>
+                <option value="">Select Transaction</option>
+                <option value="new">New Property</option>
+                <option value="resale">Resale</option>
+              </select>
+            </div>
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Furnishing</label>
+              <select name="furnishing" value={formData.furnishing} onChange={handleInputChange} style={inputStyle}>
                 <option value="">Select Furnishing</option>
-                <option value="furnished">Fully Furnished</option>
+                <option value="furnished">Furnished</option>
                 <option value="semi-furnished">Semi-Furnished</option>
                 <option value="unfurnished">Unfurnished</option>
               </select>
             </div>
-          </div>
-        </div>
-
-        {/* Section 2: Location Details */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-1.5 h-full bg-teal-500"></div>
-          <h3 className="text-xl font-bold text-[#1e293b] mb-8 flex items-center gap-3">
-             <span className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center"><i className="fas fa-map-marker-alt"></i></span>
-             Location & Address
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Building / Project Name</label>
-              <input
-                type="text"
-                name="propertyName"
-                value={formData.propertyName}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-medium"
-                placeholder="Global Heritage, etc."
-              />
-            </div>
-            
-            <div className="space-y-2 text-slate-800">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">City *</label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-medium"
-                placeholder="Bhopal / Noida"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Sector / Locality *</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-medium"
-                placeholder="Sector 62, Indrapuri"
-                required
-              />
-            </div>
-
-            <div className="md:col-span-2 lg:col-span-3 space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Full Address</label>
-              <textarea
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                rows={3}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-medium"
-                placeholder="Enter complete address details..."
-              />
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Property Age</label>
+              <input type="text" name="propertyAge" value={formData.propertyAge} onChange={handleInputChange} style={inputStyle} placeholder="e.g. 2 years old" />
             </div>
           </div>
         </div>
 
-        {/* Section 3: Media & Assets */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500"></div>
-          <h3 className="text-xl font-bold text-[#1e293b] mb-8 flex items-center gap-3">
-             <span className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center"><i className="fas fa-camera"></i></span>
-             Property Showcase
-          </h3>
+        {/* Section 2: Location Information */}
+        <div style={cardStyle}>
+          <h3 style={sectionHeaderStyle}><HiLocationMarker color="#FF9800" /> Location Information</h3>
+          <div style={formGridStyle}>
+             <div style={inputGroupStyle}><label style={labelStyle}>Flat No./Unit No.</label><input type="text" name="flatNo" value={formData.flatNo} onChange={handleInputChange} style={inputStyle} placeholder="Flat/Unit number" /></div>
+             <div style={inputGroupStyle}><label style={labelStyle}>Property Name</label><input type="text" name="propertyName" value={formData.propertyName} onChange={handleInputChange} style={inputStyle} placeholder="Property name" /></div>
+             <div style={inputGroupStyle}><label style={labelStyle}>Building Name</label><input type="text" name="buildingName" value={formData.buildingName} onChange={handleInputChange} style={inputStyle} placeholder="Building name" /></div>
+             <div style={inputGroupStyle}><label style={labelStyle}>Street</label><input type="text" name="street" value={formData.street} onChange={handleInputChange} style={inputStyle} placeholder="Street name" /></div>
+             <div style={inputGroupStyle}><label style={labelStyle}>Landmark</label><input type="text" name="landmark" value={formData.landmark} onChange={handleInputChange} style={inputStyle} placeholder="Nearby landmark" /></div>
+             <div style={inputGroupStyle}><label style={labelStyle}>Pin Code</label><input type="text" name="pinCode" value={formData.pinCode} onChange={handleInputChange} style={inputStyle} placeholder="Pin code" /></div>
+             <div style={inputGroupStyle}><label style={labelStyle}>City *</label><input type="text" name="city" value={formData.city} onChange={handleInputChange} style={inputStyle} placeholder="City name" required /></div>
+             <div style={inputGroupStyle}><label style={labelStyle}>Location *</label><input type="text" name="location" value={formData.location} onChange={handleInputChange} style={inputStyle} placeholder="Location/Area" required /></div>
+          </div>
+          <div style={{ ...inputGroupStyle, marginTop: '20px' }}>
+             <label style={labelStyle}>Full Address</label>
+             <textarea name="address" value={formData.address} onChange={handleInputChange} style={{ ...inputStyle, minHeight: '80px' }} placeholder="Detailed full address" />
+          </div>
+        </div>
 
-          <div className="space-y-8">
-            <div className="border-2 border-dashed border-slate-200 rounded-3xl p-10 text-center hover:border-amber-400 hover:bg-amber-50/10 transition-all cursor-pointer group relative">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <div className="w-16 h-16 rounded-2xl bg-slate-100 mx-auto flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform group-hover:bg-amber-100 group-hover:text-amber-600">
-                <i className="fas fa-cloud-upload-alt text-2xl"></i>
-              </div>
-              <h4 className="mt-4 text-lg font-bold text-[#1e293b]">Click to Upload Images</h4>
-              <p className="text-slate-400 text-sm mt-1">High resolution images are recommended (PNG, JPG)</p>
-            </div>
-
-            {images.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {images.map((image, index) => (
-                  <div key={index} className="relative aspect-square rounded-2xl overflow-hidden group">
-                    <img
-                      src={URL.createObjectURL(image)}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                    >
-                      <i className="fas fa-times text-xs"></i>
-                    </button>
+        {/* Section 3: Description & Media */}
+        <div style={cardStyle}>
+          <h3 style={sectionHeaderStyle}><HiInformationCircle color="#2196F3" /> Property Details & Media</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+             <div style={inputGroupStyle}><label style={labelStyle}>Property Short Description</label><textarea name="propertyDescription" value={formData.propertyDescription} onChange={handleInputChange} style={{ ...inputStyle, minHeight: '80px' }} placeholder="Brief description of the property" /></div>
+             <div style={inputGroupStyle}><label style={labelStyle}>Detailed Information</label><textarea name="detailedInformation" value={formData.detailedInformation} onChange={handleInputChange} style={{ ...inputStyle, minHeight: '120px' }} placeholder="Comprehensive property details, specs, etc." /></div>
+             <div style={inputGroupStyle}><label style={labelStyle}>YouTube Tour URL</label><input type="url" name="youtubeUrl" value={formData.youtubeUrl} onChange={handleInputChange} style={inputStyle} placeholder="https://youtube.com/watch?v=..." /></div>
+             
+             <div style={{ ...inputGroupStyle, marginTop: '10px' }}>
+                <label style={labelStyle}>Property Images</label>
+                <div style={uploadBoxStyle}>
+                   <input type="file" multiple accept="image/*" onChange={handleImageChange} style={hiddenFileInputStyle} id="fileInput" />
+                   <label htmlFor="fileInput" style={uploadLabelStyle}>
+                      <HiCloudUpload size={30} />
+                      <span>{images.length > 0 ? `${images.length} images selected` : 'Drag & drop or click to upload property images'}</span>
+                   </label>
+                </div>
+                {images.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px', marginTop: '15px' }}>
+                    {images.map((img, idx) => (
+                      <div key={idx} style={previewBoxStyle}>
+                        <img src={URL.createObjectURL(img)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="preview" />
+                        <button type="button" onClick={() => removeImage(idx)} style={removeImageButtonStyle}><HiX /></button>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-
-            <div className="space-y-2 pt-4">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Virtual Tour Link (YouTube/Vimeo)</label>
-              <div className="relative">
-                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400">
-                    <i className="fab fa-youtube"></i>
-                 </div>
-                 <input
-                   type="url"
-                   name="youtubeUrl"
-                   value={formData.youtubeUrl}
-                   onChange={handleInputChange}
-                   className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all font-medium"
-                   placeholder="https://youtube.com/watch?v=..."
-                 />
-              </div>
-            </div>
+                )}
+             </div>
           </div>
         </div>
 
         {/* Section 4: Amenities */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-          <h3 className="text-xl font-bold text-[#1e293b] mb-8 flex items-center gap-3">
-             <span className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center"><i className="fas fa-th-list"></i></span>
-             Amenities & Facilities
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div style={cardStyle}>
+          <h3 style={sectionHeaderStyle}><HiViewGrid color="#9C27B0" /> Amenities</h3>
+          <div style={amenitiesGridStyle}>
             {amenitiesList.map((amenity) => {
-              const checked = formData.amenities.includes(amenity);
+              const isChecked = formData.amenities.includes(amenity);
               return (
-                <label 
-                  key={amenity} 
-                  className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
-                    checked 
-                      ? 'bg-blue-50 border-blue-200 text-blue-700 font-bold shadow-sm' 
-                      : 'bg-slate-50 border-slate-100 text-slate-500 hover:bg-white hover:border-slate-300'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => handleAmenityChange(amenity)}
-                    className="hidden"
-                  />
-                  <div className={`w-5 h-5 rounded flex items-center justify-center border-2 ${
-                    checked ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-300'
-                  }`}>
-                    {checked && <i className="fas fa-check text-[10px]"></i>}
-                  </div>
-                  <span className="text-xs">{amenity}</span>
-                </label>
-              )
+                <div key={amenity} onClick={() => handleAmenityChange(amenity)} style={amenityItemStyle(isChecked)}>
+                   {isChecked ? <HiCheckCircle color="#4CAF50" size={18} /> : <div style={{ width: '18px', height: '18px', border: '2px solid #EEE', borderRadius: '50%' }} />}
+                   <span style={{ fontSize: '12px', fontWeight: isChecked ? '700' : '500' }}>{amenity}</span>
+                </div>
+              );
             })}
           </div>
         </div>
 
-        {/* Action Bar */}
-        <div className="flex justify-end gap-6 pt-10">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-8 py-4 bg-white text-slate-600 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition-all"
-          >
-            Go Back
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-12 py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl font-black shadow-xl shadow-blue-500/30 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:scale-100"
-          >
-            {loading ? (
-              <span className="flex items-center gap-3">
-                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                 Processing...
-              </span>
-            ) : 'Publish Property Listing'}
-          </button>
+        {/* Footer Actions */}
+        <div style={{ display: 'flex', gap: '20px', padding: '20px 0 50px' }}>
+           <button type="button" onClick={onCancel} style={{ flex: 1, padding: '15px', borderRadius: '12px', border: '1px solid #E6E9EF', background: 'white', fontWeight: 'bold', cursor: 'pointer' }}>Cancel</button>
+           <button disabled={loading} type="submit" style={{ flex: 2, padding: '15px', borderRadius: '12px', background: 'var(--color-navy)', color: 'white', border: 'none', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(10, 28, 58, 0.2)' }}>
+              {loading ? 'Processing...' : 'Add Property'}
+           </button>
         </div>
       </form>
     </div>
   );
 };
+
+// Styles
+const cardStyle = { backgroundColor: 'white', borderRadius: '20px', padding: '40px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' };
+const formGridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' };
+const amenitiesGridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '15px' };
+const amenityItemStyle = (active) => ({ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 15px', borderRadius: '12px', backgroundColor: active ? '#F1F8E9' : '#F8F9FA', border: active ? '1px solid #C8E6C9' : '1px solid #E6E9EF', cursor: 'pointer', transition: 'all 0.2s' });
+const uploadBoxStyle = { border: '2px dashed #E6E9EF', borderRadius: '12px', backgroundColor: '#F8F9FA', padding: '40px', textAlign: 'center', cursor: 'pointer', position: 'relative' };
+const hiddenFileInputStyle = { position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' };
+const uploadLabelStyle = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', color: '#90A4AE', fontSize: '14px', fontWeight: '600' };
+const previewBoxStyle = { position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '10px', overflow: 'hidden', border: '1px solid #E6E9EF' };
+const removeImageButtonStyle = { position: 'absolute', top: '5px', right: '5px', background: '#F44336', color: 'white', border: 'none', borderRadius: '4px', padding: '2px', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' };
 
 AddPropertyForm.propTypes = {
   onCancel: PropTypes.func.isRequired,
