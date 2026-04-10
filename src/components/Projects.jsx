@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { HiOfficeBuilding, HiHome, HiLocationMarker, HiCurrencyRupee } from 'react-icons/hi';
+import PropertyCard from './PropertyCard';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -54,124 +54,49 @@ const Projects = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-7xl mx-auto">
+    <main style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', paddingTop: '80px' }}>
+      <section className="section-padding">
+        <div className="container">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-6">
-              Our Projects
-            </h1>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Discover our premium residential and commercial projects designed to meet your lifestyle needs.
+          <div className="section-header text-center fade-in-up">
+            <span className="subtitle">Signature Portfolio</span>
+            <h2>Our Projects</h2>
+            <div className="divider mx-auto"></div>
+            <p className="section-desc">
+              Discover our premium residential and commercial projects elegantly designed to meet your discerning lifestyle needs.
             </p>
           </div>
 
           {/* Projects Grid */}
           {projects.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="property-grid">
               {projects.map((project) => (
-                <div key={project._id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group flex flex-col cursor-pointer" onClick={() => navigate(`/project/${project._id}`)}>
-                  <div className="h-52 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center overflow-hidden relative">
-                    {project.images && project.images.length > 0 ? (
-                      <img
-                        src={project.images[0]}
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                    ) : (
-                      project.type === 'residential' ? (
-                        <HiHome className="w-16 h-16 text-blue-600" />
-                      ) : (
-                        <HiOfficeBuilding className="w-16 h-16 text-blue-600" />
-                      )
-                    )}
-                    <div className="absolute top-4 right-4">
-                      <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(project.status)}`}>
-                        {getStatusLabel(project.status)}
-                      </span>
-                    </div>
-                    <div className="absolute top-4 left-4">
-                      <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-slate-900/70 text-white backdrop-blur-md capitalize">
-                        {project.type}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-6 flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">{project.title}</h3>
-                    <div className="flex items-center gap-1 text-slate-600 mb-2">
-                      <HiLocationMarker className="w-4 h-4 flex-shrink-0" />
-                      <span className="text-sm">{project.location}, {project.city}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-blue-600 font-semibold mb-3">
-                      <HiCurrencyRupee className="w-5 h-5" />
-                      <span>Starting from {project.price}</span>
-                    </div>
-                    <p className="text-slate-600 text-sm mb-4 line-clamp-2 flex-1">{project.description}</p>
-
-                    {/* Highlights */}
-                    {project.highlights && project.highlights.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {project.highlights.slice(0, 3).map((highlight, index) => (
-                          <span key={index} className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100">
-                            {highlight}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/project/${project._id}`);
-                        }}
-                        className="flex-1 bg-blue-500 text-white py-2.5 px-4 rounded-xl hover:bg-blue-600 transition-colors font-semibold text-sm text-center"
-                      >
-                        View Details
-                      </button>
-                      <a
-                        href="tel:+919406650197"
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex-1 border border-blue-500 text-blue-600 py-2.5 px-4 rounded-xl hover:bg-blue-600 hover:text-white transition-colors font-semibold text-sm text-center"
-                      >
-                        Call Now
-                      </a>
-                    </div>
-                  </div>
-                </div>
+                 <PropertyCard key={project._id} property={project} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <HiOfficeBuilding className="w-20 h-20 text-slate-300 mx-auto mb-6" />
-              <h3 className="text-2xl font-bold text-slate-700 mb-3">No Projects Available Yet</h3>
-              <p className="text-slate-500 max-w-md mx-auto">We&apos;re adding new projects soon. Check back later or contact us for information.</p>
-              <Link
-                to="/contact"
-                className="inline-block mt-6 bg-blue-500 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-600 transition-colors"
-              >
-                Contact Us
-              </Link>
+            <div className="text-center section-padding fade-in-up">
+               <i className="fas fa-building" style={{ fontSize: '4rem', color: 'var(--color-gray)', marginBottom: '20px' }}></i>
+               <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '10px' }}>No Projects Available Yet</h3>
+               <p className="text-slate-500">We're adding new prestigious projects soon. Check back later or contact our advisory team.</p>
             </div>
           )}
 
           {/* CTA Section */}
-          <div className="text-center mt-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl p-12 text-white">
-            <h2 className="text-3xl font-semibold mb-4">Interested in Our Projects?</h2>
-            <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
-              Get detailed information about our ongoing and upcoming projects. Our team is ready to assist you.
-            </p>
-            <Link
-              to="/contact"
-              className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-slate-50 transition-all duration-300 font-semibold shadow-lg"
-            >
-              Get in Touch
-            </Link>
-          </div>
+          <section className="section-padding" style={{ backgroundColor: 'var(--color-navy)', color: 'var(--color-white)', textAlign: 'center', marginTop: '60px', borderRadius: '16px' }}>
+             <div className="container fade-in-up">
+                <h2 style={{ color: 'var(--color-white)', fontSize: '2.5rem', marginBottom: '15px' }}>Interested in Our Projects?</h2>
+                <p style={{ fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto 30px', opacity: '0.9' }}>
+                  Get detailed priority information about our ongoing and upcoming signature projects before they hit the open market.
+                </p>
+                <Link to="/contact" className="btn btn-secondary" style={{ padding: '15px 40px', fontSize: '1.1rem' }}>
+                  Get Priority Access
+                </Link>
+             </div>
+          </section>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 

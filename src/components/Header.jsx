@@ -25,10 +25,11 @@ function Header() {
             <div className="container nav-content">
                 <Link to="/" className="logo-container">
                     <img src="/logo/logo.png" alt="TRX Emblem" className="logo-badge" />
-                    <div className="logo-text">
+                    {/* The logo image contains the text, so we commented this out to prevent double-logos */}
+                    {/* <div className="logo-text">
                         <span className="trx">TRX</span> 
                         <span className="brand-name">The Realty Xperts</span>
-                    </div>
+                    </div> */}
                 </Link>
                 <nav className="nav-links">
                     <Link to="/" className={isActive('/')}>Home</Link>
