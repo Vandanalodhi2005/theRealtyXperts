@@ -52,7 +52,7 @@ function Footer() {
                                 <div style={{ width: '35px', height: '35px', borderRadius: '50%', backgroundColor: 'rgba(198,156,109,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold)' }}>
                                     <i className="fas fa-user border-0"></i>
                                 </div>
-                                <span>Sameer Tiwari</span>
+                                <span>TRX Group</span>
                             </li>
                             <li>
                                 <div style={{ width: '35px', height: '35px', borderRadius: '50%', backgroundColor: 'rgba(198,156,109,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold)' }}>
@@ -64,7 +64,7 @@ function Footer() {
                                 <div style={{ width: '35px', height: '35px', borderRadius: '50%', backgroundColor: 'rgba(198,156,109,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold)' }}>
                                     <i className="fas fa-envelope"></i>
                                 </div>
-                                <a href="mailto:Emailtotre@gmail.com" style={{ fontSize: '0.95rem' }}>Emailtotre@gmail.com</a>
+                                <a href="emailtotrx@gmail.com" style={{ fontSize: '0.95rem' }}>emailtotrx@gmail.com</a>
                             </li>
                             <li>
                                 <div style={{ width: '35px', height: '35px', borderRadius: '50%', backgroundColor: 'rgba(0,128,128,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-teal-light)' }}>
