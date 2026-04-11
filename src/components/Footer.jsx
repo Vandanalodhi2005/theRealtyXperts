@@ -13,7 +13,7 @@ function Footer() {
                     {/* Brand Column */}
                     <div className="footer-brand" style={{ paddingRight: '20px' }}>
                         <Link to="/" className="logo-container footer-logo">
-                            <img src="/logo/logo.png" alt="TRX Emblem" className="logo-badge" style={{ height: '60px', filter: 'brightness(1.2)' }} />
+                            <img src="/logo/footer.png" alt="TRX Emblem" className="logo-badge" style={{ height: '60px', filter: 'brightness(1.2)' }} />
                         </Link>
                         <p className="tagline" style={{ color: 'var(--color-gray)', opacity: 0.8, lineHeight: '1.8', marginTop: '20px' }}>
                             Setting the gold standard in premium real estate. We turn your property dreams into prestigious addresses.
