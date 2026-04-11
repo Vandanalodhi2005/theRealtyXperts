@@ -55,27 +55,27 @@ function App() {
       <Toaster position="top-right" />
       <Routes>
         {/* User Routes with Header/Footer */}
-      <Route path="/" element={<UserLayout><Home /></UserLayout>} />
-      <Route path="/about" element={<UserLayout><AboutUs /></UserLayout>} />
-      <Route path="/services" element={<UserLayout><Services /></UserLayout>} />
-      <Route path="/properties" element={<UserLayout><Properties category="all" /></UserLayout>} />
-      <Route path="/residential" element={<UserLayout><Properties category="residential" /></UserLayout>} />
-      <Route path="/commercial" element={<UserLayout><Properties category="commercial" /></UserLayout>} />
-      <Route path="/investment" element={<UserLayout><Investment /></UserLayout>} />
-      <Route path="/investment/:id" element={<UserLayout><InvestmentDetails /></UserLayout>} />
-      <Route path="/property/:id" element={<UserLayout><PropertyDetails /></UserLayout>} />
-      <Route path="/projects" element={<UserLayout><Projects /></UserLayout>} />
-      <Route path="/project/:id" element={<UserLayout><ProjectDetails /></UserLayout>} />
-      <Route path="/submit-property" element={<UserLayout><SubmitProperty /></UserLayout>} />
-      <Route path="/contact" element={<UserLayout><ContactUs /></UserLayout>} />
-      <Route path="/terms" element={<UserLayout><TermsAndConditions /></UserLayout>} />
-      <Route path="/privacy" element={<UserLayout><PrivacyPolicy /></UserLayout>} />
-      <Route path="/cookie-policy" element={<UserLayout><CookiePolicy /></UserLayout>} />
+        <Route path="/" element={<UserLayout><Home /></UserLayout>} />
+        <Route path="/about" element={<UserLayout><AboutUs /></UserLayout>} />
+        <Route path="/services" element={<UserLayout><Services /></UserLayout>} />
+        <Route path="/properties" element={<UserLayout><Properties category="all" /></UserLayout>} />
+        <Route path="/residential" element={<UserLayout><Properties category="residential" /></UserLayout>} />
+        <Route path="/commercial" element={<UserLayout><Properties category="commercial" /></UserLayout>} />
+        <Route path="/investment" element={<UserLayout><Investment /></UserLayout>} />
+        <Route path="/investment/:id" element={<UserLayout><InvestmentDetails /></UserLayout>} />
+        <Route path="/property/:id" element={<UserLayout><PropertyDetails /></UserLayout>} />
+        <Route path="/projects" element={<UserLayout><Projects /></UserLayout>} />
+        <Route path="/project/:id" element={<UserLayout><ProjectDetails /></UserLayout>} />
+        <Route path="/submit-property" element={<UserLayout><SubmitProperty /></UserLayout>} />
+        <Route path="/contact" element={<UserLayout><ContactUs /></UserLayout>} />
+        <Route path="/terms" element={<UserLayout><TermsAndConditions /></UserLayout>} />
+        <Route path="/privacy" element={<UserLayout><PrivacyPolicy /></UserLayout>} />
+        <Route path="/cookie-policy" element={<UserLayout><CookiePolicy /></UserLayout>} />
 
-      {/* Admin Routes without Header/Footer */}
-      <Route path="/admin/login" element={<AdminLayout><AdminLogin /></AdminLayout>} />
-      <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-    </Routes>
+        {/* Admin Routes without Header/Footer */}
+        <Route path="/admin/login" element={<AdminLayout><AdminLogin /></AdminLayout>} />
+        <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+      </Routes>
     </>
   );
 }

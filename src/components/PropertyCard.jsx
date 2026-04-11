@@ -46,7 +46,10 @@ const PropertyCard = ({ property }) => {
       </div>
       
       <div className="card-footer">
-         <Link to={`/${property.landType ? 'investment' : property.type === 'upcoming' ? 'project' : 'property'}/${property._id}`} className="btn btn-outline-primary btn-full">
+          <Link 
+            to={`/${property.landType ? 'investment' : (property.type && !property.propertyType) ? 'project' : 'property'}/${property._id}`} 
+            className="btn btn-outline-primary btn-full"
+          >
             View Details
          </Link>
       </div>

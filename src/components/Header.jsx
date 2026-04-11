@@ -43,6 +43,7 @@ function Header() {
                     <Link to="/commercial" className={isActive('/commercial')}>Commercial</Link>
                     <Link to="/investment" className={isActive('/investment')}>Investment</Link>
                     <Link to="/projects" className={isActive('/projects')}>Projects</Link>
+                    <Link to="/gallery" className={isActive('/gallery')}>Gallery</Link>
                     <Link to="/services" className={isActive('/services')}>Services</Link>
                     <Link to="/contact" className="btn btn-nav-contact">
                         <PhoneCall size={18} />

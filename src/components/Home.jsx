@@ -31,28 +31,35 @@ function Home() {
             fadeObserver.observe(el);
         });
 
-        // Fetch and categorize data
-        const props = JSON.parse(localStorage.getItem('trx_properties') || '[]');
-        const projs = JSON.parse(localStorage.getItem('trx_projects') || '[]');
-        const invs = JSON.parse(localStorage.getItem('trx_investments') || '[]');
+        // Fetch and categorize data from API
+        const fetchData = async () => {
+            try {
+                const [propsRes, projsRes, invsRes] = await Promise.all([
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`),
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects`),
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments`)
+                ]);
 
-        const combined = [...props, ...projs, ...invs];
+                const props = propsRes.ok ? await propsRes.json() : [];
+                const projs = projsRes.ok ? await projsRes.json() : [];
+                const invs = invsRes.ok ? await invsRes.json() : [];
 
-        setCategories({
-            residential: combined.filter(p => 
-                p.type === 'apartment' || p.type === 'villa' || p.type === 'residential' ||
-                (p.title && p.title.toLowerCase().includes('residential'))
-            ).slice(0, 4),
-            commercial: combined.filter(p => 
-                p.type === 'commercial' || p.type === 'plot' || 
-                (p.title && p.title.toLowerCase().includes('commercial'))
-            ).slice(0, 4),
-            projects: combined.slice(0, 4), // Master projects/latest
-            investments: combined.filter(p => 
-                p.type === 'agricultural' || p.type === 'investment' ||
-                (p.title && p.title.toLowerCase().includes('investment'))
-            ).slice(0, 4)
-        });
+                setCategories({
+                    residential: props.filter(p => 
+                        p.propertyType === 'apartment' || p.propertyType === 'villa'
+                    ).slice(0, 4),
+                    commercial: props.filter(p => 
+                        p.propertyType === 'commercial' || p.propertyType === 'plot'
+                    ).slice(0, 4),
+                    projects: projs.slice(0, 4),
+                    investments: invs.slice(0, 4)
+                });
+            } catch (err) {
+                console.error("Home data fetch error:", err);
+            }
+        };
+
+        fetchData();
 
         return () => fadeObserver.disconnect();
     }, []);
@@ -71,32 +78,33 @@ function Home() {
         }, 800);
     };
 
-    const PropertyCard = ({ item, type }) => {
+    const PropertyCard = ({ item }) => {
         // Determine Link based on type
-        const linkPath = `/properties/${item.id}`;
+        const linkBase = item.landType ? 'investment' : (item.type && !item.propertyType) ? 'project' : 'property';
+        const linkPath = `/${linkBase}/${item._id}`;
         
         return (
             <div className="property-card">
                 <div className="card-img-wrapper">
                     <div className="status-badge" style={{ backgroundColor: 'var(--color-gold)', textTransform: 'capitalize' }}>
-                        {item.status || 'Available'}
+                        {item.status?.replace(/-/g, ' ') || 'Available'}
                     </div>
                     <img 
-                        src={item.coverImage || `/assets/images/property_${Math.floor(Math.random() * 3) + 1}.png`} 
-                        alt={item.title} 
+                        src={item.images?.[0] || `/assets/images/property_1.png`} 
+                        alt={item.title || item.propertyName} 
                         className="card-img" 
                         onError={(e) => { e.target.src = '/assets/images/property_1.png' }}
                     />
-                    <div className="price-tag">{item.price || 'Price on Request'}</div>
+                    <div className="price-tag">₹ {item.price?.toLocaleString() || item.totalPrice?.toLocaleString() || 'Price on Request'}</div>
                 </div>
                 <div className="card-content">
-                    <h3>{item.title || item.propertyName || "Premium Property"}</h3>
-                    <p className="location">
+                    <h3 className="line-clamp-1">{item.propertyName || item.title || "Premium Property"}</h3>
+                    <p className="location line-clamp-1">
                         <i className="fas fa-map-marker-alt"></i> {item.location} {item.city ? `, ${item.city}` : ''}
                     </p>
                     <div className="card-amenities">
-                        {item.bedrooms && <span><i className="fas fa-bed"></i> {item.bedrooms} Bed</span>}
-                        {item.area && <span><i className="fas fa-vector-square"></i> {item.area} sqft</span>}
+                        {item.bedroom && <span><i className="fas fa-bed"></i> {item.bedroom} Bed</span>}
+                        {item.area && <span><i className="fas fa-vector-square"></i> {item.area} {item.areaUnit || 'sq.ft'}</span>}
                     </div>
                 </div>
                 <div className="card-footer">
@@ -170,12 +178,11 @@ function Home() {
                 dark={true}
             />
 
-            {/* Projects Section */}
             <CategorySection 
                 title="Upcoming Projects" 
                 subtitle="Future Developments" 
                 data={categories.projects} 
-                link="/frontend-projects" 
+                link="/projects" 
             />
 
             {/* Commercial Section */}

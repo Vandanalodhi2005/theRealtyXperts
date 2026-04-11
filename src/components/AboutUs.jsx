@@ -35,7 +35,7 @@ function About() {
                 textAlign: 'center',
                 paddingTop: '80px'
             }}>
-                <div className="container" style={{ opacity: 0 }} className="animate-on-scroll">
+                <div className="container animate-on-scroll" style={{ opacity: 0 }}>
                     <span className="subtitle" style={{ color: 'var(--color-gold)', letterSpacing: '6px' }}>ESTABLISHED 2016</span>
                     <h1 style={{ fontSize: '4rem', fontWeight: '900',color: 'white', marginBottom: '1rem' }}>Our Legacy of Trust</h1>
                     <div className="divider mx-auto" style={{ background: 'var(--color-gold)' }}></div>

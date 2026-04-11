@@ -20,10 +20,12 @@ import {
   HiClipboardList,
   HiX,
   HiMenu,
+  HiPhotograph,
 } from 'react-icons/hi';
 import AddPropertyForm from './AddPropertyForm';
 import AddInvestmentForm from './AddInvestmentForm';
 import AddProjectForm from './AddProjectForm';
+import GalleryManagement from './GalleryManagement';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -39,6 +41,7 @@ const AdminDashboard = () => {
     const [projects, setProjects] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [contacts, setContacts] = useState([]);
+    const [gallery, setGallery] = useState([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     const fetchData = useCallback(async () => {
@@ -53,7 +56,8 @@ const AdminDashboard = () => {
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, { headers }),
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments`, { headers }),
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects`, { headers }),
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/submitted-properties`, { headers })
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/submitted-properties`, { headers }),
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/gallery`, { headers })
             ]);
 
             if (dashRes.ok) setDashboardData((await dashRes.json()).data);
@@ -62,6 +66,7 @@ const AdminDashboard = () => {
             if (investRes.ok) setInvestments(await investRes.json());
             if (projectRes.ok) setProjects(await projectRes.json());
             if (subRes.ok) setSubmissions(await subRes.json());
+            if (galleryRes.ok) setGallery(await galleryRes.json());
             
         } catch (e) {
             console.error(e);
@@ -147,6 +152,7 @@ const AdminDashboard = () => {
         { id: 'submissions', label: 'Submissions', icon: HiDocumentText },
         { id: 'analytics', label: 'Analytics', icon: HiChartBar },
         { id: 'settings', label: 'Settings', icon: HiCog },
+        { id: 'gallery', label: 'Gallery', icon: HiPhotograph },
     ];
 
     const renderDashboard = () => (
@@ -165,42 +171,70 @@ const AdminDashboard = () => {
                     <div style={statIconBoxStyle('#E8F5E9', '#4CAF50')}><HiMail size={20} /></div>
                 </div>
                 <div style={statCardStyle('#9C27B0')}>
-                    <div style={{ flex: 1 }}><p style={statTitleStyle}>Land Investments</p><h3 style={statValueStyle}>{investments.length}</h3><p style={{ color: '#9C27B0', fontSize: '11px', fontWeight: 'bold', marginTop: '10px' }}>↗ Strategy Portfolio</p></div>
-                    <div style={statIconBoxStyle('#F3E5F5', '#9C27B0')}><HiGlobe size={20} /></div>
+                    <div style={{ flex: 1 }}><p style={statTitleStyle}>Total Projects</p><h3 style={statValueStyle}>{projects.length}</h3><p style={{ color: '#9C27B0', fontSize: '11px', fontWeight: 'bold', marginTop: '10px' }}>↗ Signature Ventures</p></div>
+                    <div style={statIconBoxStyle('#F3E5F5', '#9C27B0')}><HiClipboardList size={20} /></div>
+                </div>
+                <div style={statCardStyle('#E91E63')}>
+                    <div style={{ flex: 1 }}><p style={statTitleStyle}>Land Investments</p><h3 style={statValueStyle}>{investments.length}</h3><p style={{ color: '#E91E63', fontSize: '11px', fontWeight: 'bold', marginTop: '10px' }}>↗ Portfolio Assets</p></div>
+                    <div style={statIconBoxStyle('#FCE4EC', '#E91E63')}><HiGlobe size={20} /></div>
+                </div>
+                <div style={statCardStyle('#FF9800')}>
+                    <div style={{ flex: 1 }}><p style={statTitleStyle}>Gallery Assets</p><h3 style={statValueStyle}>{gallery.length}</h3><p style={{ color: '#FF9800', fontSize: '11px', fontWeight: 'bold', marginTop: '10px' }}>↗ Visual Media</p></div>
+                    <div style={statIconBoxStyle('#FFF3E0', '#FF9800')}><HiPhotograph size={20} /></div>
                 </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
                  <div style={mainCardStyle}>
-                    <h4 style={cardHeaderStyle}>Recent Properties</h4>
-                    <div style={{ padding: '20px 0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                        <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)', fontWeight: '700' }}>Recent Properties</h4>
+                        <span style={{ fontSize: '10px', backgroundColor: '#F8F9FA', padding: '4px 8px', borderRadius: '4px', color: '#666' }}>Last 5</span>
+                    </div>
+                    <div style={{ padding: '10px 0' }}>
                         {properties.length === 0 ? <p style={{ color: '#90A4AE', fontSize: '14px', textAlign: 'center' }}>No properties found</p> : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                {properties.slice(0, 3).map(p => (
-                                    <div key={p._id} style={{ display: 'flex', gap: '15px', alignItems: 'center', paddingBottom: '10px', borderBottom: '1px solid #F0F0F0' }}>
-                                        <div style={{ width: '35px', height: '35px', borderRadius: '8px', backgroundColor: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><HiOfficeBuilding color="var(--color-navy)" /></div>
-                                        <div style={{ flex: 1 }}><p style={{ fontWeight: '700', fontSize: '13px', color: 'var(--color-navy)' }}>{p.propertyName}</p><p style={{ fontSize: '11px', color: '#607D8B' }}>{p.location}</p></div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {properties.slice(0, 5).map(p => (
+                                    <div key={p._id} style={{ display: 'flex', gap: '15px', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #F8F9FA' }}>
+                                        <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#F0F4F8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                            {p.images?.[0] ? <img src={p.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} /> : <HiOfficeBuilding color="var(--color-navy)" />}
+                                        </div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <p style={{ fontWeight: '700', fontSize: '13px', color: 'var(--color-navy)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.propertyName}</p>
+                                            <p style={{ fontSize: '11px', color: '#607D8B', margin: '2px 0 0' }}>{p.location}</p>
+                                        </div>
+                                        <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-gold)' }}>₹{p.price?.toLocaleString()}</span>
                                     </div>
                                 ))}
                             </div>
                         )}
                     </div>
-                    <button onClick={() => setActiveTab('properties')} style={{ ...actionButtonStyle, backgroundColor: '#F39C12' }}>View All Properties</button>
+                    <button onClick={() => setActiveTab('properties')} style={{ ...actionButtonStyle, backgroundColor: 'var(--color-navy)', marginTop: '10px' }}>Manage Properties</button>
                  </div>
+                 
                  <div style={mainCardStyle}>
-                    <h4 style={cardHeaderStyle}>Recent Inquiries</h4>
-                    <div style={{ padding: '20px 0' }}>
-                        {contacts.slice(0, 3).map(contact => (
-                            <div key={contact._id} style={{ display: 'flex', gap: '15px', alignItems: 'center', paddingBottom: '10px', marginBottom: '10px' }}>
-                                <div style={{ width: '35px', height: '35px', borderRadius: '50%', backgroundColor: '#ECEFF1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><HiUser color="#90A4AE" /></div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><p style={{ fontWeight: '700', fontSize: '13px', color: 'var(--color-navy)' }}>{contact.name}</p>{contact.status === 'unread' && <span style={{ fontSize: '9px', padding: '1px 8px', borderRadius: '4px', backgroundColor: '#FFEBEE', color: '#F44336', fontWeight: 'bold' }}>Unread</span>}</div>
-                                    <p style={{ fontSize: '11px', color: '#607D8B' }}>{contact.message.slice(0, 25)}...</p>
-                                </div>
-                            </div>
-                        ))}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                        <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)', fontWeight: '700' }}>Recent Inquiries</h4>
+                        <span style={{ fontSize: '10px', backgroundColor: '#FFEBEE', padding: '4px 8px', borderRadius: '4px', color: '#F44336', fontWeight: 'bold' }}>{contacts.filter(c => c.status === 'unread').length} New</span>
                     </div>
-                    <button onClick={() => setActiveTab('inquiries')} style={{ ...actionButtonStyle, backgroundColor: '#4A90E2' }}>View All Inquiries</button>
+                    <div style={{ padding: '10px 0' }}>
+                        {contacts.length === 0 ? <p style={{ color: '#90A4AE', fontSize: '14px', textAlign: 'center' }}>No inquiries yet</p> : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {contacts.slice(0, 5).map(contact => (
+                                    <div key={contact._id} style={{ display: 'flex', gap: '15px', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #F8F9FA' }}>
+                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#ECEFF1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><HiUser color="#90A4AE" /></div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                <p style={{ fontWeight: '700', fontSize: '13px', color: 'var(--color-navy)', margin: 0 }}>{contact.name}</p>
+                                                <span style={{ fontSize: '9px', color: '#90A4AE' }}>{new Date(contact.createdAt).toLocaleDateString()}</span>
+                                            </div>
+                                            <p style={{ fontSize: '11px', color: '#607D8B', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{contact.message}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={() => setActiveTab('inquiries')} style={{ ...actionButtonStyle, backgroundColor: '#4A90E2', marginTop: '10px' }}>View All Inquiries</button>
                  </div>
             </div>
         </div>
@@ -564,16 +598,16 @@ const AdminDashboard = () => {
                     <h4 style={cardHeaderStyle}>Website Traffic</h4>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '20px' }}>
                         <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#F0F4F8', borderRadius: '12px' }}>
-                            <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold', color: '#607D8B', textTransform: 'uppercase' }}>Today</p>
-                            <h3 style={{ margin: '10px 0 0', fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800' }}>1,234</h3>
+                            <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold', color: '#607D8B', textTransform: 'uppercase' }}>Recent Listings</p>
+                            <h3 style={{ margin: '10px 0 0', fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800' }}>{dashboardData?.recentProperties || 0}</h3>
                         </div>
                         <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#E3F2FD', borderRadius: '12px' }}>
-                            <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold', color: '#2196F3', textTransform: 'uppercase' }}>This Week</p>
-                            <h3 style={{ margin: '10px 0 0', fontSize: '24px', color: '#2196F3', fontWeight: '800' }}>8,654</h3>
+                            <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold', color: '#2196F3', textTransform: 'uppercase' }}>Active Inquiries</p>
+                            <h3 style={{ margin: '10px 0 0', fontSize: '24px', color: '#2196F3', fontWeight: '800' }}>{dashboardData?.unreadContacts || 0}</h3>
                         </div>
                         <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#E8F5E9', borderRadius: '12px' }}>
-                            <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold', color: '#4CAF50', textTransform: 'uppercase' }}>This Month</p>
-                            <h3 style={{ margin: '10px 0 0', fontSize: '24px', color: '#4CAF50', fontWeight: '800' }}>32,456</h3>
+                            <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold', color: '#4CAF50', textTransform: 'uppercase' }}>Total Data Points</p>
+                            <h3 style={{ margin: '10px 0 0', fontSize: '24px', color: '#4CAF50', fontWeight: '800' }}>{properties.length + investments.length + projects.length}</h3>
                         </div>
                     </div>
                 </div>
@@ -583,18 +617,14 @@ const AdminDashboard = () => {
                     <div style={mainCardStyle}>
                         <h4 style={cardHeaderStyle}>Popular Properties</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                            {[
-                                { title: '3 BHK Apartment', views: 234, color: 'var(--color-gold)' },
-                                { title: 'Commercial Space', views: 189, color: '#2196F3' },
-                                { title: 'Villa in Bhopal', views: 156, color: '#9C27B0' }
-                            ].map((item, idx) => (
+                            {properties.slice(0, 3).map((item, idx) => (
                                 <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '12px', background: '#F8F9FA', borderRadius: '10px' }}>
-                                    <div style={{ width: '8px', height: '35px', backgroundColor: item.color, borderRadius: '4px' }}></div>
+                                    <div style={{ width: '8px', height: '35px', backgroundColor: idx === 0 ? 'var(--color-gold)' : idx === 1 ? '#2196F3' : '#9C27B0', borderRadius: '4px' }}></div>
                                     <div style={{ flex: 1 }}>
-                                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)' }}>{item.title}</p>
-                                        <p style={{ margin: 0, fontSize: '11px', color: '#607D8B' }}>{item.views} total views</p>
+                                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)' }}>{item.propertyName}</p>
+                                        <p style={{ margin: 0, fontSize: '11px', color: '#607D8B' }}>{item.location}</p>
                                     </div>
-                                    <HiTrendingUp color={item.color} />
+                                    <HiTrendingUp color={idx === 0 ? 'var(--color-gold)' : idx === 1 ? '#2196F3' : '#9C27B0'} />
                                 </div>
                             ))}
                         </div>
@@ -605,9 +635,9 @@ const AdminDashboard = () => {
                         <h4 style={cardHeaderStyle}>Lead Sources</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             {[
-                                { name: 'Direct', value: 45, color: 'var(--color-navy)' },
-                                { name: 'Google Search', value: 32, color: 'var(--color-gold)' },
-                                { name: 'Social Media', value: 23, color: '#4CAF50' }
+                                { name: 'Residential', value: Math.round((properties.length / (properties.length + investments.length + projects.length || 1)) * 100), color: 'var(--color-navy)' },
+                                { name: 'Land/Plot', value: Math.round((investments.length / (properties.length + investments.length + projects.length || 1)) * 100), color: 'var(--color-gold)' },
+                                { name: 'Commercial', value: Math.round((projects.length / (properties.length + investments.length + projects.length || 1)) * 100), color: '#4CAF50' }
                             ].map((source, idx) => (
                                 <div key={idx}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -700,6 +730,7 @@ const AdminDashboard = () => {
         if (activeTab === 'submissions') return renderSubmissions();
         if (activeTab === 'analytics') return renderAnalytics();
         if (activeTab === 'settings') return renderSettings();
+        if (activeTab === 'gallery') return <GalleryManagement />;
         return (
             <div style={mainCardStyle}>
                 <h2 style={cardHeaderStyle}>{activeTab.toUpperCase()} SECTION</h2>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { HiArrowLeft, HiLocationMarker, HiCurrencyRupee, HiHome, HiOfficeBuilding, HiMail, HiPhone, HiSparkles } from 'react-icons/hi';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { HiArrowLeft, HiLocationMarker, HiCurrencyRupee, HiHome, HiOfficeBuilding, HiMail, HiPhone, HiSparkles, HiShieldCheck, HiOutlineVariable, HiArrowSmRight } from 'react-icons/hi';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
 import PropertyCard from './PropertyCard';
@@ -38,78 +38,90 @@ const InquiryModal = ({ property, onClose, onSubmit }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Inquiry Form</h2>
-          <div className="mb-4 p-4 bg-slate-50 rounded-lg">
-            <h3 className="font-semibold text-slate-900">{property?.propertyName || `${property?.bedroom} BHK ${property?.propertyType}`}</h3>
-            <p className="text-sm text-slate-600">{property?.location}, {property?.city}</p>
-            <p className="text-lg font-bold text-blue-600 mt-1">₹{property?.price?.toLocaleString()}</p>
+    <div className="fixed inset-0 bg-navy/95 backdrop-blur-xl flex items-center justify-center z-[1000] p-6 animate-in fade-in duration-500">
+      <div className="bg-white rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.3)] max-w-xl w-full max-h-[90vh] overflow-y-auto border border-white/20">
+        <div className="p-10 md:p-14">
+          <div className="text-center mb-10">
+            <span className="subtitle" style={{ fontSize: '0.65rem', color: 'var(--color-gold)' }}>VIP CONSULTATION</span>
+            <h2 className="text-4xl font-black text-navy mt-4" style={{ color: 'var(--color-navy)' }}>Direct Inquiry</h2>
+            <div className="w-12 h-1 bg-gold mx-auto mt-4 rounded-full" style={{ backgroundColor: 'var(--color-gold)' }}></div>
+          </div>
+          
+          <div className="mb-10 p-8 bg-slate-50 rounded-[2rem] border border-slate-100 flex gap-6 items-center">
+             <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden flex-shrink-0 border-4 border-white shadow-lg">
+                <img src={property?.images?.[0]} alt="Property" className="w-full h-full object-cover" />
+             </div>
+             <div>
+                <h3 className="font-black text-navy text-base leading-tight" style={{ color: 'var(--color-navy)' }}>{property?.propertyName || `${property?.bedroom} BHK ${property?.propertyType}`}</h3>
+                <p className="text-xs text-slate-400 font-bold mt-1">{property?.location}, {property?.city}</p>
+                <p className="text-xl font-black text-gold mt-2" style={{ color: 'var(--color-gold)' }}>₹{property?.price?.toLocaleString()}</p>
+             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div>
+                  <label className="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3 ml-2">Full Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all font-medium text-navy"
+                    required
+                  />
+               </div>
+               <div>
+                  <label className="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3 ml-2">Phone Number</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all font-medium text-navy"
+                    required
+                  />
+               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email *</label>
+              <label className="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3 ml-2">Email Identity</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all font-medium text-navy"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Phone *</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Message</label>
+              <label className="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3 ml-2">Personal Message</label>
               <textarea
                 name="message"
                 value={formData.message}
                 onChange={handleInputChange}
-                rows={4}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all font-medium text-navy"
               />
             </div>
 
-            <div className="flex space-x-3 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-8">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-colors"
+                className="order-2 sm:order-1 flex-1 px-8 py-5 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-red-500 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="order-1 sm:order-2 flex-[2] px-8 py-5 bg-navy text-white rounded-2xl hover:bg-gold transition-all duration-500 font-black text-xs uppercase tracking-[0.3em] shadow-2xl disabled:opacity-50"
+                style={{ backgroundColor: 'var(--color-navy)' }}
               >
-                {loading ? 'Sending...' : 'Send Inquiry'}
+                {loading ? 'Transmitting...' : 'Send Inquiry'}
               </button>
             </div>
           </form>
@@ -139,13 +151,30 @@ const PropertyDetails = () => {
     fetchProperty();
   }, [id]);
 
+  useEffect(() => {
+    if (property) {
+      window.scrollTo(0, 0);
+      const observerOptions = { threshold: 0.1 };
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('fade-in-up');
+            entry.target.style.opacity = '1';
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+      return () => observer.disconnect();
+    }
+  }, [property]);
+
   const fetchProperty = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties/${id}`);
       if (response.ok) {
         const data = await response.json();
         setProperty(data);
-        // After fetching current property, fetch related ones
         fetchRelatedProperties(data);
       } else {
         toast.error('Property not found');
@@ -164,7 +193,6 @@ const PropertyDetails = () => {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`);
       if (response.ok) {
         const allProps = await response.json();
-        // Filter: same type or same city, excluding current property
         const related = allProps
           .filter(p => p._id !== currentProp._id)
           .filter(p => p.propertyType === currentProp.propertyType || p.city === currentProp.city)
@@ -200,14 +228,10 @@ const PropertyDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-center items-center h-96">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-slate-600">Loading property details...</p>
-            </div>
-          </div>
+      <div className="min-h-screen bg-navy flex items-center justify-center" style={{ backgroundColor: 'var(--color-navy)' }}>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-gold border-t-transparent animate-spin rounded-full mx-auto mb-6" style={{ borderColor: 'rgba(198, 156, 109, 0.2)', borderTopColor: 'var(--color-gold)' }}></div>
+          <p className="text-white/50 uppercase tracking-[0.4em] text-[0.6rem] font-black">Syncing Portfolio...</p>
         </div>
       </div>
     );
@@ -215,74 +239,94 @@ const PropertyDetails = () => {
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-900 mb-4">Property Not Found</h1>
-            <button
-              onClick={() => navigate('/')}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Back to Home
-            </button>
-          </div>
-        </div>
+      <div className="min-h-screen bg-light flex flex-col items-center justify-center p-4">
+        <h1 className="text-3xl font-black text-navy mb-4">Property Not Found</h1>
+        <button onClick={() => navigate('/')} className="btn btn-primary">Return to Collection</button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Image Gallery */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group">
-              <div className="aspect-[16/9] lg:aspect-[21/9] bg-slate-100 flex items-center justify-center relative overflow-hidden">
+    <main className="property-details-wrapper bg-[#FDFDFD]">
+      {/* Cinematic Hero Section */}
+      <section className="bg-navy relative overflow-hidden flex items-center justify-center py-32 lg:py-52" style={{ backgroundColor: 'var(--color-navy)' }}>
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-navy/60 via-navy/80 to-navy z-10"></div>
+          <img 
+            src={property.images && property.images.length > 0 ? property.images[0] : ''} 
+            alt="Background" 
+            className="w-full h-full object-cover grayscale opacity-30 animate-ken-burns"
+          />
+        </div>
+        <div className="container relative z-10 px-6 text-center animate-on-scroll" style={{ opacity: 0 }}>
+          <div className="inline-flex items-center gap-3 px-6 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full mb-10">
+             <HiSparkles className="text-gold" style={{ color: 'var(--color-gold)' }} />
+             <span className="text-gold text-[0.65rem] font-black tracking-[0.4em] uppercase">{property.propertyType} | {property.status}</span>
+          </div>
+          <h1 className="text-5xl md:text-8xl font-black text-white mt-4 mb-8 leading-tight tracking-tighter uppercase whitespace-pre-wrap">
+            {property.propertyName || `${property.bedroom || ''} BHK ${property.propertyType}`}
+          </h1>
+          <div className="max-w-2xl mx-auto h-[1px] bg-gradient-to-r from-transparent via-gold to-transparent opacity-50 mb-10"></div>
+          <div className="flex items-center justify-center gap-4 text-white/70 font-bold text-xl">
+            <HiLocationMarker className="text-gold" style={{ color: 'var(--color-gold)' }} />
+            {property.location}, {property.city}
+          </div>
+        </div>
+      </section>
+
+      <div className="container mx-auto px-6 lg:px-12 -mt-24 relative z-40 pb-32">
+        {/* Navigation Action */}
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-4 bg-white px-8 py-4 rounded-2xl shadow-xl text-navy font-black text-xs tracking-widest hover:text-gold transition-all group mb-16 border border-slate-50">
+          <HiArrowLeft className="w-5 h-5 transform group-hover:-translate-x-2 transition-transform" />
+          BACK TO PORTFOLIO
+        </button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+          {/* Visuals & Specs */}
+          <div className="lg:col-span-8 space-y-20">
+            {/* Image Showcase */}
+            <div className="bg-white rounded-[3rem] shadow-2xl border-8 border-white overflow-hidden group animate-on-scroll" style={{ opacity: 0 }}>
+              <div className="aspect-[16/10] bg-slate-100 flex items-center justify-center relative overflow-hidden">
                 {property.images && property.images.length > 0 ? (
                   <>
                     <img
                       src={property.images[currentImageIndex]}
                       alt={property.propertyName || 'Property'}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                     />
                     {property.images.length > 1 && (
-                      <>
+                      <div className="absolute inset-x-8 top-1/2 -translate-y-1/2 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                         <button
                           onClick={() => setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : property.images.length - 1))}
-                          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-md text-slate-900 p-3 rounded-full hover:bg-blue-500 hover:text-white transition-all shadow-lg z-10"
+                          className="bg-white/90 backdrop-blur-md text-navy p-4 rounded-full hover:bg-gold hover:text-white transition-all shadow-2xl"
                         >
                           ‹
                         </button>
                         <button
                           onClick={() => setCurrentImageIndex((prev) => (prev < property.images.length - 1 ? prev + 1 : 0))}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-md text-slate-900 p-3 rounded-full hover:bg-blue-500 hover:text-white transition-all shadow-lg z-10"
+                          className="bg-white/90 backdrop-blur-md text-navy p-4 rounded-full hover:bg-gold hover:text-white transition-all shadow-2xl"
                         >
                           ›
                         </button>
-                      </>
+                      </div>
                     )}
                   </>
                 ) : (
-                  <div className="text-center text-slate-400">
-                    <HiHome className="w-20 h-20 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium">No image available</p>
-                  </div>
+                  <HiHome className="w-32 h-32 text-slate-100" />
                 )}
               </div>
               {property.images && property.images.length > 1 && (
-                <div className="p-4 bg-white border-t border-slate-50">
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+                <div className="p-6 bg-white border-t border-slate-50">
+                  <div className="flex gap-4 overflow-x-auto pb-2 px-2">
                     {property.images.map((image, index) => (
                       <img
                         key={index}
                         src={image}
-                        alt={`Property ${index + 1}`}
-                        className={`w-24 h-16 flex-none object-cover rounded-xl cursor-pointer transition-all duration-300 ${
+                        alt={`View ${index + 1}`}
+                        className={`w-32 h-20 rounded-2xl flex-none object-cover cursor-pointer transition-all duration-300 border-4 ${
                           currentImageIndex === index 
-                            ? 'ring-2 ring-blue-500 ring-offset-2 opacity-100' 
-                            : 'opacity-60 hover:opacity-100'
+                            ? 'border-gold scale-110 shadow-lg' 
+                            : 'border-white opacity-50 hover:opacity-100'
                         }`}
                         onClick={() => setCurrentImageIndex(index)}
                       />
@@ -292,271 +336,171 @@ const PropertyDetails = () => {
               )}
             </div>
 
-            {/* Property Details */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
-              <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-8">
+            {/* Structured Details */}
+            <div className="bg-white rounded-[3rem] shadow-xl border border-slate-50 p-10 md:p-20 animate-on-scroll" style={{ opacity: 0 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-semibold mb-4">
-                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                    {property.status.toUpperCase()}
-                  </div>
-                  <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">
-                    {property.propertyName || `${property.bedroom || ''} BHK ${property.propertyType}`}
-                  </h1>
-                  <div className="flex items-center text-slate-500 font-medium">
-                    <HiLocationMarker className="w-5 h-5 mr-1.5 text-slate-400 flex-shrink-0" />
-                    {property.location}, {property.city}
-                  </div>
+                  <span className="subtitle block mb-4" style={{ fontSize: '0.7rem' }}>ASSET DEFINITION</span>
+                  <h2 className="text-4xl md:text-5xl font-black text-navy leading-tight" style={{ color: 'var(--color-navy)' }}>
+                    Exclusive Luxury {property.propertyType}
+                  </h2>
+                  <div className="w-16 h-1.5 bg-gold mt-8 rounded-full"></div>
                 </div>
-                <div className="md:text-right bg-slate-50 p-4 rounded-2xl border border-slate-100 w-full md:w-auto">
-                  <div className="text-3xl font-extrabold text-blue-600 mb-1">
+                <div className="bg-slate-50 p-10 rounded-[2.5rem] border-l-8 border-gold shadow-sm flex flex-col justify-center gap-2" style={{ borderColor: 'var(--color-gold)' }}>
+                  <span className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest">Global Valuation</span>
+                  <div className="text-5xl font-black text-navy" style={{ color: 'var(--color-navy)' }}>
                     ₹{property.price?.toLocaleString()}
-                  </div>
-                  <div className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-                    {property.transaction === 'rent' ? 'per month' : 'Total Price'}
                   </div>
                 </div>
               </div>
 
-              {/* Quick Info Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-colors">
-                  <div className="p-3 bg-white rounded-xl shadow-sm text-blue-500">
-                    <HiHome className="w-6 h-6" />
+              {/* High-Performance Icons */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20 bg-slate-50 p-4 rounded-[2.5rem]">
+                {[
+                  { icon: HiHome, label: 'Type', val: property.propertyType, color: 'text-emerald-500' },
+                  { icon: HiOfficeBuilding, label: 'Space', val: `${property.area} sq.ft`, color: 'text-blue-500' },
+                  { icon: HiOutlineVariable, label: 'Rooms', val: `${property.bedroom} BHK`, color: 'text-gold' },
+                  { icon: HiCurrencyRupee, label: 'Intent', val: property.transaction, color: 'text-purple-500' }
+                ].map((stat, i) => (
+                  <div key={i} className="bg-white p-8 rounded-[2rem] text-center border border-slate-100 hover:shadow-xl transition-all">
+                    <stat.icon className={`w-10 h-10 mx-auto mb-4 ${stat.color}`} />
+                    <p className="text-[0.6rem] font-black text-slate-300 uppercase tracking-widest mb-1">{stat.label}</p>
+                    <p className="text-lg font-black text-navy uppercase truncate" style={{ color: 'var(--color-navy)' }}>{stat.val}</p>
                   </div>
+                ))}
+              </div>
+
+              {/* Multimedia & Narrative */}
+              <div className="space-y-20">
+                {property.youtubeUrl && (property.youtubeUrl.includes('youtube.com') || property.youtubeUrl.includes('youtu.be')) && (
                   <div>
-                    <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-0.5">Type</div>
-                    <div className="font-bold text-slate-900">{property.propertyType}</div>
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-colors">
-                  <div className="p-3 bg-white rounded-xl shadow-sm text-blue-500">
-                    <HiOfficeBuilding className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-0.5">Area</div>
-                    <div className="font-bold text-slate-900">{property.area} sq.ft</div>
-                  </div>
-                </div>
-                {property.bedroom && (
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-colors">
-                    <div className="p-3 bg-white rounded-xl shadow-sm text-blue-500">
-                      <HiHome className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-0.5">Bedrooms</div>
-                      <div className="font-bold text-slate-900">{property.bedroom}</div>
+                    <h2 className="text-2xl font-black text-navy mb-10 flex items-center gap-4">
+                       <span className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center">
+                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                       </span>
+                       Cinematic Tour
+                    </h2>
+                    <div className="aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white">
+                      <iframe
+                        src={property.youtubeUrl.replace('watch?v=', 'embed/').split('&')[0]}
+                        title="Tour"
+                        className="w-full h-full"
+                        allowFullScreen
+                      ></iframe>
                     </div>
                   </div>
                 )}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-colors">
-                  <div className="p-3 bg-white rounded-xl shadow-sm text-blue-500">
-                    <HiCurrencyRupee className="w-6 h-6" />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 capitalize font-black">
+                  <div>
+                    <h3 className="text-xl font-black mb-6 uppercase tracking-widest text-navy">Asset Description</h3>
+                    <p className="text-slate-500 leading-relaxed font-bold border-l-4 border-slate-100 pl-8 capitalize">{property.propertyDescription}</p>
                   </div>
                   <div>
-                    <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-0.5">Transaction</div>
-                    <div className="font-bold text-slate-900 capitalize">{property.transaction || 'Sale'}</div>
+                    <h3 className="text-xl font-black mb-6 uppercase tracking-widest text-navy">Global Specs</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                       {[
+                         { l: 'Asset ID', v: property._id?.slice(-8).toUpperCase() },
+                         { l: 'Age', v: property.propertyAge || 'Prime' },
+                         { l: 'Furnishing', v: property.furnishing || 'Standard' },
+                         { l: 'Listing Date', v: new Date(property.createdAt).toLocaleDateString() }
+                       ].map((spec, i) => (
+                         <div key={i} className="flex justify-between items-center py-4 border-b border-slate-50">
+                            <span className="text-[0.6rem] text-slate-400 font-bold uppercase">{spec.l}</span>
+                            <span className="text-sm text-navy">{spec.val || spec.v}</span>
+                         </div>
+                       ))}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Description */}
-              {property.propertyDescription && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                    <span className="p-1.5 bg-slate-100 rounded-lg text-slate-600">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
-                    </span>
-                    Description
-                  </h2>
-                  <p className="text-slate-700 leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-100">{property.propertyDescription}</p>
-                </div>
-              )}
-
-              {/* Detailed Information */}
-              {property.detailedInformation && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                    <span className="p-1.5 bg-slate-100 rounded-lg text-slate-600">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </span>
-                    Detailed Information
-                  </h2>
-                  <p className="text-slate-700 leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-100">{property.detailedInformation}</p>
-                </div>
-              )}
-
-              {/* Property Overview / Summary */}
-              <div className="mb-10 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                  <span className="p-1.5 bg-blue-100 rounded-lg text-blue-600">
-                    <HiOfficeBuilding className="w-5 h-5" />
-                  </span>
-                  Property Overview
-                </h2>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 capitalize">
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors">
-                    <div className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">Property ID</div>
-                    <div className="font-semibold text-slate-900">{property._id?.slice(-8).toUpperCase()}</div>
+                {/* Amenities */}
+                {property.amenities && property.amenities.length > 0 && (
+                  <div>
+                    <h3 className="text-2xl font-black mb-10 text-navy uppercase tracking-widest">Premium Amenities</h3>
+                    <div className="flex flex-wrap gap-4">
+                      {property.amenities.map((a, i) => (
+                        <div key={i} className="px-8 py-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-4 hover:border-gold transition-colors shadow-sm">
+                           <HiShieldCheck className="text-emerald-500 w-6 h-6" />
+                           <span className="text-sm font-black text-navy uppercase">{a}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors">
-                    <div className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">Listed On</div>
-                    <div className="font-semibold text-slate-900">{new Date(property.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</div>
-                  </div>
-                  {property.furnishing && (
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors">
-                      <div className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">Furnishing</div>
-                      <div className="font-semibold text-slate-900">{property.furnishing}</div>
-                    </div>
-                  )}
-                  {property.propertyAge && (
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors">
-                      <div className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">Property Age</div>
-                      <div className="font-semibold text-slate-900">{property.propertyAge}</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Amenities */}
-              {property.amenities && property.amenities.length > 0 && (
-                <div className="mb-10">
-                  <h2 className="text-xl font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                    <span className="p-1.5 bg-green-100 rounded-lg text-green-600">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                    </span>
-                    Premium Amenities
-                  </h2>
-                  <div className="flex flex-wrap gap-3">
-                    {property.amenities.map((amenity, index) => (
-                      <div 
-                        key={index} 
-                        className="flex items-center px-4 py-2 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 rounded-xl text-sm font-medium text-slate-700 transition-all duration-300 cursor-default group shadow-sm"
-                      >
-                        <span className="w-2 h-2 bg-blue-400 group-hover:bg-blue-500 group-hover:scale-125 transition-transform duration-300 rounded-full mr-2"></span>
-                        {amenity}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Location Details */}
-              <div className="border-t pt-8">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                  <span className="p-1.5 bg-blue-100 rounded-lg text-blue-600">
-                    <HiLocationMarker className="w-5 h-5" />
-                  </span>
-                  Location & Address
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {property.flatNo && (
-                    <div className="flex flex-col p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:shadow-sm transition-all">
-                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Flat/Unit No</span>
-                      <span className="font-semibold text-slate-900">{property.flatNo}</span>
-                    </div>
-                  )}
-                  {property.buildingName && (
-                    <div className="flex flex-col p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:shadow-sm transition-all">
-                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Building</span>
-                      <span className="font-semibold text-slate-900">{property.buildingName}</span>
-                    </div>
-                  )}
-                  {property.street && (
-                    <div className="flex flex-col p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:shadow-sm transition-all">
-                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Street</span>
-                      <span className="font-semibold text-slate-900">{property.street}</span>
-                    </div>
-                  )}
-                  {property.landmark && (
-                    <div className="flex flex-col p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:shadow-sm transition-all">
-                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Landmark</span>
-                      <span className="font-semibold text-slate-900">{property.landmark}</span>
-                    </div>
-                  )}
-                  {property.pinCode && (
-                    <div className="flex flex-col p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:shadow-sm transition-all">
-                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Pin Code</span>
-                      <span className="font-semibold text-slate-900">{property.pinCode}</span>
-                    </div>
-                  )}
-                  {property.address && (
-                    <div className="flex flex-col p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:shadow-sm transition-all md:col-span-3">
-                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Full Address</span>
-                      <span className="font-semibold text-slate-900">{property.address}</span>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Inquiry Card */}
-            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8 sticky top-28 overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50 pointer-events-none"></div>
-              
-              <h2 className="text-2xl font-bold text-slate-900 mb-2 relative z-10">Interested?</h2>
-              <p className="text-slate-500 mb-8 relative z-10">Contact us to get more details or schedule a viewing for this property.</p>
-              
-              <button
-                onClick={() => setShowInquiryModal(true)}
-                className="w-full bg-slate-900 text-white py-4 px-6 rounded-2xl hover:bg-blue-500 transition-all duration-300 font-bold flex items-center justify-center gap-3 shadow-lg shadow-slate-900/20 hover:shadow-blue-500/30 transform hover:-translate-y-1 relative z-10"
-              >
-                <HiMail className="w-6 h-6" />
-                Send Inquiry Now
-              </button>
+          {/* Action Sidebar */}
+          <div className="lg:col-span-4 lg:sticky lg:top-32 space-y-10">
+            {/* Conversion Card */}
+            <div className="bg-navy rounded-[3rem] p-12 text-white shadow-2xl relative overflow-hidden group" style={{ backgroundColor: 'var(--color-navy)' }}>
+               <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+               
+               <span className="text-gold font-black tracking-[0.4em] uppercase text-[0.6rem] mb-6 block" style={{ color: 'var(--color-gold)' }}>SECURE TRANSACTION</span>
+               <h3 className="text-4xl font-black mb-8 leading-tight">Initiate Acquisition</h3>
+               <p className="text-white/50 mb-12 font-medium leading-relaxed italic border-l border-white/10 pl-6 text-sm">
+                 Connect with our executive planners to receive the full prospectus of this luxury asset.
+               </p>
 
-              <div className="mt-4 space-y-3 relative z-10">
-                <a 
-                  href="tel:+919406650197" 
-                  className="w-full bg-slate-100 text-slate-800 py-4 px-6 rounded-2xl hover:bg-slate-200 transition-all duration-300 font-bold flex items-center justify-center gap-3 shadow-sm transform hover:-translate-y-1 border border-slate-200"
-                >
-                  <HiPhone className="w-6 h-6 text-slate-600" />
-                  Call Now
-                </a>
-                <a 
-                  href="https://wa.me/919406650197" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full bg-[#25D366] text-white py-4 px-6 rounded-2xl hover:bg-[#128C7E] transition-all duration-300 font-bold flex items-center justify-center gap-3 shadow-lg shadow-[#25D366]/20 hover:shadow-[#25D366]/40 transform hover:-translate-y-1"
-                >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
-                  Chat on WhatsApp
-                </a>
-              </div>
+               <button
+                 onClick={() => setShowInquiryModal(true)}
+                 className="w-full bg-gold text-navy py-6 rounded-2xl font-black uppercase tracking-[0.3em] text-xs hover:bg-white transition-all duration-500 shadow-2xl flex items-center justify-center gap-4 group/btn"
+                 style={{ backgroundColor: 'var(--color-gold)', color: 'var(--color-navy)' }}
+               >
+                 <HiMail className="w-7 h-7" />
+                 Inquire via VIP Channel
+                 <HiArrowSmRight className="w-6 h-6 transform -rotate-45 group-hover/btn:rotate-0 transition-transform" />
+               </button>
+
+               <div className="grid grid-cols-2 gap-4 mt-10">
+                  <a href="tel:+919264175587" className="bg-white/10 p-5 rounded-2xl flex flex-col items-center gap-3 border border-white/5 hover:bg-white/20 transition-all">
+                     <HiPhone className="w-6 h-6 text-gold" style={{ color: 'var(--color-gold)' }} />
+                     <span className="text-[0.6rem] font-black uppercase tracking-widest">Call Expert</span>
+                  </a>
+                  <a href="https://wa.me/919264175587" target="_blank" rel="noreferrer" className="bg-[#25D366]/10 p-5 rounded-2xl flex flex-col items-center gap-3 border border-[#25D366]/20 hover:bg-[#25D366] transition-all group/wa">
+                     <svg className="w-6 h-6 text-[#25D366] group-hover/wa:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+                     <span className="text-[0.6rem] font-black uppercase tracking-widest group-hover/wa:text-white">WhatsApp</span>
+                  </a>
+               </div>
             </div>
 
+            {/* Credibility Sidebar */}
+            <div className="bg-white rounded-[3rem] p-12 border border-slate-50 shadow-xl overflow-hidden relative">
+               <div className="absolute top-0 right-0 p-8 opacity-5">
+                  <HiShieldCheck size={100} />
+               </div>
+               <span className="text-gold font-black uppercase text-[0.6rem] tracking-widest mb-8 block">PLATINUM ASSURANCE</span>
+               <div className="space-y-6">
+                  <div className="flex items-center gap-6">
+                     <div className="text-5xl font-black text-navy" style={{ color: 'var(--color-navy)' }}>15+</div>
+                     <div className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest leading-tight">Years Industry <br/>Leadership</div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                     <div className="text-5xl font-black text-gold" style={{ color: 'var(--color-gold)' }}>50k+</div>
+                     <div className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest leading-tight">Satisfied <br/>Global Clients</div>
+                  </div>
+               </div>
+            </div>
           </div>
         </div>
 
-        {/* Related Properties Section */}
+        {/* Global Related Section */}
         {relatedProperties.length > 0 && (
-          <div className="mt-16 pt-16 border-t border-slate-200">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-2">
-                  <HiSparkles className="text-blue-500 w-8 h-8" />
-                  You Might Also Like
-                </h2>
-                <p className="text-slate-600">Discover other properties that match your preferences.</p>
-              </div>
-              <button 
-                onClick={() => navigate('/properties')}
-                className="hidden sm:block text-blue-600 font-bold hover:text-blue-700 transition-colors"
-              >
-                View All Properties →
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {relatedProperties.map((prop) => (
-                <PropertyCard key={prop._id} property={prop} />
-              ))}
-            </div>
+          <div className="mt-40">
+             <div className="flex items-end justify-between mb-20">
+                <div>
+                   <span className="text-gold font-black uppercase text-[0.65rem] tracking-[0.4em] mb-4 block">Recommended Asset</span>
+                   <h2 className="text-5xl font-black text-navy leading-tight uppercase tracking-tighter">You Might Also <span className="text-gold">Admire</span></h2>
+                </div>
+                <Link to="/properties" className="hidden md:flex items-center gap-3 px-10 py-5 bg-white border border-slate-100 rounded-full font-black text-[0.65rem] tracking-widest hover:bg-navy hover:text-white transition-all shadow-xl">
+                   FULL COLLECTION
+                </Link>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+               {relatedProperties.map(p => <PropertyCard key={p._id} property={p} />)}
+             </div>
           </div>
         )}
       </div>
@@ -569,7 +513,25 @@ const PropertyDetails = () => {
           onSubmit={handleInquirySubmit}
         />
       )}
-    </div>
+
+      {/* Animations */}
+      <style>{`
+        @keyframes ken-burns {
+          0% { transform: scale(1); }
+          100% { transform: scale(1.1); }
+        }
+        .animate-ken-burns {
+          animation: ken-burns 30s infinite alternate ease-in-out;
+        }
+        .fade-in-up {
+          animation: fadeInUp 1.2s cubic-bezier(0.2, 1, 0.2, 1) forwards;
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(60px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </main>
   );
 };
 
