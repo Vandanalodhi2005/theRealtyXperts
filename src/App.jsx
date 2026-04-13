@@ -18,6 +18,7 @@ import Home from './components/Home';
 import Investment from './components/Investment';
 import InvestmentDetails from './components/InvestmentDetails';
 import ProjectDetails from './components/ProjectDetails';
+import Gallery from './components/Gallery';
 import PropTypes from 'prop-types';
 import { Toaster } from 'react-hot-toast';
 import ScrollToTop from './components/ScrollToTop';
@@ -66,6 +67,7 @@ function App() {
         <Route path="/property/:id" element={<UserLayout><PropertyDetails /></UserLayout>} />
         <Route path="/projects" element={<UserLayout><Projects /></UserLayout>} />
         <Route path="/project/:id" element={<UserLayout><ProjectDetails /></UserLayout>} />
+        <Route path="/gallery" element={<UserLayout><Gallery /></UserLayout>} />
         <Route path="/submit-property" element={<UserLayout><SubmitProperty /></UserLayout>} />
         <Route path="/contact" element={<UserLayout><ContactUs /></UserLayout>} />
         <Route path="/terms" element={<UserLayout><TermsAndConditions /></UserLayout>} />

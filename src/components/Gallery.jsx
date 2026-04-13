@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { HiCamera, HiSearch, HiX, HiAdjustments } from 'react-icons/hi';
+import { HiX, HiPhotograph, HiChevronRight } from 'react-icons/hi';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('All');
+  const [visibleCount, setVisibleCount] = useState(6);
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ const Gallery = () => {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/gallery`);
       if (response.ok) {
         const data = await response.json();
-        setImages(data);
+        setImages(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Error fetching gallery images:', error);
@@ -26,166 +26,129 @@ const Gallery = () => {
     }
   };
 
-  const categories = ['All', ...new Set(images.map(img => img.category || 'General'))];
-  const filteredImages = filter === 'All' ? images : images.filter(img => img.category === filter);
+  const displayedImages = images.slice(0, visibleCount);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center" style={{ backgroundColor: 'var(--color-navy)' }}>
-        <div className="flex flex-col items-center">
-          <div className="w-20 h-20 border-w-2 border-gold border-t-transparent animate-spin rounded-full mb-6" style={{ border: '3px solid rgba(198, 156, 109, 0.1)', borderTopColor: 'var(--color-gold)' }}></div>
-          <p className="text-gold/50 text-[0.6rem] font-bold tracking-[0.4em] uppercase animate-pulse">Establishing Connection</p>
+      <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-slate-400 font-bold tracking-widest text-xs uppercase">Unlocking Media Vault...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD]">
-      {/* Dynamic Hero Section */}
-      <section className="relative h-[60vh] lg:h-[70vh] flex items-center justify-center overflow-hidden bg-navy">
+    <main className="min-h-screen bg-[#F8F9FB] font-serif selection:bg-gold selection:text-white">
+      {/* Premium Hero Section */}
+      <section className="relative h-[65vh] flex items-center justify-center overflow-hidden bg-navy" style={{ backgroundColor: '#07162F' }}>
         <div className="absolute inset-0 z-0">
-           <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/40 to-navy z-10"></div>
-           <img 
-              src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070" 
-              className="w-full h-full object-cover scale-110 animate-ken-burns"
-              alt="Architecture"
-           />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#07162F]/80 via-[#07162F]/40 to-[#F8F9FB] z-10"></div>
+          <img 
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070" 
+            className="w-full h-full object-cover"
+            alt="Hero Background"
+          />
         </div>
-        
-        <div className="container relative z-20 px-6 text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full border border-gold/30 bg-gold/5 backdrop-blur-md mb-8">
-             <span className="w-2 h-2 bg-gold rounded-full animate-ping"></span>
-             <span className="text-gold text-[0.65rem] font-black tracking-[0.3em] uppercase">Visual Portfolio 2024</span>
-          </div>
-          <h1 className="text-5xl md:text-8xl font-black text-white leading-tight mb-8">
-            The Art of <span className="text-gold" style={{ color: 'var(--color-gold)' }}>Living</span>
+        <div className="container relative z-20 text-center px-4">
+          <h1 className="text-5xl md:text-8xl font-black text-white leading-tight mb-4 tracking-tighter uppercase italic">
+            Elite <span style={{ color: '#C69C6D' }}>Collections</span>
           </h1>
-          <div className="max-w-xl mx-auto h-[1px] bg-gradient-to-r from-transparent via-gold to-transparent opacity-50 mb-8"></div>
-          <p className="text-white/60 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
-            Every structure tells a story of ambition. Explore our collection of architectural landmarks and premium developments.
+          <p className="text-white/60 text-xs md:text-base font-medium max-w-2xl mx-auto leading-relaxed tracking-[0.5em] uppercase">
+            Architectural Excellence Captured
           </p>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4">
-           <div className="w-[1px] h-16 bg-gradient-to-b from-gold/50 to-transparent"></div>
         </div>
       </section>
 
-      {/* Content Section */}
-      <div className="container mx-auto px-6 -mt-20 relative z-30 pb-32">
-        {/* Refined Filter Bar */}
-        <div className="bg-white rounded-[3rem] shadow-2xl p-4 md:p-6 mb-20 border border-slate-100 flex flex-wrap items-center justify-center gap-4 max-w-4xl mx-auto">
-          <div className="hidden md:flex items-center gap-2 px-6 border-r border-slate-100 mr-2 text-navy/40">
-             <HiAdjustments className="w-5 h-5" />
-             <span className="text-[0.6rem] font-black uppercase tracking-widest">Filter By</span>
-          </div>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`px-8 py-3 rounded-full text-[0.65rem] font-black uppercase tracking-widest transition-all duration-500 ${
-                filter === cat 
-                  ? 'bg-navy text-white shadow-[0_10px_30px_rgba(10,28,58,0.3)] transform -translate-y-1' 
-                  : 'text-slate-400 hover:text-gold hover:bg-slate-50'
-              }`}
-              style={filter === cat ? { backgroundColor: 'var(--color-navy)' } : {}}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Portfolio Masonry */}
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-10 space-y-10">
-          {filteredImages.map((image, index) => (
-            <div 
-              key={image._id} 
-              className="break-inside-avoid relative group rounded-[2.5rem] overflow-hidden bg-white shadow-xl hover:shadow-[0_40px_80px_-20px_rgba(10,28,58,0.15)] transition-all duration-700 hover:-translate-y-2 border border-slate-100"
-              onClick={() => setSelectedImage(image)}
-            >
-              <div className="relative overflow-hidden">
-                <img 
-                  src={image.imageUrl} 
-                  alt={image.title} 
-                  className="w-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-navy/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-[2px]"></div>
-                
-                {/* Visual Label */}
-                <div className="absolute top-8 left-8 p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                   <div className="text-white text-[0.6rem] font-black tracking-widest uppercase">{image.category || 'Architecture'}</div>
+      {/* Gallery Showcase Area */}
+      <div className="container mx-auto px-6 md:px-12 lg:px-20 -mt-24 relative z-30 pb-40">
+        
+        {/* Gallery Card Container */}
+        <div className="bg-white rounded-xl shadow-[0_30px_70px_-20px_rgba(0,0,0,0.15)] p-10 md:p-16 border border-slate-100">
+            <div className="flex items-center justify-between mb-16 border-b border-slate-100 pb-8">
+                <div>
+                   <h2 className="text-4xl font-bold text-[#07162F] tracking-tight m-0">Gallery</h2>
+                   <div className="h-[3px] w-16 mt-3" style={{ backgroundColor: '#C69C6D' }}></div>
                 </div>
-
-                {/* Main Caption */}
-                <div className="absolute bottom-0 left-0 right-0 p-10 translate-y-6 group-hover:translate-y-0 transition-all duration-500 opacity-0 group-hover:opacity-100">
-                   <h3 className="text-2xl font-black text-white leading-tight mb-2">{image.title || 'Exquisite Space'}</h3>
-                   <div className="w-12 h-1 bg-gold rounded-full" style={{ backgroundColor: 'var(--color-gold)' }}></div>
+                <div className="hidden md:block text-[#C69C6D] font-bold text-[0.6rem] tracking-[0.4em] uppercase">
+                   Showing {displayedImages.length} of {images.length} Assets
                 </div>
-
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
-                    <div className="w-16 h-16 bg-gold text-white rounded-full flex items-center justify-center shadow-2xl transform scale-50 group-hover:scale-100 transition-transform duration-500">
-                       <HiSearch className="w-6 h-6" />
-                    </div>
-                </div>
-              </div>
             </div>
-          ))}
-        </div>
 
-        {images.length === 0 && (
-          <div className="text-center py-40 border-2 border-dashed border-slate-100 rounded-[4rem]">
-             <HiCamera className="w-24 h-24 text-slate-100 mx-auto mb-6" />
-             <h3 className="text-2xl font-black text-slate-300 uppercase tracking-widest">Awaiting the lens...</h3>
-             <p className="text-slate-400 mt-2 font-medium">Visual assets are being curated for this collection.</p>
-          </div>
-        )}
+            {/* High-Resolution Grid - No image cutting */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-20">
+                {displayedImages.map((image, index) => (
+                    <div 
+                        key={image._id || index}
+                        onClick={() => setSelectedImage(image)}
+                        className="group flex flex-col"
+                    >
+                        {/* THE FRAME: Wide white padding + Strong Border + Deep Shadow */}
+                        <div className="bg-white p-6 border-4 border-[#F0F4F8] shadow-[10px_10px_40px_rgba(0,0,0,0.08)] hover:shadow-[15px_15px_60px_rgba(0,0,0,0.15)] transition-all duration-500 hover:-translate-y-3 cursor-pointer overflow-hidden rounded-sm">
+                            {/* Inner Container: object-contain ensures NO CUTTING */}
+                            <div className="relative aspect-[4/3] bg-slate-50 flex items-center justify-center overflow-hidden border border-slate-100">
+                                <img 
+                                    src={image.imageUrl} 
+                                    alt={image.title} 
+                                    className="max-w-full max-h-full w-auto h-auto object-contain transition-transform duration-700 group-hover:scale-110"
+                                />
+                            </div>
+                        </div>
+                        
+                        {/* Asset Meta - Bottom spacing as requested */}
+                        <div className="mt-8 text-center px-4">
+                           <h3 className="text-lg font-bold text-[#07162F] uppercase tracking-tighter truncate leading-tight italic">{image.title}</h3>
+                           <p className="mt-2 text-[#C69C6D] text-[0.6rem] font-bold tracking-[0.3em] uppercase">{image.category}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* See More Navigation */}
+            {visibleCount < images.length && (
+              <div className="mt-24 text-center">
+                  <button 
+                    onClick={() => setVisibleCount(prev => prev + 6)}
+                    className="inline-flex items-center gap-4 px-14 py-5 bg-[#07162F] text-white rounded-lg text-[0.7rem] font-black uppercase tracking-[0.5em] hover:bg-[#C69C6D] transition-all duration-500 shadow-2xl hover:shadow-gold/20 group"
+                  >
+                    SEE MORE ASSETS <HiChevronRight className="w-5 h-5 group-hover:translate-x-3 transition-transform duration-500" />
+                  </button>
+              </div>
+            )}
+
+            {images.length === 0 && (
+                <div className="py-40 text-center">
+                    <HiPhotograph className="w-16 h-16 text-slate-100 mx-auto mb-6" />
+                    <p className="text-slate-300 font-bold uppercase tracking-widest text-xs">No media assets in collection</p>
+                </div>
+            )}
+        </div>
       </div>
 
-      {/* Experimental Lightbox */}
+      {/* Image Spotlight Modal */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 bg-navy/98 backdrop-blur-2xl z-[1000] flex items-center justify-center p-6 md:p-16 animate-in fade-in duration-500"
+          className="fixed inset-0 bg-[#07162F]/98 backdrop-blur-2xl z-[5000] flex items-center justify-center p-6 md:p-12 animate-in fade-in duration-500"
           onClick={() => setSelectedImage(null)}
         >
-          <button 
-             className="absolute top-10 right-10 text-white/50 hover:text-gold transition-all duration-300 z-[1001] transform hover:rotate-90"
-             onClick={() => setSelectedImage(null)}
-          >
-            <HiX className="w-10 h-10" />
-          </button>
-          
-          <div className="relative w-full h-full flex flex-col md:flex-row gap-12 items-center justify-center" onClick={e => e.stopPropagation()}>
-             <div className="flex-1 max-w-5xl h-full flex items-center justify-center">
-                <img 
-                  src={selectedImage.imageUrl} 
-                  alt={selectedImage.title} 
-                  className="max-w-full max-h-full object-contain rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] border border-white/10"
-                />
+          <button className="absolute top-10 right-10 text-white hover:text-[#C69C6D] transition-all"><HiX size={44} /></button>
+          <div className="relative max-w-7xl w-full flex flex-col items-center" onClick={e => e.stopPropagation()}>
+             <div className="bg-white p-2 md:p-4 shadow-2xl rounded-sm">
+                <img src={selectedImage.imageUrl} className="max-h-[75vh] object-contain" alt="Spotlight" />
              </div>
-             
-             <div className="w-full md:w-80 text-center md:text-left">
-                <span className="text-gold font-black tracking-[0.4em] uppercase text-xs mb-4 block" style={{ color: 'var(--color-gold)' }}>{selectedImage.category}</span>
-                <h3 className="text-4xl font-black text-white mb-6 leading-tight">{selectedImage.title}</h3>
-                <div className="w-16 h-1.5 bg-gold mb-12 hidden md:block" style={{ backgroundColor: 'var(--color-gold)' }}></div>
-                <p className="text-white/40 text-sm font-medium leading-relaxed italic border-l-2 border-white/10 pl-6">
-                   "This asset represents the high standard of engineering and design excellence maintained by Realty Xperts."
-                </p>
+             <div className="mt-10 text-center">
+                <h3 className="text-3xl text-white font-bold tracking-tight uppercase italic">{selectedImage.title}</h3>
+                <p className="mt-2 text-[#C69C6D] text-xs font-bold tracking-[0.4em] uppercase">{selectedImage.category} COLLECTION</p>
              </div>
           </div>
         </div>
       )}
 
-      {/* Custom Keyframes for Animations */}
       <style>{`
-        @keyframes ken-burns {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.1); }
-        }
-        .animate-ken-burns {
-          animation: ken-burns 20s infinite alternate ease-in-out;
-        }
+        h1, h2, h3 { font-family: 'Poppins', serif; }
+        .bg-navy { background-color: #07162F; }
+        .text-gold { color: #C69C6D; }
       `}</style>
     </main>
   );

@@ -50,7 +50,7 @@ const AdminDashboard = () => {
             const token = localStorage.getItem('adminToken');
             const headers = { 'Authorization': `Bearer ${token}` };
             
-            const [dashRes, propRes, contactRes, investRes, projectRes, subRes] = await Promise.all([
+            const [dashRes, propRes, contactRes, investRes, projectRes, subRes, galleryRes] = await Promise.all([
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/dashboard`, { headers }),
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`, { headers }),
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, { headers }),

@@ -30,7 +30,7 @@ const token = localStorage.getItem('adminToken');
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
-        user: token ? { username: 'admin', role: 'admin' } : null,
+        user: token ? { username: 'vandana', role: 'admin' } : null,
         loading: false,
         error: null,
         isAuthenticated: !!token,
