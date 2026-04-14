@@ -43,6 +43,8 @@ const AdminDashboard = () => {
     const [contacts, setContacts] = useState([]);
     const [gallery, setGallery] = useState([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [selectedInquiry, setSelectedInquiry] = useState(null);
+    const [selectedSubmission, setSelectedSubmission] = useState(null);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -141,6 +143,55 @@ const AdminDashboard = () => {
                 fetchData();
             }
         } catch (e) { toast.error('Error deleting project'); }
+    };
+
+    const handleUpdateInquiryStatus = async (id, newStatus) => {
+        try {
+            const token = localStorage.getItem('adminToken');
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact/${id}/status`, {
+                method: 'PUT',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (res.ok) {
+                toast.success(`Status updated to ${newStatus}`);
+                fetchData();
+                if (selectedInquiry && selectedInquiry._id === id) {
+                    setSelectedInquiry(prev => ({ ...prev, status: newStatus }));
+                }
+            }
+        } catch (e) { toast.error('Error updating status'); }
+    };
+
+    const handleViewInquiry = (contact) => {
+        setSelectedInquiry(contact);
+        if (contact.status === 'unread') {
+            handleUpdateInquiryStatus(contact._id, 'read');
+        }
+    };
+
+    const handleUpdateSubmissionStatus = async (id, newStatus) => {
+        try {
+            const token = localStorage.getItem('adminToken');
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/submitted-properties/${id}/status`, {
+                method: 'PUT',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (res.ok) {
+                toast.success(`Property marked as ${newStatus}`);
+                fetchData();
+                if (selectedSubmission && selectedSubmission._id === id) {
+                    setSelectedSubmission(prev => ({ ...prev, status: newStatus }));
+                }
+            }
+        } catch (e) { toast.error('Error updating submission status'); }
     };
 
     const sidebarItems = [
@@ -521,7 +572,12 @@ const AdminDashboard = () => {
                                     <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64' }}>{contact.message}</p>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                    <button style={{ backgroundColor: 'white', border: '1px solid var(--color-gold)', color: 'var(--color-gold)', padding: '8px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}>View Details</button>
+                                    <button 
+                                        onClick={() => handleViewInquiry(contact)}
+                                        style={{ backgroundColor: 'white', border: '1px solid var(--color-gold)', color: 'var(--color-gold)', padding: '8px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+                                    >
+                                        View Details
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -578,7 +634,12 @@ const AdminDashboard = () => {
                                     <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Location</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)' }}>{sub.location}</p></div>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                    <button style={{ backgroundColor: 'white', border: '1px solid var(--color-navy)', color: 'var(--color-navy)', padding: '10px 25px', borderRadius: '10px', fontSize: '13px', fontWeight: '800', cursor: 'pointer', transition: 'all 0.2s' }}>View Details</button>
+                                    <button 
+                                        onClick={() => setSelectedSubmission(sub)}
+                                        style={{ backgroundColor: 'white', border: '1px solid var(--color-navy)', color: 'var(--color-navy)', padding: '10px 25px', borderRadius: '10px', fontSize: '13px', fontWeight: '800', cursor: 'pointer', transition: 'all 0.2s' }}
+                                    >
+                                        View Details
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -720,6 +781,158 @@ const AdminDashboard = () => {
         );
     };
 
+    const renderSubmissionModal = () => {
+        if (!selectedSubmission) return null;
+
+        return (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                <div style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                    <button 
+                        onClick={() => setSelectedSubmission(null)}
+                        style={{ position: 'absolute', top: '24px', right: '24px', background: '#F8F9FA', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#607D8B' }}
+                    >
+                        <HiX size={20} />
+                    </button>
+
+                    <div style={{ padding: '40px' }}>
+                        <div style={{ marginBottom: '30px' }}>
+                            <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '2px', display: 'block', marginBottom: '10px' }}>Property Submission</span>
+                            <h3 style={{ fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800', margin: 0 }}>{selectedSubmission.title}</h3>
+                            <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                                <span style={{ padding: '4px 12px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', backgroundColor: selectedSubmission.status === 'pending' ? '#FFF3E0' : selectedSubmission.status === 'approved' ? '#E8F5E9' : '#FFEBEE', color: selectedSubmission.status === 'pending' ? '#EF6C00' : selectedSubmission.status === 'approved' ? '#4CAF50' : '#F44336' }}>{selectedSubmission.status}</span>
+                                <span style={{ color: '#90A4AE', fontSize: '13px' }}>Submitted on {new Date(selectedSubmission.createdAt).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+                            <div style={detailBoxStyle}>
+                                <p style={detailLabelStyle}>Contact Person</p>
+                                <p style={detailValueStyle}>{selectedSubmission.contactName}</p>
+                            </div>
+                            <div style={detailBoxStyle}>
+                                <p style={detailLabelStyle}>Email</p>
+                                <p style={detailValueStyle}>{selectedSubmission.contactEmail}</p>
+                            </div>
+                            <div style={detailBoxStyle}>
+                                <p style={detailLabelStyle}>Phone</p>
+                                <p style={detailValueStyle}>{selectedSubmission.contactPhone}</p>
+                            </div>
+                            <div style={detailBoxStyle}>
+                                <p style={detailLabelStyle}>Category</p>
+                                <p style={{ ...detailValueStyle, textTransform: 'capitalize' }}>{selectedSubmission.category}</p>
+                            </div>
+                            <div style={detailBoxStyle}>
+                                <p style={detailLabelStyle}>Property Type</p>
+                                <p style={{ ...detailValueStyle, textTransform: 'capitalize' }}>{selectedSubmission.type}</p>
+                            </div>
+                            <div style={detailBoxStyle}>
+                                <p style={detailLabelStyle}>Price</p>
+                                <p style={{ ...detailValueStyle, color: 'var(--color-gold)' }}>₹{selectedSubmission.price?.toLocaleString()}</p>
+                            </div>
+                        </div>
+
+                        <div style={{ background: '#F8F9FA', padding: '25px', borderRadius: '20px', marginBottom: '40px' }}>
+                            <p style={detailLabelStyle}>Location</p>
+                            <p style={{ ...detailValueStyle, marginBottom: '20px' }}>{selectedSubmission.location}</p>
+                            <p style={detailLabelStyle}>Description</p>
+                            <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64' }}>{selectedSubmission.description}</p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            {selectedSubmission.status === 'pending' && (
+                                <>
+                                    <button 
+                                        onClick={() => handleUpdateSubmissionStatus(selectedSubmission._id, 'approved')}
+                                        style={{ flex: 1, backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                    >
+                                        Approve
+                                    </button>
+                                    <button 
+                                        onClick={() => handleUpdateSubmissionStatus(selectedSubmission._id, 'rejected')}
+                                        style={{ flex: 1, backgroundColor: '#F44336', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                    >
+                                        Reject
+                                    </button>
+                                </>
+                            )}
+                            <button 
+                                onClick={() => window.location.href = `mailto:${selectedSubmission.contactEmail}`}
+                                style={{ flex: 1, backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                            >
+                                Contact Submitter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderInquiryModal = () => {
+        if (!selectedInquiry) return null;
+
+        return (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                <div style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+                    <button 
+                        onClick={() => setSelectedInquiry(null)}
+                        style={{ position: 'absolute', top: '24px', right: '24px', background: '#F8F9FA', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#607D8B' }}
+                    >
+                        <HiX size={20} />
+                    </button>
+
+                    <div style={{ padding: '40px' }}>
+                        <div style={{ marginBottom: '30px' }}>
+                            <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '2px', display: 'block', marginBottom: '10px' }}>Inquiry Details</span>
+                            <h3 style={{ fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800', margin: 0 }}>{selectedInquiry.name}</h3>
+                            <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                                <span style={{ padding: '4px 12px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', backgroundColor: selectedInquiry.status === 'unread' ? '#FFEBEE' : selectedInquiry.status === 'responded' ? '#E8F5E9' : '#E3F2FD', color: selectedInquiry.status === 'unread' ? '#F44336' : selectedInquiry.status === 'responded' ? '#4CAF50' : '#2196F3' }}>
+                                    {selectedInquiry.status}
+                                </span>
+                                <span style={{ color: '#90A4AE', fontSize: '13px' }}>{new Date(selectedInquiry.createdAt).toLocaleString()}</span>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+                            <div style={{ background: '#F8F9FA', padding: '15px', borderRadius: '12px' }}>
+                                <p style={{ fontSize: '11px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Email Address</p>
+                                <p style={{ margin: 0, fontWeight: '600', color: 'var(--color-navy)', wordBreak: 'break-all' }}>{selectedInquiry.email}</p>
+                            </div>
+                            <div style={{ background: '#F8F9FA', padding: '15px', borderRadius: '12px' }}>
+                                <p style={{ fontSize: '11px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Phone Number</p>
+                                <p style={{ margin: 0, fontWeight: '600', color: 'var(--color-navy)' }}>{selectedInquiry.phone}</p>
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '40px' }}>
+                            <p style={{ fontSize: '11px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '15px' }}>Message Content</p>
+                            <div style={{ background: '#F8F9FA', padding: '24px', borderRadius: '15px', borderLeft: '4px solid var(--color-gold)', lineHeight: '1.8', color: '#455A64', fontSize: '15px' }}>
+                                {selectedInquiry.message}
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            {selectedInquiry.status !== 'responded' && (
+                                <button 
+                                    onClick={() => handleUpdateInquiryStatus(selectedInquiry._id, 'responded')}
+                                    style={{ flex: 1, backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(76, 175, 80, 0.2)' }}
+                                >
+                                    Mark as Responded
+                                </button>
+                            )}
+                            <button 
+                                onClick={() => window.location.href = `mailto:${selectedInquiry.email}`}
+                                style={{ flex: 1, backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                            >
+                                Reply via Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderContent = () => {
         if (loading) return <div style={{ textAlign: 'center', padding: '100px', color: '#90A4AE' }}>Loading System Data...</div>;
         if (activeTab === 'dashboard') return renderDashboard();
@@ -814,6 +1027,8 @@ const AdminDashboard = () => {
                     .md-hidden { display: none !important; }
                 }
             `}</style>
+            {renderInquiryModal()}
+            {renderSubmissionModal()}
         </div>
     );
 };
@@ -833,5 +1048,9 @@ const actionButtonStyle = { width: '100%', padding: '12px', border: 'none', bord
 
 const tableHeaderStyle = { textAlign: 'left', padding: '12px 15px', fontSize: '10px', color: '#90A4AE', fontWeight: '800', letterSpacing: '1px' };
 const tableCellStyle = { padding: '15px', fontSize: '13px', color: '#455A64' };
+
+const detailBoxStyle = { background: '#F8F9FA', padding: '15px', borderRadius: '12px' };
+const detailLabelStyle = { fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' };
+const detailValueStyle = { margin: 0, fontWeight: '700', color: 'var(--color-navy)' };
 
 export default AdminDashboard;
