@@ -45,6 +45,11 @@ const AdminDashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [selectedInquiry, setSelectedInquiry] = useState(null);
     const [selectedSubmission, setSelectedSubmission] = useState(null);
+    const [adminSettings, setAdminSettings] = useState({
+        newUsername: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -192,6 +197,112 @@ const AdminDashboard = () => {
                 }
             }
         } catch (e) { toast.error('Error updating submission status'); }
+    };
+
+    const handleDeleteInquiry = async (id) => {
+        if (!confirm('Permanently delete this inquiry?')) return;
+        try {
+            const token = localStorage.getItem('adminToken');
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                toast.success('Inquiry Deleted');
+                if (selectedInquiry && selectedInquiry._id === id) setSelectedInquiry(null);
+                fetchData();
+            }
+        } catch (e) { toast.error('Error deleting inquiry'); }
+    };
+
+    const handleDeleteSubmission = async (id) => {
+        if (!confirm('Permanently delete this submission?')) return;
+        try {
+            const token = localStorage.getItem('adminToken');
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/submitted-properties/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                toast.success('Submission Deleted');
+                if (selectedSubmission && selectedSubmission._id === id) setSelectedSubmission(null);
+                fetchData();
+            }
+        } catch (e) { toast.error('Error deleting submission'); }
+    };
+
+    const handleUpdateCredentials = async (e) => {
+        e.preventDefault();
+        
+        if (adminSettings.newPassword && adminSettings.newPassword !== adminSettings.confirmPassword) {
+            toast.error('Passwords do not match');
+            return;
+        }
+
+        if (!adminSettings.newUsername && !adminSettings.newPassword) {
+            toast.error('Please enter at least one field to update');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('adminToken');
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/update-settings`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    newUsername: adminSettings.newUsername,
+                    newPassword: adminSettings.newPassword
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                toast.success(data.message);
+                setAdminSettings({ newUsername: '', newPassword: '', confirmPassword: '' });
+                // If username changed, we might want to log out or update user state
+                if (adminSettings.newUsername) {
+                    toast.success('Username changed. Please note for next login.');
+                }
+            } else {
+                toast.error(data.message || 'Error updating settings');
+            }
+        } catch (e) {
+            toast.error('Error updating settings');
+        }
+    };
+
+    const handleExportInquiries = () => {
+        if (contacts.length === 0) {
+            toast.error('No inquiries to export');
+            return;
+        }
+
+        const headers = ['Name', 'Email', 'Phone', 'Message', 'Status', 'Date'];
+        const csvRows = [
+            headers.join(','),
+            ...contacts.map(c => [
+                `"${c.name}"`,
+                `"${c.email}"`,
+                `"${c.phone}"`,
+                `"${c.message ? c.message.replace(/"/g, '""').replace(/\n/g, ' ') : ''}"`,
+                `"${c.status}"`,
+                `"${new Date(c.createdAt).toLocaleDateString()}"`
+            ].join(','))
+        ];
+
+        const csvContent = csvRows.join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `inquiries_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Inquiries exported successfully');
     };
 
     const sidebarItems = [
@@ -348,7 +459,12 @@ const AdminDashboard = () => {
                                         </td>
                                         <td style={{ ...tableCellStyle, textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <button style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiEye /></button>
+                                                <button 
+                                                    onClick={() => navigate(`/property/${p._id}`)}
+                                                    style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                                >
+                                                    <HiEye />
+                                                </button>
                                                 <button onClick={() => handleDeleteProperty(p._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
                                             </div>
                                         </td>
@@ -421,7 +537,12 @@ const AdminDashboard = () => {
                                         </td>
                                         <td style={{ ...tableCellStyle, textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <button style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiEye /></button>
+                                                <button 
+                                                    onClick={() => navigate(`/investment/${i._id}`)}
+                                                    style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                                >
+                                                    <HiEye />
+                                                </button>
                                                 <button onClick={() => handleDeleteInvestment(i._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
                                             </div>
                                         </td>
@@ -494,7 +615,12 @@ const AdminDashboard = () => {
                                         </td>
                                         <td style={{ ...tableCellStyle, textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <button style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiEye /></button>
+                                                <button 
+                                                    onClick={() => navigate(`/project/${p._id}`)}
+                                                    style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                                >
+                                                    <HiEye />
+                                                </button>
                                                 <button onClick={() => handleDeleteProject(p._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
                                             </div>
                                         </td>
@@ -518,7 +644,12 @@ const AdminDashboard = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2 style={{ color: 'var(--color-navy)', fontSize: '24px', fontWeight: 'bold' }}>Customer Inquiries</h2>
-                    <button style={{ backgroundColor: '#F8F9FA', border: '1px solid #E6E9EF', padding: '8px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '700', color: 'var(--color-navy)', cursor: 'pointer' }}>Export</button>
+                    <button 
+                        onClick={handleExportInquiries}
+                        style={{ backgroundColor: '#F8F9FA', border: '1px solid #E6E9EF', padding: '8px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '700', color: 'var(--color-navy)', cursor: 'pointer' }}
+                    >
+                        Export
+                    </button>
                 </div>
 
                 {/* Inquiry Stats */}
@@ -571,7 +702,13 @@ const AdminDashboard = () => {
                                 <div style={{ padding: '15px', backgroundColor: 'white', borderRadius: '8px', borderLeft: '4px solid var(--color-gold)' }}>
                                     <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64' }}>{contact.message}</p>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                    <button 
+                                        onClick={() => handleDeleteInquiry(contact._id)}
+                                        style={{ backgroundColor: 'white', border: '1px solid #F44336', color: '#F44336', padding: '8px 15px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                    >
+                                        <HiTrash size={14} />
+                                    </button>
                                     <button 
                                         onClick={() => handleViewInquiry(contact)}
                                         style={{ backgroundColor: 'white', border: '1px solid var(--color-gold)', color: 'var(--color-gold)', padding: '8px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
@@ -633,7 +770,13 @@ const AdminDashboard = () => {
                                     <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Price</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-gold)' }}>₹{sub.price?.toLocaleString()}</p></div>
                                     <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Location</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)' }}>{sub.location}</p></div>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                    <button 
+                                        onClick={() => handleDeleteSubmission(sub._id)}
+                                        style={{ backgroundColor: 'white', border: '1px solid #F44336', color: '#F44336', padding: '10px 15px', borderRadius: '10px', fontSize: '13px', fontWeight: '800', cursor: 'pointer' }}
+                                    >
+                                        <HiTrash size={16} />
+                                    </button>
                                     <button 
                                         onClick={() => setSelectedSubmission(sub)}
                                         style={{ backgroundColor: 'white', border: '1px solid var(--color-navy)', color: 'var(--color-navy)', padding: '10px 25px', borderRadius: '10px', fontSize: '13px', fontWeight: '800', cursor: 'pointer', transition: 'all 0.2s' }}
@@ -738,44 +881,59 @@ const AdminDashboard = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
                 <h2 style={{ color: 'var(--color-navy)', fontSize: '24px', fontWeight: 'bold' }}>System Settings</h2>
 
-                {/* General Settings */}
+                {/* General Settings placeholder */}
                 <div style={mainCardStyle}>
                     <h4 style={cardHeaderStyle}>General Settings</h4>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>Company Name</label>
-                            <input type="text" defaultValue="The realty Xperts" style={{ ...tableCellStyle, border: '1px solid #E6E9EF', borderRadius: '10px' }} />
+                            <input type="text" defaultValue="The realty Xperts" style={{ ...inputFieldStyle }} readOnly />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>Contact Email</label>
-                            <input type="email" defaultValue="emailtotrx@gmail.com" style={{ ...tableCellStyle, border: '1px solid #E6E9EF', borderRadius: '10px' }} />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>Phone Number</label>
-                            <input type="text" defaultValue="+91-926-417-5587" style={{ ...tableCellStyle, border: '1px solid #E6E9EF', borderRadius: '10px' }} />
+                            <input type="email" defaultValue="emailtotrx@gmail.com" style={{ ...inputFieldStyle }} readOnly />
                         </div>
                     </div>
-                    <button style={{ ...actionButtonStyle, maxWidth: '200px', backgroundColor: 'var(--color-gold)' }}>Save Changes</button>
                 </div>
 
-                {/* Security Settings */}
+                {/* Admin Accounts Credentials */}
                 <div style={mainCardStyle}>
-                    <h4 style={cardHeaderStyle}>Security Settings</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>Current Password</label>
-                            <input type="password" placeholder="••••••••" style={{ ...tableCellStyle, border: '1px solid #E6E9EF', borderRadius: '10px' }} />
+                    <h4 style={cardHeaderStyle}>Admin Credentials</h4>
+                    <form onSubmit={handleUpdateCredentials} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>New Username</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Enter new username" 
+                                    value={adminSettings.newUsername}
+                                    onChange={(e) => setAdminSettings({...adminSettings, newUsername: e.target.value})}
+                                    style={inputFieldStyle} 
+                                />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>New Password</label>
+                                <input 
+                                    type="password" 
+                                    placeholder="Enter new password" 
+                                    value={adminSettings.newPassword}
+                                    onChange={(e) => setAdminSettings({...adminSettings, newPassword: e.target.value})}
+                                    style={inputFieldStyle} 
+                                />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>Confirm New Password</label>
+                                <input 
+                                    type="password" 
+                                    placeholder="Confirm new password" 
+                                    value={adminSettings.confirmPassword}
+                                    onChange={(e) => setAdminSettings({...adminSettings, confirmPassword: e.target.value})}
+                                    style={inputFieldStyle} 
+                                />
+                            </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>New Password</label>
-                            <input type="password" placeholder="Enter new password" style={{ ...tableCellStyle, border: '1px solid #E6E9EF', borderRadius: '10px' }} />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>Confirm New Password</label>
-                            <input type="password" placeholder="Confirm new password" style={{ ...tableCellStyle, border: '1px solid #E6E9EF', borderRadius: '10px' }} />
-                        </div>
-                    </div>
-                    <button style={{ ...actionButtonStyle, maxWidth: '200px', backgroundColor: 'var(--color-navy)' }}>Update Password</button>
+                        <button type="submit" style={{ ...actionButtonStyle, maxWidth: '200px', backgroundColor: 'var(--color-navy)' }}>Update Credentials</button>
+                    </form>
                 </div>
             </div>
         );
@@ -1052,5 +1210,16 @@ const tableCellStyle = { padding: '15px', fontSize: '13px', color: '#455A64' };
 const detailBoxStyle = { background: '#F8F9FA', padding: '15px', borderRadius: '12px' };
 const detailLabelStyle = { fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' };
 const detailValueStyle = { margin: 0, fontWeight: '700', color: 'var(--color-navy)' };
+
+const inputFieldStyle = {
+    padding: '12px 15px',
+    backgroundColor: '#F8F9FA',
+    border: '1px solid #E6E9EF',
+    borderRadius: '10px',
+    fontSize: '14px',
+    color: '#455A64',
+    outline: 'none',
+    width: '100%'
+};
 
 export default AdminDashboard;

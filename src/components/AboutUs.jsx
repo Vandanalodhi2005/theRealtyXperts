@@ -190,6 +190,81 @@ function About() {
                 </div>
             </section>
 
+            {/* Team Section */}
+            <section className="section-padding" style={{ backgroundColor: '#f8f9fa' }}>
+                <div className="container">
+                    <div className="section-header text-center animate-on-scroll">
+                        <span className="subtitle">OUR CORE TEAM</span>
+                        <h2>Experts Behind Our Success</h2>
+                        <div className="divider mx-auto"></div>
+                    </div>
+
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                        gap: '30px', 
+                        marginTop: '50px',
+                        justifyContent: 'center'
+                    }}>
+                        {/* AGM Card */}
+                        <div className="animate-on-scroll" style={{ 
+                            backgroundColor: 'white', 
+                            borderRadius: 'var(--radius-lg)', 
+                            padding: '50px 30px',
+                            boxShadow: 'var(--shadow-md)',
+                            textAlign: 'center',
+                            borderTop: '5px solid var(--color-gold)',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ 
+                                width: '120px', 
+                                height: '120px', 
+                                borderRadius: '50%', 
+                                backgroundColor: 'rgba(10, 28, 58, 0.05)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                margin: '0 auto 30px',
+                                border: '2px solid rgba(198, 156, 109, 0.2)'
+                            }}>
+                                <i className="fas fa-user-tie" style={{ fontSize: '3.5rem', color: 'var(--color-gold)' }}></i>
+                            </div>
+                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '8px' }}>Mr. Tiwari</h3>
+                            <div style={{ height: '2px', width: '40px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
+                            <p style={{ color: 'var(--color-gold)', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>AGM Manager</p>
+                        </div>
+
+                        {/* HR Card */}
+                        <div className="animate-on-scroll" style={{ 
+                            backgroundColor: 'white', 
+                            borderRadius: 'var(--radius-lg)', 
+                            padding: '50px 30px',
+                            boxShadow: 'var(--shadow-md)',
+                            textAlign: 'center',
+                            borderTop: '5px solid var(--color-gold)',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ 
+                                width: '120px', 
+                                height: '120px', 
+                                borderRadius: '50%', 
+                                backgroundColor: 'rgba(10, 28, 58, 0.05)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                margin: '0 auto 30px',
+                                border: '2px solid rgba(198, 156, 109, 0.2)'
+                            }}>
+                                <i className="fas fa-user-circle" style={{ fontSize: '3.5rem', color: 'var(--color-gold)' }}></i>
+                            </div>
+                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '8px' }}>Mr. Ppragya Tiwari</h3>
+                            <div style={{ height: '2px', width: '40px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
+                            <p style={{ color: 'var(--color-gold)', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>HR Manager</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* The Legacy / Capital Group Inspired Section */}
             <section className="section-padding" style={{ 
                 backgroundImage: "linear-gradient(rgba(10, 28, 58, 0.96), rgba(10, 28, 58, 0.96)), url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=2070&auto=format&fit=crop')",
