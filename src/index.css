@@ -352,6 +352,18 @@ h2 {
     gap: 2rem;
 }
 
+.mobile-menu-toggle {
+    display: none;
+    font-size: 1.5rem;
+    color: var(--color-navy);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.mobile-menu-toggle:hover {
+    color: var(--color-gold);
+}
+
 .nav-links a {
     text-decoration: none;
     color: var(--color-navy);
@@ -1014,6 +1026,24 @@ h2 {
         grid-template-columns: 1fr !important;
     }
     
+    .nav-links a {
+        font-size: 1.2rem;
+        font-weight: 600;
+        width: 100%;
+        text-align: center;
+    }
+
+    .btn-nav-contact {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+}
+
+@media (max-width: 1024px) {
     .navbar {
         padding: 15px 0;
     }
@@ -1041,19 +1071,20 @@ h2 {
 
     .nav-links a {
         font-size: 1.2rem;
-        font-weight: 600;
         width: 100%;
         text-align: center;
     }
 
-    .btn-nav-contact {
-        width: 100%;
-        justify-content: center;
-    }
-    
     .mobile-menu-toggle {
         display: block;
     }
+    
+    .logo-badge {
+        height: 40px;
+    }
+}
+
+@media (max-width: 768px) {
     
     .hero h1 {
         font-size: 2.5rem;

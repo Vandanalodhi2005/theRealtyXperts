@@ -69,7 +69,7 @@ function Contact() {
                                 </div>
                                 <div>
                                     <h3 style={{ fontSize: '1.2rem', marginBottom: '5px' }}>Email Us</h3>
-                                    <a href="mailto:Emailtotrx@gmail.com" style={{ color: 'var(--color-dark-gray)', textDecoration: 'none', fontSize: '1.1rem' }}>Emailtotre@gmail.com</a>
+                                    <a href="mailto:Emailtotrx@gmail.com" style={{ color: 'var(--color-dark-gray)', textDecoration: 'none', fontSize: '1.1rem' }}>Emailtotrx@gmail.com</a>
                                 </div>
                             </div>
 

@@ -257,7 +257,7 @@ function About() {
                             }}>
                                 <i className="fas fa-user-circle" style={{ fontSize: '3.5rem', color: 'var(--color-gold)' }}></i>
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '8px' }}>Mr. Ppragya Tiwari</h3>
+                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '8px' }}>Mr. Pragya Tiwari</h3>
                             <div style={{ height: '2px', width: '40px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
                             <p style={{ color: 'var(--color-gold)', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>HR Manager</p>
                         </div>
