@@ -100,6 +100,7 @@ const AddProjectForm = ({ onCancel, onSuccess }) => {
               <option value="">Select Type</option>
               <option value="residential">Residential</option>
               <option value="commercial">Commercial</option>
+              <option value="investment">Investment</option>
               <option value="mixed">Mixed-use</option>
             </select>
           </div>

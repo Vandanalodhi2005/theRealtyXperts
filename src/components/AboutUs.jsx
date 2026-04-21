@@ -261,6 +261,34 @@ function About() {
                             <div style={{ height: '2px', width: '40px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
                             <p style={{ color: 'var(--color-gold)', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>HR Manager</p>
                         </div>
+
+                        {/* Sales Card */}
+                        <div className="animate-on-scroll" style={{ 
+                            backgroundColor: 'white', 
+                            borderRadius: 'var(--radius-lg)', 
+                            padding: '50px 30px',
+                            boxShadow: 'var(--shadow-md)',
+                            textAlign: 'center',
+                            borderTop: '5px solid var(--color-gold)',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{ 
+                                width: '120px', 
+                                height: '120px', 
+                                borderRadius: '50%', 
+                                backgroundColor: 'rgba(10, 28, 58, 0.05)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                margin: '0 auto 30px',
+                                border: '2px solid rgba(198, 156, 109, 0.2)'
+                            }}>
+                                <i className="fas fa-chart-line" style={{ fontSize: '3.5rem', color: 'var(--color-gold)' }}></i>
+                            </div>
+                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '8px' }}>Mr. Deepak Sharma</h3>
+                            <div style={{ height: '2px', width: '40px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
+                            <p style={{ color: 'var(--color-gold)', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Sales Manager</p>
+                        </div>
                     </div>
                 </div>
             </section>

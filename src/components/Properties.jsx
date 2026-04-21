@@ -71,6 +71,8 @@ const Properties = ({ category = 'all' }) => {
       if (!['apartment', 'villa', 'plot'].includes(property.propertyType)) return false;
     } else if (category === 'commercial') {
       if (property.propertyType !== 'commercial') return false;
+    } else if (category === 'investment') {
+      if (property.propertyType !== 'investment') return false;
     }
 
     // Additional User Filters
@@ -79,6 +81,8 @@ const Properties = ({ category = 'all' }) => {
         if (!['apartment', 'villa', 'plot'].includes(property.propertyType)) return false;
       } else if (filters.category === 'commercial') {
         if (property.propertyType !== 'commercial') return false;
+      } else if (filters.category === 'investment') {
+        if (property.propertyType !== 'investment') return false;
       }
     }
 
@@ -139,6 +143,7 @@ const Properties = ({ category = 'all' }) => {
                 <option value="all">All Categories</option>
                 <option value="residential">Residential</option>
                 <option value="commercial">Commercial</option>
+                <option value="investment">Investment</option>
               </select>
 
               <select
@@ -152,6 +157,7 @@ const Properties = ({ category = 'all' }) => {
                 <option value="villa">Villa</option>
                 <option value="plot">Plot</option>
                 <option value="commercial">Commercial</option>
+                <option value="investment">Investment</option>
               </select>
 
               <select

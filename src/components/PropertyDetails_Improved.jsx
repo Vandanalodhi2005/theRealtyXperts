@@ -1,22 +1,24 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { HiLocationMarker, HiCurrencyRupee, HiArrowLeft, HiPhone, HiCheckCircle, HiExclamation } from 'react-icons/hi';
-import { FaMapMarkerAlt, FaRulerCombined, FaLandmark } from 'react-icons/fa';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { HiArrowLeft, HiLocationMarker, HiCurrencyRupee, HiCheckCircle, HiExclamation, HiPhone, HiHome } from 'react-icons/hi';
+import { FaBed, FaBath, FaRuler, FaDoorOpen } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
-const InvestmentDetails = () => {
+const PropertyDetails = () => {
   const { id } = useParams();
-  const [investment, setInvestment] = useState(null);
+  const navigate = useNavigate();
+  const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
   const [retrying, setRetrying] = useState(false);
 
   useEffect(() => {
-    fetchInvestment();
+    window.scrollTo(0, 0);
+    fetchProperty();
   }, [id]);
 
-  const fetchInvestment = async () => {
+  const fetchProperty = async () => {
     try {
       setError(null);
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -25,7 +27,7 @@ const InvestmentDetails = () => {
         throw new Error('Backend URL not configured');
       }
 
-      const response = await fetch(`${backendUrl}/api/investments/${id}`);
+      const response = await fetch(`${backendUrl}/api/properties/${id}`);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -34,14 +36,14 @@ const InvestmentDetails = () => {
       const data = await response.json();
       
       if (!data || typeof data !== 'object') {
-        throw new Error('Invalid investment data received');
+        throw new Error('Invalid property data received');
       }
 
-      setInvestment(data);
+      setProperty(data);
     } catch (error) {
-      console.error('Error fetching investment:', error);
-      setError(error.message || 'Failed to load investment details');
-      toast.error('Failed to load investment');
+      console.error('Error fetching property:', error);
+      setError(error.message || 'Failed to load property details');
+      toast.error('Failed to load property');
     } finally {
       setLoading(false);
     }
@@ -50,16 +52,25 @@ const InvestmentDetails = () => {
   const handleRetry = async () => {
     setRetrying(true);
     setLoading(true);
-    await fetchInvestment();
+    await fetchProperty();
     setRetrying(false);
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'available': return { bg: '#dcfce7', color: '#16a34a', label: 'Available' };
+      case 'sold': return { bg: '#fee2e2', color: '#dc2626', label: 'Sold' };
+      case 'upcoming': return { bg: '#dbeafe', color: '#0284c7', label: 'Upcoming' };
+      default: return { bg: '#f3f4f6', color: '#374151', label: status };
+    }
   };
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'linear-gradient(to bottom right, #f1f5f9, #ffffff, #f1f5f9)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'linear-gradient(to bottom right, #f1f5f9, #ffffff)' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', height: '64px', width: '64px', border: '4px solid #bfdbfe', borderTop: '4px solid #2563eb', margin: '0 auto 16px' }}></div>
-          <p style={{ color: '#475569', fontWeight: '500' }}>Loading investment details...</p>
+          <p style={{ color: '#475569', fontWeight: '500' }}>Loading property details...</p>
         </div>
       </div>
     );
@@ -67,10 +78,10 @@ const InvestmentDetails = () => {
 
   if (error) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'linear-gradient(to bottom right, #f1f5f9, #ffffff, #f1f5f9)', padding: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'linear-gradient(to bottom right, #f1f5f9, #ffffff)', padding: '16px' }}>
         <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', padding: '32px', maxWidth: '448px', textAlign: 'center' }}>
           <HiExclamation style={{ width: '64px', height: '64px', color: '#ef4444', margin: '0 auto 16px' }} />
-          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', marginBottom: '8px' }}>Error Loading Investment</h2>
+          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', marginBottom: '8px' }}>Error Loading Property</h2>
           <p style={{ color: '#475569', marginBottom: '24px' }}>{error}</p>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
@@ -92,60 +103,85 @@ const InvestmentDetails = () => {
             >
               {retrying ? 'Retrying...' : 'Try Again'}
             </button>
-            <Link to="/investment" style={{
-              flex: 1,
-              border: '2px solid #2563eb',
-              color: '#2563eb',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontWeight: '600',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background 0.3s'
-            }} onMouseEnter={(e) => e.target.style.background = '#eff6ff'} onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+            <button
+              onClick={() => navigate('/properties')}
+              style={{
+                flex: 1,
+                border: '2px solid #2563eb',
+                color: '#2563eb',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontWeight: '600',
+                background: 'transparent',
+                cursor: 'pointer',
+                transition: 'background 0.3s'
+              }}
+              onMouseEnter={(e) => e.target.style.background = '#eff6ff'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}
+            >
               Back
-            </Link>
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!investment) {
+  if (!property) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'linear-gradient(to bottom right, #f1f5f9, #ffffff, #f1f5f9)', padding: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'linear-gradient(to bottom right, #f1f5f9, #ffffff)', padding: '16px' }}>
         <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', padding: '32px', maxWidth: '448px', textAlign: 'center' }}>
           <HiExclamation style={{ width: '64px', height: '64px', color: '#f59e0b', margin: '0 auto 16px' }} />
-          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', marginBottom: '8px' }}>Investment Not Found</h2>
-          <p style={{ color: '#475569', marginBottom: '24px' }}>The investment you're looking for doesn't exist or has been removed.</p>
-          <Link to="/investment" style={{
-            display: 'inline-block',
-            background: '#2563eb',
-            color: 'white',
-            padding: '8px 24px',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontWeight: '600',
-            transition: 'background 0.3s'
-          }}>
-            Back to Investments
-          </Link>
+          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', marginBottom: '8px' }}>Property Not Found</h2>
+          <p style={{ color: '#475569', marginBottom: '24px' }}>The property you're looking for doesn't exist.</p>
+          <button
+            onClick={() => navigate('/properties')}
+            style={{
+              display: 'inline-block',
+              background: '#2563eb',
+              color: 'white',
+              padding: '8px 24px',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontWeight: '600',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'background 0.3s'
+            }}
+          >
+            Back to Properties
+          </button>
         </div>
       </div>
     );
   }
 
+  const statusColor = getStatusColor(property.status);
+
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #f1f5f9, #ffffff, #f1f5f9)' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #f1f5f9, #ffffff)' }}>
       {/* Header */}
       <div style={{ background: 'white', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 40 }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px', paddingLeft: '16px', paddingRight: '16px' }}>
-          <Link to="/investment" style={{ display: 'inline-flex', alignItems: 'center', color: '#475569', textDecoration: 'none', fontWeight: '500', transition: 'color 0.3s' }} onMouseEnter={(e) => e.target.style.color = '#2563eb'} onMouseLeave={(e) => e.target.style.color = '#475569'}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px' }}>
+          <button
+            onClick={() => navigate('/properties')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              color: '#475569',
+              textDecoration: 'none',
+              fontWeight: '500',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'color 0.3s'
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#2563eb'}
+            onMouseLeave={(e) => e.target.style.color = '#475569'}
+          >
             <HiArrowLeft style={{ width: '20px', height: '20px', marginRight: '8px' }} />
-            Back to Investments
-          </Link>
+            Back to Properties
+          </button>
         </div>
       </div>
 
@@ -156,32 +192,31 @@ const InvestmentDetails = () => {
           {/* Image Gallery */}
           <div style={{ gridColumn: 'span 2' }}>
             {/* Main Image */}
-            <div style={{ background: '#cbd5e1', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', transition: 'box-shadow 0.3s' }}>
-              <div style={{ aspectRatio: '16/10', background: 'linear-gradient(to bottom right, #e2e8f0, #cbd5e1)', position: 'relative', overflow: 'hidden' }}>
-                {investment.images && investment.images.length > 0 ? (
+            <div style={{ background: '#cbd5e1', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+              <div style={{ aspectRatio: '16/10', background: '#e2e8f0', position: 'relative', overflow: 'hidden' }}>
+                {property.images && property.images.length > 0 ? (
                   <>
                     <img
-                      src={investment.images[activeImage]}
-                      alt={investment.title}
+                      src={property.images[activeImage]}
+                      alt={property.propertyName}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     <div style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(0, 0, 0, 0.6)', color: 'white', padding: '8px 12px', borderRadius: '9999px', fontSize: '14px', fontWeight: '600' }}>
-                      {activeImage + 1} / {investment.images.length}
+                      {activeImage + 1} / {property.images.length}
                     </div>
                   </>
                 ) : (
-                  <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to bottom right, #f0fdf4, #dcfce7)' }}>
-                    <FaLandmark style={{ width: '80px', height: '80px', color: '#4ade80', marginBottom: '12px' }} />
-                    <p style={{ color: '#16a34a', fontWeight: '600' }}>No images available</p>
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to bottom right, #f0fdf4, #dcfce7)' }}>
+                    <HiHome style={{ width: '80px', height: '80px', color: '#4ade80' }} />
                   </div>
                 )}
               </div>
             </div>
 
             {/* Thumbnails */}
-            {investment.images && investment.images.length > 1 && (
+            {property.images && property.images.length > 1 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', gap: '8px' }}>
-                {investment.images.map((img, index) => (
+                {property.images.map((img, index) => (
                   <button
                     key={index}
                     onClick={() => setActiveImage(index)}
@@ -207,23 +242,19 @@ const InvestmentDetails = () => {
 
           {/* Quick Info Card */}
           <div style={{ gridColumn: 'span 1' }}>
-            {/* Status Badges */}
+            {/* Status & Type */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
               <span style={{
                 padding: '8px 16px',
                 borderRadius: '9999px',
                 fontSize: '12px',
                 fontWeight: 'bold',
-                background: investment.status === 'available' ? 'linear-gradient(to right, #dcfce7, #d1fae5)' :
-                             investment.status === 'upcoming' ? 'linear-gradient(to right, #dbeafe, #bae6fd)' :
-                             'linear-gradient(to right, #fee2e2, #fecaca)',
-                color: investment.status === 'available' ? '#16a34a' :
-                       investment.status === 'upcoming' ? '#0284c7' :
-                       '#dc2626',
+                background: statusColor.bg,
+                color: statusColor.color,
                 display: 'inline-block',
                 width: 'fit-content'
               }}>
-                {investment.status?.toUpperCase() || 'AVAILABLE'}
+                {statusColor.label}
               </span>
               <span style={{
                 padding: '8px 16px',
@@ -237,55 +268,69 @@ const InvestmentDetails = () => {
                 gap: '6px',
                 width: 'fit-content'
               }}>
-                <FaLandmark style={{ width: '12px', height: '12px' }} />
-                {investment.landType || 'Land'}
+                <HiHome style={{ width: '12px', height: '12px' }} />
+                {property.propertyType}
               </span>
             </div>
 
             {/* Title & Location */}
             <div style={{ marginBottom: '24px' }}>
-              <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#0f172a', marginBottom: '8px', lineHeight: '1.25' }}>{investment.title}</h1>
+              <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#0f172a', marginBottom: '8px', lineHeight: '1.25' }}>
+                {property.propertyName || `${property.bedroom} BHK ${property.propertyType}`}
+              </h1>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#475569' }}>
                 <HiLocationMarker style={{ width: '20px', height: '20px', marginTop: '4px', flexShrink: 0, color: '#2563eb' }} />
                 <div>
-                  <p style={{ fontWeight: '600' }}>{investment.location}</p>
-                  <p style={{ fontSize: '14px', color: '#64748b' }}>{investment.city}</p>
+                  <p style={{ fontWeight: '600' }}>{property.location}</p>
+                  <p style={{ fontSize: '14px', color: '#64748b' }}>{property.city}</p>
                 </div>
               </div>
             </div>
 
-            {/* Price & Area Box */}
+            {/* Price Box */}
             <div style={{ background: 'linear-gradient(to bottom right, #eff6ff, #e0f2fe)', border: '1px solid #bfdbfe', borderRadius: '16px', padding: '24px', marginBottom: '24px', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {/* Total Price */}
-                <div style={{ paddingBottom: '16px', borderBottom: '1px solid #bfdbfe' }}>
-                  <p style={{ fontSize: '12px', color: '#475569', fontWeight: 'bold', letterSpacing: '0.1em', marginBottom: '4px', textTransform: 'uppercase' }}>Total Price</p>
+                {/* Price */}
+                <div>
+                  <p style={{ fontSize: '12px', color: '#475569', fontWeight: 'bold', letterSpacing: '0.1em', marginBottom: '4px', textTransform: 'uppercase' }}>Price</p>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                     <HiCurrencyRupee style={{ width: '28px', height: '28px', color: '#2563eb' }} />
                     <p style={{ fontSize: '32px', fontWeight: '900', color: '#1d4ed8' }}>
-                      {investment.totalPrice ? investment.totalPrice.toLocaleString() : 'N/A'}
+                      {property.price ? property.price.toLocaleString() : 'N/A'}
                     </p>
                   </div>
                 </div>
 
-                {/* Land Area */}
-                <div style={{ paddingBottom: '16px', borderBottom: '1px solid #bfdbfe' }}>
-                  <p style={{ fontSize: '12px', color: '#475569', fontWeight: 'bold', letterSpacing: '0.1em', marginBottom: '4px', textTransform: 'uppercase' }}>Land Area</p>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                    <FaRulerCombined style={{ width: '20px', height: '20px', color: '#2563eb' }} />
-                    <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a' }}>
-                      {investment.area ? `${investment.area.toLocaleString()} ${investment.areaUnit || 'sq.ft'}` : 'N/A'}
-                    </p>
-                  </div>
+                {/* Key Details */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', paddingTop: '12px', borderTop: '1px solid #bfdbfe' }}>
+                  {property.bedroom && (
+                    <div>
+                      <p style={{ fontSize: '12px', color: '#475569', fontWeight: 'bold', marginBottom: '4px' }}>Bedrooms</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <FaBed style={{ width: '16px', height: '16px', color: '#2563eb' }} />
+                        <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a' }}>{property.bedroom}</p>
+                      </div>
+                    </div>
+                  )}
+                  {property.bathroom && (
+                    <div>
+                      <p style={{ fontSize: '12px', color: '#475569', fontWeight: 'bold', marginBottom: '4px' }}>Bathrooms</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <FaBath style={{ width: '16px', height: '16px', color: '#2563eb' }} />
+                        <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a' }}>{property.bathroom}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Price Per Unit */}
-                {investment.pricePerUnit && (
-                  <div>
-                    <p style={{ fontSize: '12px', color: '#475569', fontWeight: 'bold', letterSpacing: '0.1em', marginBottom: '4px', textTransform: 'uppercase' }}>Price Per sq.ft</p>
-                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#1d4ed8' }}>
-                      ₹{investment.pricePerUnit.toLocaleString()}/sq.ft
-                    </p>
+                {/* Area */}
+                {property.area && (
+                  <div style={{ paddingTop: '12px', borderTop: '1px solid #bfdbfe' }}>
+                    <p style={{ fontSize: '12px', color: '#475569', fontWeight: 'bold', marginBottom: '4px' }}>Built Area</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <FaRuler style={{ width: '16px', height: '16px', color: '#2563eb' }} />
+                      <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a' }}>{property.area.toLocaleString()} sq.ft</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -294,7 +339,7 @@ const InvestmentDetails = () => {
             {/* CTA Buttons */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <a
-                href="tel:+919406650197"
+                href={`tel:+919406650197`}
                 style={{
                   width: '100%',
                   background: 'linear-gradient(to right, #2563eb, #1d4ed8)',
@@ -318,7 +363,7 @@ const InvestmentDetails = () => {
                 Call Now
               </a>
               <a
-                href="https://wa.me/919406650197?text=Hi%20I%20am%20interested%20in%20this%20investment"
+                href={`https://wa.me/919406650197?text=Hi%20I%20am%20interested%20in%20this%20property:%20${property.propertyName}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -366,53 +411,32 @@ const InvestmentDetails = () => {
           <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '32px' }}>
             
             {/* Description */}
-            {investment.description && (
+            {property.description && (
               <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }}>
                 <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{ width: '4px', height: '32px', background: '#2563eb', borderRadius: '9999px' }}></div>
-                  About This Investment
+                  About This Property
                 </h3>
-                <p style={{ color: '#475569', lineHeight: '1.6', fontSize: '18px', whiteSpace: 'pre-wrap' }}>
-                  {investment.description}
+                <p style={{ color: '#475569', lineHeight: '1.6', fontSize: '16px', whiteSpace: 'pre-wrap' }}>
+                  {property.description}
                 </p>
               </div>
             )}
 
-            {/* Key Highlights */}
-            {investment.highlights && investment.highlights.length > 0 && (
+            {/* Amenities */}
+            {property.amenities && property.amenities.length > 0 && (
               <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }}>
                 <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{ width: '4px', height: '32px', background: '#16a34a', borderRadius: '9999px' }}></div>
-                  Key Highlights
+                  Amenities & Features
                 </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                  {investment.highlights.map((h, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #86efac' }}>
-                      <HiCheckCircle style={{ width: '20px', height: '20px', color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
-                      <span style={{ color: '#1f2937', fontWeight: '500' }}>{h}</span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                  {property.amenities.map((amenity, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #86efac' }}>
+                      <HiCheckCircle style={{ width: '20px', height: '20px', color: '#16a34a', flexShrink: 0 }} />
+                      <span style={{ color: '#1f2937', fontWeight: '500' }}>{amenity}</span>
                     </div>
                   ))}
-                </div>
-              </div>
-            )}
-
-            {/* Nearby Places */}
-            {investment.nearbyPlaces && (
-              <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }}>
-                <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '4px', height: '32px', background: '#a855f7', borderRadius: '9999px' }}></div>
-                  Nearby Places & Landmarks
-                </h3>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {typeof investment.nearbyPlaces === 'string' 
-                    ? investment.nearbyPlaces.split(',').map((place, i) => (
-                        <span key={i} style={{ padding: '8px 16px', background: '#f3e8ff', color: '#9333ea', borderRadius: '9999px', fontSize: '14px', fontWeight: '600', border: '1px solid #e9d5ff', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <FaMapMarkerAlt style={{ width: '14px', height: '14px' }} />
-                          {place.trim()}
-                        </span>
-                      ))
-                    : <span style={{ color: '#475569' }}>{investment.nearbyPlaces}</span>
-                  }
                 </div>
               </div>
             )}
@@ -422,26 +446,30 @@ const InvestmentDetails = () => {
           {/* Side Info */}
           <div style={{ gridColumn: 'span 1' }}>
             <div style={{ background: 'linear-gradient(to bottom right, #f9fafb, #f3f4f6)', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', border: '1px solid #e5e7eb', position: 'sticky', top: '100px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>Investment Summary</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>Property Summary</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0', fontSize: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
-                  <span style={{ color: '#475569' }}>Status</span>
-                  <span style={{ fontWeight: 'bold', color: '#0f172a', textTransform: 'capitalize' }}>{investment.status || 'Available'}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
-                  <span style={{ color: '#475569' }}>Land Type</span>
-                  <span style={{ fontWeight: 'bold', color: '#0f172a', textTransform: 'capitalize' }}>{investment.landType || 'N/A'}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
-                  <span style={{ color: '#475569' }}>Location</span>
-                  <span style={{ fontWeight: 'bold', color: '#0f172a' }}>{investment.city || 'N/A'}</span>
-                </div>
-                {investment.totalPrice && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-                    <span style={{ color: '#475569' }}>Total Investment</span>
-                    <span style={{ fontWeight: 'bold', color: '#2563eb' }}>₹{(investment.totalPrice / 10000000).toFixed(1)}Cr</span>
+                {property.bedroom && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
+                    <span style={{ color: '#475569' }}>Bedrooms</span>
+                    <span style={{ fontWeight: 'bold', color: '#0f172a' }}>{property.bedroom}</span>
                   </div>
                 )}
+                {property.bathroom && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
+                    <span style={{ color: '#475569' }}>Bathrooms</span>
+                    <span style={{ fontWeight: 'bold', color: '#0f172a' }}>{property.bathroom}</span>
+                  </div>
+                )}
+                {property.area && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
+                    <span style={{ color: '#475569' }}>Built Area</span>
+                    <span style={{ fontWeight: 'bold', color: '#0f172a' }}>{property.area.toLocaleString()} sq.ft</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
+                  <span style={{ color: '#475569' }}>Status</span>
+                  <span style={{ fontWeight: 'bold', color: '#0f172a', textTransform: 'capitalize' }}>{property.status}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -451,4 +479,4 @@ const InvestmentDetails = () => {
   );
 };
 
-export default InvestmentDetails;
+export default PropertyDetails;

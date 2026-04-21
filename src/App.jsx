@@ -65,7 +65,10 @@ function App() {
         <Route path="/investment" element={<UserLayout><Investment /></UserLayout>} />
         <Route path="/investment/:id" element={<UserLayout><InvestmentDetails /></UserLayout>} />
         <Route path="/property/:id" element={<UserLayout><PropertyDetails /></UserLayout>} />
-        <Route path="/projects" element={<UserLayout><Projects /></UserLayout>} />
+        <Route path="/projects" element={<UserLayout><Projects type="all" /></UserLayout>} />
+        <Route path="/projects/residential" element={<UserLayout><Projects type="residential" /></UserLayout>} />
+        <Route path="/projects/commercial" element={<UserLayout><Projects type="commercial" /></UserLayout>} />
+        <Route path="/projects/investment" element={<UserLayout><Projects type="investment" /></UserLayout>} />
         <Route path="/project/:id" element={<UserLayout><ProjectDetails /></UserLayout>} />
         <Route path="/gallery" element={<UserLayout><Gallery /></UserLayout>} />
         <Route path="/submit-property" element={<UserLayout><SubmitProperty /></UserLayout>} />

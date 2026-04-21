@@ -141,10 +141,11 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
               <label style={labelStyle}>Property Type *</label>
               <select name="propertyType" value={formData.propertyType} onChange={handleInputChange} style={inputStyle} required>
                 <option value="">Select Type</option>
-                <option value="apartment">Apartment</option>
-                <option value="villa">Villa</option>
-                <option value="plot">Plot</option>
-                <option value="commercial">Commercial</option>
+                 <option value="apartment">Apartment</option>
+                 <option value="villa">Villa</option>
+                 <option value="plot">Plot</option>
+                 <option value="commercial">Commercial</option>
+                 <option value="investment">Investment</option>
               </select>
             </div>
             <div style={inputGroupStyle}>

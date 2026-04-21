@@ -2,18 +2,22 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropertyCard from './PropertyCard';
 
-const Projects = () => {
+const Projects = ({ type = 'all' }) => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [type]);
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects`);
+      const url = type && type !== 'all' 
+        ? `${import.meta.env.VITE_BACKEND_URL}/api/projects?type=${type}`
+        : `${import.meta.env.VITE_BACKEND_URL}/api/projects`;
+        
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setProjects(data);
@@ -60,7 +64,7 @@ const Projects = () => {
           {/* Header */}
           <div className="section-header text-center fade-in-up">
             <span className="subtitle">Signature Portfolio</span>
-            <h2>Our Projects</h2>
+            <h2 className="capitalize">{type !== 'all' ? `${type} Projects` : 'Our Projects'}</h2>
             <div className="divider mx-auto"></div>
             <p className="section-desc">
               Discover our premium residential and commercial projects elegantly designed to meet your discerning lifestyle needs.
