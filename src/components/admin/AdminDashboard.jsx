@@ -70,7 +70,10 @@ const AdminDashboard = () => {
             if (dashRes.ok) setDashboardData((await dashRes.json()).data);
             if (propRes.ok) setProperties(await propRes.json());
             if (contactRes.ok) setContacts(await contactRes.json());
-            if (investRes.ok) setInvestments(await investRes.json());
+            if (investRes.ok) {
+                const resData = await investRes.json();
+                setInvestments(resData.data || resData);
+            }
             if (projectRes.ok) setProjects(await projectRes.json());
             if (subRes.ok) setSubmissions(await subRes.json());
             if (galleryRes.ok) setGallery(await galleryRes.json());

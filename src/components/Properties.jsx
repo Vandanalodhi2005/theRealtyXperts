@@ -78,11 +78,17 @@ const Properties = ({ category = 'all' }) => {
     // Additional User Filters
     if (filters.category !== 'all') {
       if (filters.category === 'residential') {
-        if (!['apartment', 'villa', 'plot'].includes(property.propertyType)) return false;
+        const isResProp = ['apartment', 'villa', 'plot'].includes(property.propertyType);
+        const isResProj = property.type === 'residential';
+        if (!isResProp && !isResProj) return false;
       } else if (filters.category === 'commercial') {
-        if (property.propertyType !== 'commercial') return false;
+        const isCommProp = property.propertyType === 'commercial';
+        const isCommProj = property.type === 'commercial';
+        if (!isCommProp && !isCommProj) return false;
       } else if (filters.category === 'investment') {
-        if (property.propertyType !== 'investment') return false;
+        const isInvProp = property.propertyType === 'investment';
+        const isInvProj = property.type === 'investment';
+        if (!isInvProp && !isInvProj) return false;
       }
     }
 

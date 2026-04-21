@@ -16,7 +16,7 @@ const Investment = () => {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments`);
       if (response.ok) {
         const data = await response.json();
-        setInvestments(data);
+        setInvestments(data.data || data);
       }
     } catch (error) {
       console.error('Error fetching investments:', error);
