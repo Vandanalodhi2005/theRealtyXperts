@@ -1117,6 +1117,7 @@ const AdminDashboard = () => {
         <div style={{ minHeight: '100vh', backgroundColor: '#F8F9FB', display: 'flex', flexDirection: 'column' }}>
             {/* Header */}
             <header style={{ height: '70px', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', borderBottom: '1px solid #E6E9EF', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+               
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <button 
                         className="md-hidden"
@@ -1125,7 +1126,7 @@ const AdminDashboard = () => {
                     >
                         <HiMenu size={24} />
                     </button>
-                    <span style={{ fontWeight: '800', color: 'var(--color-navy)', fontSize: '18px', letterSpacing: '-0.5px' }}>THE REALTY XPERTS</span>
+                   <Link to="/"> <span style={{ fontWeight: '800', color: 'var(--color-navy)', fontSize: '18px', letterSpacing: '-0.5px' }}>THE REALTY XPERTS</span></Link>
                     <span className="lg-visible" style={{ color: '#90A4AE', fontSize: '13px', marginLeft: '10px', paddingLeft: '10px', borderLeft: '1px solid #EEE' }}>Admin Portal</span>
                 </div>
                 <button 

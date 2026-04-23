@@ -21,23 +21,29 @@ const Properties = ({ category = 'all' }) => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const navigate = useNavigate();
 
-  const fetchProperties = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`);
-      if (response.ok) {
-        const data = await response.json();
-        setProperties(data);
-      }
+      const [propsRes, projsRes] = await Promise.all([
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`),
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects`)
+      ]);
+
+      const propsData = propsRes.ok ? await propsRes.json() : [];
+      const projsData = projsRes.ok ? await projsRes.json() : [];
+
+      // Combine both with a flag to identify projects if needed
+      // but PropertyCard handles both based on field existence
+      setProperties([...propsData, ...projsData]);
     } catch (error) {
-      console.error('Error fetching properties:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchProperties();
-  }, [fetchProperties]);
+    fetchData();
+  }, [fetchData]);
 
   const handleFilterChange = (e) => {
     setFilters({
@@ -68,11 +74,17 @@ const Properties = ({ category = 'all' }) => {
   const filteredProperties = properties.filter(property => {
     // Filter by route category
     if (category === 'residential') {
-      if (!['apartment', 'villa', 'plot'].includes(property.propertyType)) return false;
+      const isResProp = ['apartment', 'villa', 'plot'].includes(property.propertyType);
+      const isResProj = property.type === 'residential';
+      if (!isResProp && !isResProj) return false;
     } else if (category === 'commercial') {
-      if (property.propertyType !== 'commercial') return false;
+      const isCommProp = property.propertyType === 'commercial';
+      const isCommProj = property.type === 'commercial';
+      if (!isCommProp && !isCommProj) return false;
     } else if (category === 'investment') {
-      if (property.propertyType !== 'investment') return false;
+      const isInvProp = property.propertyType === 'investment';
+      const isInvProj = property.type === 'investment';
+      if (!isInvProp && !isInvProj) return false;
     }
 
     // Additional User Filters

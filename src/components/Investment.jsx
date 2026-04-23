@@ -8,16 +8,21 @@ const Investment = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchInvestments();
+    fetchData();
   }, []);
 
-  const fetchInvestments = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments`);
-      if (response.ok) {
-        const data = await response.json();
-        setInvestments(data.data || data);
-      }
+      const [invRes, projRes] = await Promise.all([
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments`),
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects?type=investment`)
+      ]);
+
+      const invData = invRes.ok ? await invRes.json() : [];
+      const projData = projRes.ok ? await projRes.json() : [];
+
+      const combined = [...(invData.data || invData), ...projData];
+      setInvestments(combined);
     } catch (error) {
       console.error('Error fetching investments:', error);
     } finally {
