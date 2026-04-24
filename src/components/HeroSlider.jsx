@@ -80,10 +80,11 @@ const HeroSlider = () => {
               </p>
               <button
                 onClick={() => navigate(slide.link)}
-                className="bg-blue-500 text-slate-900 px-8 py-4 rounded-lg font-bold hover:bg-blue-400 transition-all duration-300 flex items-center gap-2 shadow-xl hover:shadow-blue-500/20 hover:-translate-y-1"
+                className="group/btn relative inline-flex items-center gap-3 bg-[#C69C6D] text-[#0A1C3A] px-10 py-5 rounded-full font-black text-xs uppercase tracking-[0.3em] overflow-hidden transition-all duration-500 hover:bg-[#0A1C3A] hover:text-white hover:shadow-[0_15px_40px_rgba(198,156,109,0.4)] hover:-translate-y-1 active:scale-95"
               >
-                {slide.buttonText}
-                <HiArrowRight className="w-5 h-5" />
+                <span className="relative z-10">{slide.buttonText}</span>
+                <HiArrowRight className="relative z-10 w-5 h-5 transition-transform duration-500 group-hover/btn:translate-x-2" />
+                <div className="absolute inset-0 bg-[#0A1C3A] translate-y-full transition-transform duration-500 group-hover/btn:translate-y-0" />
               </button>
             </div>
           </div>

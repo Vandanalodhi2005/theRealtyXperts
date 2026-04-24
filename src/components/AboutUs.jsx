@@ -135,30 +135,31 @@ function About() {
                 <div className="container">
                     <div className="about-highlights-grid" style={{ gridTemplateColumns: 'minmax(0, 0.8fr) minmax(0, 1.2fr)' }}>
                         <div className="animate-on-scroll">
-                            <div style={{ position: 'relative' }}>
+                              <div style={{ position: 'relative' }}>
                                 <div style={{ 
                                     borderRadius: 'var(--radius-lg)', 
                                     overflow: 'hidden', 
-                                    boxShadow: 'var(--shadow-lg)'
+                                    boxShadow: 'var(--shadow-lg)',
+                                    height: window.innerWidth < 768 ? '400px' : '550px'
                                 }}>
-                                    <img src="/about/owner.jpeg" alt="Mr. Sanjeev Kumar" style={{ width: '100%', height: '550px', objectFit: 'cover', display: 'block' }} />
+                                    <img src="/about/owner.jpeg" alt="Mr. Sanjeev Kumar" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                                 </div>
                                 <div style={{
                                     position: 'absolute',
-                                    bottom: '30px',
-                                    left: '30px',
-                                    right: '30px',
+                                    bottom: '20px',
+                                    left: '20px',
+                                    right: '20px',
                                     backgroundColor: 'rgba(10, 28, 58, 0.95)',
-                                    padding: '20px',
+                                    padding: '15px',
                                     borderRadius: 'var(--radius-md)',
                                     color: 'white',
                                     textAlign: 'center',
                                     backdropFilter: 'blur(5px)'
                                 }}>
-                                    <h3 style={{ fontSize: '1.4rem',color: 'white', marginBottom: '2px' }}>Mr. Sanjeev Kumar</h3>
-                                    <p style={{ color: 'var(--color-gold)', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase' }}>CMD, The Realty Xperts</p>
+                                    <h3 style={{ fontSize: '1.2rem',color: 'white', marginBottom: '2px' }}>Mr. Sanjeev Kumar</h3>
+                                    <p style={{ color: 'var(--color-gold)', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase' }}>CMD, The Realty Xperts</p>
                                 </div>
-                            </div>
+                              </div>
                         </div>
 
                         <div className="animate-on-scroll">

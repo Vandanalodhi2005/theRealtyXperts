@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import PropertyCard from './PropertyCard';
+import HeroSlider from './HeroSlider';
 
 function Home() {
     const navigate = useNavigate();
 
+    const [activeTab, setActiveTab] = useState('residential');
     const [categories, setCategories] = useState({
         residential: [],
         commercial: [],
@@ -44,15 +47,30 @@ function Home() {
                 const projs = projsRes.ok ? await projsRes.json() : [];
                 const invs = invsRes.ok ? await invsRes.json() : [];
 
+                // Combine Residential properties and projects
+                const resData = [
+                    ...props.filter(p => p.propertyType === 'apartment' || p.propertyType === 'villa'),
+                    ...projs.filter(p => p.type === 'residential')
+                ];
+
+                // Combine Commercial properties and projects
+                const commData = [
+                    ...props.filter(p => p.propertyType === 'commercial' || p.propertyType === 'plot'),
+                    ...projs.filter(p => p.type === 'commercial')
+                ];
+
+                // Combine Investment properties, projects, and investments
+                const investData = [
+                    ...props.filter(p => p.propertyType === 'investment'),
+                    ...projs.filter(p => p.type === 'investment'),
+                    ...invs
+                ];
+
                 setCategories({
-                    residential: props.filter(p =>
-                        p.propertyType === 'apartment' || p.propertyType === 'villa'
-                    ).slice(0, 4),
-                    commercial: props.filter(p =>
-                        p.propertyType === 'commercial' || p.propertyType === 'plot'
-                    ).slice(0, 4),
-                    projects: projs.slice(0, 4),
-                    investments: invs.slice(0, 4)
+                    residential: resData.slice(0, 4),
+                    commercial: commData.slice(0, 4),
+                    investments: investData.slice(0, 4),
+                    projects: projs.slice(0, 4) // Keep general projects tab too
                 });
             } catch (err) {
                 console.error("Home data fetch error:", err);
@@ -78,43 +96,7 @@ function Home() {
         }, 800);
     };
 
-    const PropertyCard = ({ item }) => {
-        // Determine Link based on type
-        const linkBase = item.landType ? 'investment' : (item.type && !item.propertyType) ? 'project' : 'property';
-        const linkPath = `/${linkBase}/${item._id}`;
-
-        return (
-            <div className="property-card">
-                <div className="card-img-wrapper">
-                    <div className="status-badge" style={{ backgroundColor: 'var(--color-gold)', textTransform: 'capitalize' }}>
-                        {item.status?.replace(/-/g, ' ') || 'Available'}
-                    </div>
-                    <img
-                        src={item.images?.[0] || `/assets/images/property_1.png`}
-                        alt={item.title || item.propertyName}
-                        className="card-img"
-                        onError={(e) => { e.target.src = '/assets/images/property_1.png' }}
-                    />
-                    <div className="price-tag">₹ {item.price?.toLocaleString() || item.totalPrice?.toLocaleString() || 'Price on Request'}</div>
-                </div>
-                <div className="card-content">
-                    <h3 className="line-clamp-1">{item.propertyName || item.title || "Premium Property"}</h3>
-                    <p className="location line-clamp-1">
-                        <i className="fas fa-map-marker-alt"></i> {item.location} {item.city ? `, ${item.city}` : ''}
-                    </p>
-                    <div className="card-amenities">
-                        {item.bedroom && <span><i className="fas fa-bed"></i> {item.bedroom} Bed</span>}
-                        {item.area && <span><i className="fas fa-vector-square"></i> {item.area} {item.areaUnit || 'sq.ft'}</span>}
-                    </div>
-                </div>
-                <div className="card-footer">
-                    <Link to={linkPath} className="btn btn-outline-primary btn-full">View Details</Link>
-                </div>
-            </div>
-        );
-    };
-
-    const CategorySection = ({ title, subtitle, data, link, dark = false }) => {
+    const CategorySection = ({ title, subtitle, data, link, dark = false, description }) => {
         if (!data || data.length === 0) return null;
 
         return (
@@ -124,11 +106,12 @@ function Home() {
                         <span className="subtitle">{subtitle}</span>
                         <h2>{title}</h2>
                         <div className="divider mx-auto"></div>
+                        {description && <p className="section-desc">{description}</p>}
                     </div>
 
                     <div className="property-grid">
                         {data.map((item, idx) => (
-                            <PropertyCard key={item.id || idx} item={item} />
+                            <PropertyCard key={item._id || idx} property={item} />
                         ))}
                     </div>
 
@@ -142,64 +125,94 @@ function Home() {
 
     return (
         <main>
-            <section className="hero" id="home">
-                <div className="hero-overlay"></div>
-                <div className="container hero-content">
-                    <h1 className="fade-in-up">Where Dreams <br /> Meet Addresses</h1>
-                    <p className="fade-in-up delay-1">Premium real estate services. Established in 2016.</p>
+            <HeroSlider />
 
-                    <div className="search-bar-container fade-in-up delay-2">
-                        <form className="search-form" onSubmit={handleSearchSubmit}>
-                            <div className="search-input">
-                                <i className="fas fa-search"></i>
-                                <input type="text" placeholder="Search by location, property type..." />
+            {/* Visual Category Navigation - 'Shop' Card Presentation */}
+            <section className="section-padding bg-white" id="category-navigation">
+                <div className="container">
+                    <div className="section-header text-center">
+                        <span className="subtitle">Our Expertise</span>
+                        <h2>Shop By Category</h2>
+                        <div className="divider mx-auto"></div>
+                    </div>
+
+                    <div className="category-card-grid">
+                        {[
+                            { id: 'residential', label: 'Residential', icon: 'fa-home', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070' },
+                            { id: 'projects', label: 'Signature Projects', icon: 'fa-building', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070' },
+                            { id: 'commercial', label: 'Commercial & Land', icon: 'fa-city', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069' },
+                            { id: 'investments', label: 'Investment Assets', icon: 'fa-chart-line', img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073' }
+                        ].map(cat => (
+                            <div 
+                                key={cat.id} 
+                                className={`category-nav-card ${activeTab === cat.id ? 'active' : ''}`}
+                                onClick={() => setActiveTab(cat.id)}
+                            >
+                                <div className="cat-card-overlay"></div>
+                                <img src={cat.img} alt={cat.label} className="cat-card-img" />
+                                <div className="cat-card-content">
+                                    <i className={`fas ${cat.icon}`}></i>
+                                    <h3>{cat.label}</h3>
+                                    <span className="cat-card-btn">View Collection</span>
+                                </div>
                             </div>
-                            <div className="search-divider"></div>
-                            <div className="search-select">
-                                <select defaultValue="">
-                                    <option value="" disabled>Property Type</option>
-                                    <option value="residential">Residential</option>
-                                    <option value="commercial">Commercial</option>
-                                    <option value="land">Land/Plots</option>
-                                </select>
-                            </div>
-                            <button type="submit" className="btn btn-secondary search-btn">Search Property</button>
-                        </form>
+                        ))}
+                    </div>
+
+                    {/* Dynamic Property Grid (The 'Shop' View) */}
+                    <div className="property-grid animate-fade-in" key={activeTab} style={{ marginTop: '60px' }}>
+                        {categories[activeTab]?.slice(0, 4).map((item, idx) => (
+                            <PropertyCard key={item._id || idx} property={item} />
+                        ))}
+                    </div>
+
+                    <div style={{ textAlign: 'center', marginTop: '50px' }}>
+                        <Link 
+                            to={activeTab === 'investments' ? '/investment' : `/${activeTab}`} 
+                            className="btn btn-primary" 
+                            style={{ padding: '14px 50px', borderRadius: '50px', boxShadow: 'var(--shadow-md)' }}
+                        >
+                            Explore All {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} <i className="fas fa-arrow-right" style={{ marginLeft: '10px' }}></i>
+                        </Link>
                     </div>
                 </div>
             </section>
 
             {/* Residential Section */}
             <CategorySection
-                title="Premium Residential"
+                title="Residential Properties"
                 subtitle="Luxury Living"
                 data={categories.residential}
                 link="/residential"
                 dark={true}
+                description="Discover your perfect property from our extensive collection of residential spaces defined by excellence."
             />
 
             <CategorySection
                 title="Upcoming Projects"
-                subtitle="Future Developments"
+                subtitle="Signature Portfolio"
                 data={categories.projects}
                 link="/projects"
+                description="Discover our premium residential and commercial projects elegantly designed to meet your discerning lifestyle needs."
             />
 
             {/* Commercial Section */}
             <CategorySection
-                title="Commercial & Land"
+                title="Commercial Properties"
                 subtitle="Prime Business Locations"
                 data={categories.commercial}
                 link="/commercial"
                 dark={true}
+                description="Explore prime commercial locations and plots designed for business growth and strategic investment."
             />
 
             {/* Investments Section */}
             <CategorySection
-                title="Investments"
-                subtitle="Agricultural & Plots"
+                title="Investment Opportunities"
+                subtitle="High Yield Assets"
                 data={categories.investments}
                 link="/investment"
+                description="Curated premium assets and commercial spaces designed to deliver exceptional returns and long-term capital appreciation."
             />
 
             {/* About TRX Section */}

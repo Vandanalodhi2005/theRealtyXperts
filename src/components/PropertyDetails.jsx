@@ -1,173 +1,20 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { HiArrowLeft, HiLocationMarker, HiCurrencyRupee, HiHome, HiOfficeBuilding, HiMail, HiPhone, HiSparkles, HiShieldCheck, HiOutlineVariable, HiArrowSmRight } from 'react-icons/hi';
-import PropTypes from 'prop-types';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import PropertyCard from './PropertyCard';
-
-// Inquiry Modal Component
-const InquiryModal = ({ property, onClose, onSubmit }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: `I am interested in this ${property?.propertyType} in ${property?.location}, ${property?.city}. Please provide more details.`
-  });
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      await onSubmit(formData);
-      toast.success('Inquiry sent successfully! We will contact you soon.');
-      onClose();
-    } catch (error) {
-      toast.error('Failed to send inquiry. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  return (
-    <div className="fixed inset-0 bg-navy/95 backdrop-blur-xl flex items-center justify-center z-[1000] p-6 animate-in fade-in duration-500">
-      <div className="bg-white rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.3)] max-w-xl w-full max-h-[90vh] overflow-y-auto border border-white/20">
-        <div className="p-10 md:p-14">
-          <div className="text-center mb-10">
-            <span className="subtitle" style={{ fontSize: '0.65rem', color: 'var(--color-gold)' }}>VIP CONSULTATION</span>
-            <h2 className="text-4xl font-black text-navy mt-4" style={{ color: 'var(--color-navy)' }}>Direct Inquiry</h2>
-            <div className="w-12 h-1 bg-gold mx-auto mt-4 rounded-full" style={{ backgroundColor: 'var(--color-gold)' }}></div>
-          </div>
-          
-          <div className="mb-10 p-8 bg-slate-50 rounded-[2rem] border border-slate-100 flex gap-6 items-center">
-             <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden flex-shrink-0 border-4 border-white shadow-lg">
-                <img src={property?.images?.[0]} alt="Property" className="w-full h-full object-cover" />
-             </div>
-             <div>
-                <h3 className="font-black text-navy text-base leading-tight" style={{ color: 'var(--color-navy)' }}>{property?.propertyName || `${property?.bedroom} BHK ${property?.propertyType}`}</h3>
-                <p className="text-xs text-slate-400 font-bold mt-1">{property?.location}, {property?.city}</p>
-                <p className="text-xl font-black text-gold mt-2" style={{ color: 'var(--color-gold)' }}>₹{property?.price?.toLocaleString()}</p>
-             </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div>
-                  <label className="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3 ml-2">Full Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all font-medium text-navy"
-                    required
-                  />
-               </div>
-               <div>
-                  <label className="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3 ml-2">Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all font-medium text-navy"
-                    required
-                  />
-               </div>
-            </div>
-
-            <div>
-              <label className="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3 ml-2">Email Identity</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all font-medium text-navy"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3 ml-2">Personal Message</label>
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleInputChange}
-                rows={3}
-                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all font-medium text-navy"
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 pt-8">
-              <button
-                type="button"
-                onClick={onClose}
-                className="order-2 sm:order-1 flex-1 px-8 py-5 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-red-500 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="order-1 sm:order-2 flex-[2] px-8 py-5 bg-navy text-white rounded-2xl hover:bg-gold transition-all duration-500 font-black text-xs uppercase tracking-[0.3em] shadow-2xl disabled:opacity-50"
-                style={{ backgroundColor: 'var(--color-navy)' }}
-              >
-                {loading ? 'Transmitting...' : 'Send Inquiry'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-InquiryModal.propTypes = {
-  property: PropTypes.object.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-};
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showInquiryModal, setShowInquiryModal] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [activeImage, setActiveImage] = useState(0);
   const [relatedProperties, setRelatedProperties] = useState([]);
-  const [relatedLoading, setRelatedLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchProperty();
   }, [id]);
-
-  useEffect(() => {
-    if (property) {
-      window.scrollTo(0, 0);
-      const observerOptions = { threshold: 0.1 };
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('fade-in-up');
-            entry.target.style.opacity = '1';
-          }
-        });
-      }, observerOptions);
-
-      document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-      return () => observer.disconnect();
-    }
-  }, [property]);
 
   const fetchProperty = async () => {
     try {
@@ -178,7 +25,7 @@ const PropertyDetails = () => {
         fetchRelatedProperties(data);
       } else {
         toast.error('Property not found');
-        navigate('/');
+        navigate('/properties');
       }
     } catch (error) {
       console.error('Error fetching property:', error);
@@ -201,336 +48,413 @@ const PropertyDetails = () => {
       }
     } catch (error) {
       console.error('Error fetching related properties:', error);
-    } finally {
-      setRelatedLoading(false);
     }
   };
 
-  const handleInquirySubmit = async (inquiryData) => {
-    const inquiryPayload = {
-      ...inquiryData,
-      propertyId: property._id,
-      propertyTitle: property.propertyName || `${property.bedroom} BHK ${property.propertyType}`
-    };
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'available': return { bg: '#ECFDF5', color: '#059669', border: '#A7F3D0' };
+      case 'sold': return { bg: '#FEF2F2', color: '#DC2626', border: '#FECACA' };
+      case 'rented': return { bg: '#EFF6FF', color: '#2563EB', border: '#BFDBFE' };
+      default: return { bg: '#F8FAFC', color: '#64748B', border: '#E2E8F0' };
+    }
+  };
 
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(inquiryPayload),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to send inquiry');
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'available': return 'Available';
+      case 'sold': return 'Sold Out';
+      case 'rented': return 'Rented';
+      default: return status;
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center" style={{ backgroundColor: 'var(--color-navy)' }}>
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-gold border-t-transparent animate-spin rounded-full mx-auto mb-6" style={{ borderColor: 'rgba(198, 156, 109, 0.2)', borderTopColor: 'var(--color-gold)' }}></div>
-          <p className="text-white/50 uppercase tracking-[0.4em] text-[0.6rem] font-black">Syncing Portfolio...</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-navy)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '56px', height: '56px', borderRadius: '50%',
+            border: '4px solid rgba(198,156,109,0.2)',
+            borderTopColor: 'var(--color-gold)',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 20px'
+          }}></div>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', letterSpacing: '4px', textTransform: 'uppercase', fontWeight: 'bold' }}>Loading...</p>
         </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
-  if (!property) {
-    return (
-      <div className="min-h-screen bg-light flex flex-col items-center justify-center p-4">
-        <h1 className="text-3xl font-black text-navy mb-4">Property Not Found</h1>
-        <button onClick={() => navigate('/')} className="btn btn-primary">Return to Collection</button>
-      </div>
-    );
-  }
+  if (!property) return null;
+
+  const statusStyle = getStatusStyle(property.status);
+  const propertyTitle = property.propertyName || `${property.bedroom ? property.bedroom + ' BHK ' : ''}${property.propertyType}`;
 
   return (
-    <main className="property-details-wrapper bg-[#FDFDFD]">
-      {/* Cinematic Hero Section */}
-      <section className="bg-navy relative overflow-hidden flex items-center justify-center py-32 lg:py-52" style={{ backgroundColor: 'var(--color-navy)' }}>
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-navy/60 via-navy/80 to-navy z-10"></div>
-          <img 
-            src={property.images && property.images.length > 0 ? property.images[0] : ''} 
-            alt="Background" 
-            className="w-full h-full object-cover grayscale opacity-30 animate-ken-burns"
+    <main style={{ backgroundColor: '#f8f9fa' }}>
+
+      {/* Hero Section */}
+      <section style={{
+        position: 'relative',
+        minHeight: '70vh',
+        display: 'flex',
+        alignItems: 'flex-end',
+        overflow: 'hidden',
+        backgroundColor: 'var(--color-navy)'
+      }}>
+        {property.images && property.images.length > 0 && (
+          <img
+            src={property.images[0]}
+            alt={propertyTitle}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.35 }}
           />
-        </div>
-        <div className="container relative z-10 px-6 text-center animate-on-scroll" style={{ opacity: 0 }}>
-          <div className="inline-flex items-center gap-3 px-6 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full mb-10">
-             <HiSparkles className="text-gold" style={{ color: 'var(--color-gold)' }} />
-             <span className="text-gold text-[0.65rem] font-black tracking-[0.4em] uppercase">{property.propertyType} | {property.status}</span>
-          </div>
-          <h1 className="text-5xl md:text-8xl font-black text-white mt-4 mb-8 leading-tight tracking-tighter uppercase whitespace-pre-wrap">
-            {property.propertyName || `${property.bedroom || ''} BHK ${property.propertyType}`}
-          </h1>
-          <div className="max-w-2xl mx-auto h-[1px] bg-gradient-to-r from-transparent via-gold to-transparent opacity-50 mb-10"></div>
-          <div className="flex items-center justify-center gap-4 text-white/70 font-bold text-xl">
-            <HiLocationMarker className="text-gold" style={{ color: 'var(--color-gold)' }} />
-            {property.location}, {property.city}
+        )}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,28,58,1) 30%, rgba(10,28,58,0.5) 100%)' }}></div>
+
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            position: 'absolute', top: '100px', left: '30px', zIndex: 10,
+            display: 'flex', alignItems: 'center', gap: '8px',
+            backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)', color: 'white',
+            padding: '10px 20px', borderRadius: '50px', cursor: 'pointer',
+            fontSize: '0.9rem', fontWeight: '600', transition: 'all 0.2s'
+          }}
+        >
+          <i className="fas fa-arrow-left"></i> Back
+        </button>
+
+        <div style={{ position: 'relative', zIndex: 5, width: '100%', padding: '60px 40px 80px' }}>
+          <div className="container">
+            {/* Badges */}
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
+              <span style={{
+                backgroundColor: 'rgba(198,156,109,0.2)', color: 'var(--color-gold)',
+                padding: '6px 18px', borderRadius: '50px', fontSize: '0.75rem',
+                fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px',
+                border: '1px solid rgba(198,156,109,0.3)'
+              }}>
+                <i className="fas fa-home" style={{ marginRight: '6px' }}></i>
+                {property.propertyType}
+              </span>
+              <span style={{
+                backgroundColor: statusStyle.bg, color: statusStyle.color,
+                padding: '6px 18px', borderRadius: '50px', fontSize: '0.75rem',
+                fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px',
+                border: `1px solid ${statusStyle.border}`
+              }}>
+                {getStatusLabel(property.status)}
+              </span>
+            </div>
+
+            <h1 style={{
+              fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: '900', color: 'white',
+              lineHeight: 1.15, marginBottom: '24px'
+            }}>
+              {propertyTitle}
+            </h1>
+
+            <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
+              <span style={{ color: 'rgba(255,255,255,0.75)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <i className="fas fa-map-marker-alt" style={{ color: 'var(--color-gold)' }}></i>
+                {property.location}, {property.city}
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.75)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <i className="fas fa-rupee-sign" style={{ color: 'var(--color-gold)' }}></i>
+                ₹{property.price?.toLocaleString()}
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
-      <div className="container mx-auto px-6 lg:px-12 -mt-24 relative z-40 pb-32">
-        {/* Navigation Action */}
-        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-4 bg-white px-8 py-4 rounded-2xl shadow-xl text-navy font-black text-xs tracking-widest hover:text-gold transition-all group mb-16 border border-slate-50">
-          <HiArrowLeft className="w-5 h-5 transform group-hover:-translate-x-2 transition-transform" />
-          BACK TO PORTFOLIO
-        </button>
+      {/* Main Content */}
+      <div className="container" style={{ padding: '60px 20px' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) 380px',
+          gap: '40px',
+          alignItems: 'start'
+        }}
+        className="project-layout-grid"
+        >
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-          {/* Visuals & Specs */}
-          <div className="lg:col-span-8 space-y-20">
-            {/* Image Showcase */}
-            <div className="bg-white rounded-[3rem] shadow-2xl border-8 border-white overflow-hidden group animate-on-scroll" style={{ opacity: 0 }}>
-              <div className="aspect-[16/10] bg-slate-100 flex items-center justify-center relative overflow-hidden">
-                {property.images && property.images.length > 0 ? (
-                  <>
-                    <img
-                      src={property.images[currentImageIndex]}
-                      alt={property.propertyName || 'Property'}
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                    />
-                    {property.images.length > 1 && (
-                      <div className="absolute inset-x-8 top-1/2 -translate-y-1/2 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <button
-                          onClick={() => setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : property.images.length - 1))}
-                          className="bg-white/90 backdrop-blur-md text-navy p-4 rounded-full hover:bg-gold hover:text-white transition-all shadow-2xl"
-                        >
-                          ‹
-                        </button>
-                        <button
-                          onClick={() => setCurrentImageIndex((prev) => (prev < property.images.length - 1 ? prev + 1 : 0))}
-                          className="bg-white/90 backdrop-blur-md text-navy p-4 rounded-full hover:bg-gold hover:text-white transition-all shadow-2xl"
-                        >
-                          ›
-                        </button>
+          {/* LEFT COLUMN */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+
+            {/* Image Gallery */}
+            {property.images && property.images.length > 0 && (
+              <div style={{ backgroundColor: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 30px rgba(0,0,0,0.08)' }}>
+                <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden' }}>
+                  <img
+                    src={property.images[activeImage]}
+                    alt={propertyTitle}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.4s ease' }}
+                  />
+                  {property.images.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setActiveImage(i => (i - 1 + property.images.length) % property.images.length)}
+                        style={{
+                          position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)',
+                          width: '44px', height: '44px', borderRadius: '50%',
+                          backgroundColor: 'rgba(255,255,255,0.95)', border: 'none', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontSize: '1rem', color: 'var(--color-navy)'
+                        }}
+                      >
+                        <i className="fas fa-chevron-left"></i>
+                      </button>
+                      <button
+                        onClick={() => setActiveImage(i => (i + 1) % property.images.length)}
+                        style={{
+                          position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)',
+                          width: '44px', height: '44px', borderRadius: '50%',
+                          backgroundColor: 'rgba(255,255,255,0.95)', border: 'none', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontSize: '1rem', color: 'var(--color-navy)'
+                        }}
+                      >
+                        <i className="fas fa-chevron-right"></i>
+                      </button>
+                      <div style={{ position: 'absolute', bottom: '15px', right: '15px', backgroundColor: 'rgba(0,0,0,0.55)', color: 'white', padding: '5px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                        {activeImage + 1} / {property.images.length}
                       </div>
-                    )}
-                  </>
-                ) : (
-                  <HiHome className="w-32 h-32 text-slate-100" />
-                )}
-              </div>
-              {property.images && property.images.length > 1 && (
-                <div className="p-6 bg-white border-t border-slate-50">
-                  <div className="flex gap-4 overflow-x-auto pb-2 px-2">
-                    {property.images.map((image, index) => (
-                      <img
+                    </>
+                  )}
+                </div>
+
+                {property.images.length > 1 && (
+                  <div style={{ display: 'flex', gap: '10px', padding: '15px', overflowX: 'auto' }}>
+                    {property.images.map((img, index) => (
+                      <button
                         key={index}
-                        src={image}
-                        alt={`View ${index + 1}`}
-                        className={`w-32 h-20 rounded-2xl flex-none object-cover cursor-pointer transition-all duration-300 border-4 ${
-                          currentImageIndex === index 
-                            ? 'border-gold scale-110 shadow-lg' 
-                            : 'border-white opacity-50 hover:opacity-100'
-                        }`}
-                        onClick={() => setCurrentImageIndex(index)}
-                      />
+                        onClick={() => setActiveImage(index)}
+                        style={{
+                          flexShrink: 0, width: '90px', height: '65px', borderRadius: '10px',
+                          overflow: 'hidden', padding: 0,
+                          border: activeImage === index ? '3px solid var(--color-gold)' : '3px solid transparent',
+                          cursor: 'pointer', transition: 'all 0.2s',
+                          opacity: activeImage === index ? 1 : 0.6
+                        }}
+                      >
+                        <img src={img} alt={`View ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </button>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            )}
+
+            {/* About Section */}
+            <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                <div style={{ width: '4px', height: '32px', backgroundColor: 'var(--color-gold)', borderRadius: '2px' }}></div>
+                <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--color-navy)', margin: 0 }}>About This Property</h2>
+              </div>
+              <p style={{ color: '#555', lineHeight: '1.9', fontSize: '1rem', margin: 0 }}>
+                {property.propertyDescription || property.description || 'No description available.'}
+              </p>
             </div>
 
-            {/* Structured Details */}
-            <div className="bg-white rounded-[3rem] shadow-xl border border-slate-50 p-10 md:p-20 animate-on-scroll" style={{ opacity: 0 }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
-                <div>
-                  <span className="subtitle block mb-4" style={{ fontSize: '0.7rem' }}>ASSET DEFINITION</span>
-                  <h2 className="text-4xl md:text-5xl font-black text-navy leading-tight" style={{ color: 'var(--color-navy)' }}>
-                    Exclusive Luxury {property.propertyType}
+            {/* Amenities */}
+            {property.amenities && property.amenities.length > 0 && (
+              <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
+                  <div style={{ width: '4px', height: '32px', backgroundColor: 'var(--color-gold)', borderRadius: '2px' }}></div>
+                  <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--color-navy)', margin: 0 }}>Amenities</h2>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                  {property.amenities.map((a, i) => (
+                    <div key={i} style={{
+                      display: 'flex', alignItems: 'center', gap: '12px',
+                      padding: '14px 18px', backgroundColor: '#f8f9fa',
+                      borderRadius: '10px', border: '1px solid #eee'
+                    }}>
+                      <i className="fas fa-star" style={{ color: 'var(--color-gold)', fontSize: '0.75rem', flexShrink: 0 }}></i>
+                      <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>{a}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* YouTube Video tour */}
+            {property.youtubeUrl && (property.youtubeUrl.includes('youtube.com') || property.youtubeUrl.includes('youtu.be')) && (
+              <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
+                  <div style={{ width: '4px', height: '32px', backgroundColor: '#ef4444', borderRadius: '2px' }}></div>
+                  <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--color-navy)', margin: 0 }}>
+                    <i className="fab fa-youtube" style={{ color: '#ef4444', marginRight: '10px' }}></i>
+                    Video Tour
                   </h2>
-                  <div className="w-16 h-1.5 bg-gold mt-8 rounded-full"></div>
                 </div>
-                <div className="bg-slate-50 p-10 rounded-[2.5rem] border-l-8 border-gold shadow-sm flex flex-col justify-center gap-2" style={{ borderColor: 'var(--color-gold)' }}>
-                  <span className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest">Global Valuation</span>
-                  <div className="text-5xl font-black text-navy" style={{ color: 'var(--color-navy)' }}>
-                    ₹{property.price?.toLocaleString()}
-                  </div>
+                <div style={{ borderRadius: '14px', overflow: 'hidden', aspectRatio: '16/9' }}>
+                  <iframe
+                    src={property.youtubeUrl.replace('watch?v=', 'embed/').split('&')[0]}
+                    title="Property Video Tour"
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                    allowFullScreen
+                  ></iframe>
                 </div>
               </div>
-
-              {/* High-Performance Icons */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20 bg-slate-50 p-4 rounded-[2.5rem]">
-                {[
-                  { icon: HiHome, label: 'Type', val: property.propertyType, color: 'text-emerald-500' },
-                  { icon: HiOfficeBuilding, label: 'Space', val: `${property.area} sq.ft`, color: 'text-blue-500' },
-                  { icon: HiOutlineVariable, label: 'Rooms', val: `${property.bedroom} BHK`, color: 'text-gold' },
-                  { icon: HiCurrencyRupee, label: 'Intent', val: property.transaction, color: 'text-purple-500' }
-                ].map((stat, i) => (
-                  <div key={i} className="bg-white p-8 rounded-[2rem] text-center border border-slate-100 hover:shadow-xl transition-all">
-                    <stat.icon className={`w-10 h-10 mx-auto mb-4 ${stat.color}`} />
-                    <p className="text-[0.6rem] font-black text-slate-300 uppercase tracking-widest mb-1">{stat.label}</p>
-                    <p className="text-lg font-black text-navy uppercase truncate" style={{ color: 'var(--color-navy)' }}>{stat.val}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Multimedia & Narrative */}
-              <div className="space-y-20">
-                {property.youtubeUrl && (property.youtubeUrl.includes('youtube.com') || property.youtubeUrl.includes('youtu.be')) && (
-                  <div>
-                    <h2 className="text-2xl font-black text-navy mb-10 flex items-center gap-4">
-                       <span className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center">
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-                       </span>
-                       Cinematic Tour
-                    </h2>
-                    <div className="aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white">
-                      <iframe
-                        src={property.youtubeUrl.replace('watch?v=', 'embed/').split('&')[0]}
-                        title="Tour"
-                        className="w-full h-full"
-                        allowFullScreen
-                      ></iframe>
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 capitalize font-black">
-                  <div>
-                    <h3 className="text-xl font-black mb-6 uppercase tracking-widest text-navy">Asset Description</h3>
-                    <p className="text-slate-500 leading-relaxed font-bold border-l-4 border-slate-100 pl-8 capitalize">{property.propertyDescription}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black mb-6 uppercase tracking-widest text-navy">Global Specs</h3>
-                    <div className="grid grid-cols-1 gap-4">
-                       {[
-                         { l: 'Asset ID', v: property._id?.slice(-8).toUpperCase() },
-                         { l: 'Age', v: property.propertyAge || 'Prime' },
-                         { l: 'Furnishing', v: property.furnishing || 'Standard' },
-                         { l: 'Listing Date', v: new Date(property.createdAt).toLocaleDateString() }
-                       ].map((spec, i) => (
-                         <div key={i} className="flex justify-between items-center py-4 border-b border-slate-50">
-                            <span className="text-[0.6rem] text-slate-400 font-bold uppercase">{spec.l}</span>
-                            <span className="text-sm text-navy">{spec.val || spec.v}</span>
-                         </div>
-                       ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Amenities */}
-                {property.amenities && property.amenities.length > 0 && (
-                  <div>
-                    <h3 className="text-2xl font-black mb-10 text-navy uppercase tracking-widest">Premium Amenities</h3>
-                    <div className="flex flex-wrap gap-4">
-                      {property.amenities.map((a, i) => (
-                        <div key={i} className="px-8 py-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-4 hover:border-gold transition-colors shadow-sm">
-                           <HiShieldCheck className="text-emerald-500 w-6 h-6" />
-                           <span className="text-sm font-black text-navy uppercase">{a}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* Action Sidebar */}
-          <div className="lg:col-span-4 lg:sticky lg:top-32 space-y-10">
-            {/* Conversion Card */}
-            <div className="bg-navy rounded-[3rem] p-12 text-white shadow-2xl relative overflow-hidden group" style={{ backgroundColor: 'var(--color-navy)' }}>
-               <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-               
-               <span className="text-gold font-black tracking-[0.4em] uppercase text-[0.6rem] mb-6 block" style={{ color: 'var(--color-gold)' }}>SECURE TRANSACTION</span>
-               <h3 className="text-4xl font-black mb-8 leading-tight">Initiate Acquisition</h3>
-               <p className="text-white/50 mb-12 font-medium leading-relaxed italic border-l border-white/10 pl-6 text-sm">
-                 Connect with our executive planners to receive the full prospectus of this luxury asset.
-               </p>
+          {/* RIGHT COLUMN - Sticky Sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', position: 'sticky', top: '110px' }}>
 
-               <button
-                 onClick={() => setShowInquiryModal(true)}
-                 className="w-full bg-gold text-navy py-6 rounded-2xl font-black uppercase tracking-[0.3em] text-xs hover:bg-white transition-all duration-500 shadow-2xl flex items-center justify-center gap-4 group/btn"
-                 style={{ backgroundColor: 'var(--color-gold)', color: 'var(--color-navy)' }}
-               >
-                 <HiMail className="w-7 h-7" />
-                 Inquire via VIP Channel
-                 <HiArrowSmRight className="w-6 h-6 transform -rotate-45 group-hover/btn:rotate-0 transition-transform" />
-               </button>
+            {/* Price & Info Card */}
+            <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '30px', boxShadow: '0 8px 30px rgba(0,0,0,0.1)', border: '1px solid #f0f0f0' }}>
+              <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#999', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '15px' }}>Investment Overview</p>
 
-               <div className="grid grid-cols-2 gap-4 mt-10">
-                  <a href="tel:+919264175587" className="bg-white/10 p-5 rounded-2xl flex flex-col items-center gap-3 border border-white/5 hover:bg-white/20 transition-all">
-                     <HiPhone className="w-6 h-6 text-gold" style={{ color: 'var(--color-gold)' }} />
-                     <span className="text-[0.6rem] font-black uppercase tracking-widest">Call Expert</span>
-                  </a>
-                  <a href="https://wa.me/919264175587" target="_blank" rel="noreferrer" className="bg-[#25D366]/10 p-5 rounded-2xl flex flex-col items-center gap-3 border border-[#25D366]/20 hover:bg-[#25D366] transition-all group/wa">
-                     <svg className="w-6 h-6 text-[#25D366] group-hover/wa:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
-                     <span className="text-[0.6rem] font-black uppercase tracking-widest group-hover/wa:text-white">WhatsApp</span>
-                  </a>
-               </div>
+              {/* Price */}
+              <div style={{ padding: '20px 0', borderBottom: '1px solid #f0f0f0', marginBottom: '20px' }}>
+                <p style={{ color: '#888', fontSize: '0.8rem', marginBottom: '5px', fontWeight: '600' }}>PRICE RANGE</p>
+                <p style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--color-navy)', margin: 0 }}>
+                  <i className="fas fa-rupee-sign" style={{ color: 'var(--color-gold)', marginRight: '4px', fontSize: '1.4rem' }}></i>
+                  ₹{property.price?.toLocaleString()}
+                </p>
+              </div>
+
+              {/* Details */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#888', fontSize: '0.85rem', fontWeight: '600' }}>Status</span>
+                  <span style={{
+                    padding: '4px 14px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 'bold',
+                    backgroundColor: statusStyle.bg, color: statusStyle.color, border: `1px solid ${statusStyle.border}`
+                  }}>
+                    {getStatusLabel(property.status)}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#888', fontSize: '0.85rem', fontWeight: '600' }}>Type</span>
+                  <span style={{ color: 'var(--color-navy)', fontWeight: '700', fontSize: '0.9rem', textTransform: 'capitalize' }}>{property.propertyType}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#888', fontSize: '0.85rem', fontWeight: '600' }}>Location</span>
+                  <span style={{ color: 'var(--color-navy)', fontWeight: '700', fontSize: '0.9rem' }}>{property.city}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#888', fontSize: '0.85rem', fontWeight: '600' }}>Area</span>
+                  <span style={{ color: 'var(--color-navy)', fontWeight: '700', fontSize: '0.9rem' }}>{property.area?.toLocaleString()} sq.ft</span>
+                </div>
+              </div>
+
+              {/* CTA Buttons */}
+              <div style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <a
+                  href="tel:+919264175587"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                    backgroundColor: 'var(--color-navy)', color: 'white',
+                    padding: '16px', borderRadius: '12px', fontWeight: 'bold',
+                    textDecoration: 'none', fontSize: '0.95rem', transition: 'all 0.2s'
+                  }}
+                >
+                  <i className="fas fa-phone-alt"></i>
+                  Call Now
+                </a>
+                <Link
+                  to="/contact"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                    backgroundColor: 'var(--color-gold)', color: 'white',
+                    padding: '16px', borderRadius: '12px', fontWeight: 'bold',
+                    textDecoration: 'none', fontSize: '0.95rem', transition: 'all 0.2s'
+                  }}
+                >
+                  <i className="fas fa-envelope"></i>
+                  Enquire Now
+                </Link>
+              </div>
             </div>
 
-            {/* Credibility Sidebar */}
-            <div className="bg-white rounded-[3rem] p-12 border border-slate-50 shadow-xl overflow-hidden relative">
-               <div className="absolute top-0 right-0 p-8 opacity-5">
-                  <HiShieldCheck size={100} />
-               </div>
-               <span className="text-gold font-black uppercase text-[0.6rem] tracking-widest mb-8 block">PLATINUM ASSURANCE</span>
-               <div className="space-y-6">
-                  <div className="flex items-center gap-6">
-                     <div className="text-5xl font-black text-navy" style={{ color: 'var(--color-navy)' }}>15+</div>
-                     <div className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest leading-tight">Years Industry <br/>Leadership</div>
+            {/* Contact Info Card */}
+            <div style={{
+              backgroundColor: 'var(--color-navy)', borderRadius: '20px', padding: '30px',
+              color: 'white', boxShadow: '0 8px 30px rgba(10,28,58,0.2)'
+            }}>
+              <h3 style={{ color: 'white', fontWeight: '800', fontSize: '1.1rem', marginBottom: '20px' }}>
+                <i className="fas fa-headset" style={{ color: 'var(--color-gold)', marginRight: '10px' }}></i>
+                Need Assistance?
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'rgba(198,156,109,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <i className="fas fa-phone" style={{ color: 'var(--color-gold)' }}></i>
                   </div>
-                  <div className="flex items-center gap-6">
-                     <div className="text-5xl font-black text-gold" style={{ color: 'var(--color-gold)' }}>50k+</div>
-                     <div className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest leading-tight">Satisfied <br/>Global Clients</div>
+                  <div>
+                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', marginBottom: '2px', fontWeight: '600', textTransform: 'uppercase' }}>Phone</p>
+                    <a href="tel:+919264175587" style={{ color: 'white', fontWeight: '700', textDecoration: 'none', fontSize: '0.95rem' }}>926-417-5587</a>
                   </div>
-               </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'rgba(198,156,109,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <i className="fas fa-envelope" style={{ color: 'var(--color-gold)' }}></i>
+                  </div>
+                  <div>
+                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', marginBottom: '2px', fontWeight: '600', textTransform: 'uppercase' }}>Email</p>
+                    <a href="mailto:emailtotrx@gmail.com" style={{ color: 'white', fontWeight: '700', textDecoration: 'none', fontSize: '0.85rem' }}>emailtotrx@gmail.com</a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Global Related Section */}
-        {relatedProperties.length > 0 && (
-          <div className="mt-40">
-             <div className="flex items-end justify-between mb-20">
-                <div>
-                   <span className="text-gold font-black uppercase text-[0.65rem] tracking-[0.4em] mb-4 block">Recommended Asset</span>
-                   <h2 className="text-5xl font-black text-navy leading-tight uppercase tracking-tighter">You Might Also <span className="text-gold">Admire</span></h2>
-                </div>
-                <Link to="/properties" className="hidden md:flex items-center gap-3 px-10 py-5 bg-white border border-slate-100 rounded-full font-black text-[0.65rem] tracking-widest hover:bg-navy hover:text-white transition-all shadow-xl">
-                   FULL COLLECTION
-                </Link>
-             </div>
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-               {relatedProperties.map(p => <PropertyCard key={p._id} property={p} />)}
-             </div>
-          </div>
-        )}
       </div>
 
-      {/* Inquiry Modal */}
-      {showInquiryModal && (
-        <InquiryModal
-          property={property}
-          onClose={() => setShowInquiryModal(false)}
-          onSubmit={handleInquirySubmit}
-        />
+      {/* Recommended Assets */}
+      {relatedProperties.length > 0 && (
+        <section style={{ backgroundColor: 'white', padding: '80px 20px', borderTop: '1px solid #f0f0f0' }}>
+          <div className="container">
+             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                <span style={{ color: 'var(--color-gold)', fontSize: '0.8rem', letterSpacing: '4px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '10px' }}>Recommended Assets</span>
+                <h2 style={{ color: 'var(--color-navy)', fontSize: '2.5rem', fontWeight: '900', margin: 0 }}>You Might Also Admire</h2>
+                <div style={{ width: '60px', height: '3px', backgroundColor: 'var(--color-gold)', margin: '20px auto' }}></div>
+             </div>
+             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
+                {relatedProperties.map(p => (
+                  <PropertyCard key={p._id} property={p} />
+                ))}
+             </div>
+          </div>
+        </section>
       )}
 
-      {/* Animations */}
-      <style>{`
-        @keyframes ken-burns {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.1); }
-        }
-        .animate-ken-burns {
-          animation: ken-burns 30s infinite alternate ease-in-out;
-        }
-        .fade-in-up {
-          animation: fadeInUp 1.2s cubic-bezier(0.2, 1, 0.2, 1) forwards;
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(60px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      {/* Bottom CTA */}
+      <section style={{ backgroundColor: 'var(--color-navy)', padding: '80px 20px', textAlign: 'center' }}>
+        <div className="container">
+          <p style={{ color: 'var(--color-gold)', fontSize: '0.8rem', letterSpacing: '4px', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '15px' }}>Interested in This Property?</p>
+          <h2 style={{ color: 'white', fontSize: 'clamp(1.8rem, 4vw, 3rem)', fontWeight: '900', marginBottom: '30px' }}>
+            Get in Touch with Our Experts
+          </h2>
+          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/contact" style={{
+              backgroundColor: 'var(--color-gold)', color: 'white',
+              padding: '16px 40px', borderRadius: '12px', fontWeight: 'bold',
+              textDecoration: 'none', fontSize: '0.95rem', display: 'inline-block'
+            }}>
+              Contact Us
+            </Link>
+            <Link to="/properties" style={{
+              backgroundColor: 'transparent', color: 'white',
+              padding: '16px 40px', borderRadius: '12px', fontWeight: 'bold',
+              textDecoration: 'none', fontSize: '0.95rem', display: 'inline-block',
+              border: '2px solid rgba(255,255,255,0.3)'
+            }}>
+              View All Properties
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Responsive Styles */}
     </main>
   );
 };

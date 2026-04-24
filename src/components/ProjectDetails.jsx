@@ -446,17 +446,6 @@ const ProjectDetails = () => {
         </div>
       </section>
 
-      {/* Responsive Styles */}
-      <style>{`
-        @media (max-width: 1024px) {
-          .project-layout-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .project-layout-grid > div:last-child {
-            position: static !important;
-          }
-        }
-      `}</style>
     </main>
   );
 };
