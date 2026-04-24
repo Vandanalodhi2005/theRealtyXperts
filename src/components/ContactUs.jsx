@@ -1,40 +1,62 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import emailjs from 'emailjs-com';
 
 function Contact() {
+    const [formData, setFormData] = useState({
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+    });
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const handleSubmit = async (e) => {
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = (e) => {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const newInquiry = {
-            name: `${formData.get('first_name')} ${formData.get('last_name')}`,
-            email: formData.get('email'),
-            phone: formData.get('phone'),
-            subject: formData.get('subject'),
-            message: formData.get('message'),
+
+        // Combine first and last name for EmailJS template if needed
+        const templateParams = {
+            from_name: `${formData.first_name} ${formData.last_name}`,
+            from_email: formData.email,
+            phone: formData.phone,
+            subject: formData.subject,
+            message: formData.message,
+            to_name: 'The Realty Xperts Team'
         };
 
-        try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newInquiry),
+        emailjs.send(
+            import.meta.env.VITE_EMAILJS_SERVICE_ID,
+            import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+            templateParams,
+            import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+        )
+        .then((response) => {
+            console.log('SUCCESS!', response.status, response.text);
+            alert("Thank you for reaching out! Your inquiry has been sent to our experts via EmailJS.");
+            setFormData({
+                first_name: '',
+                last_name: '',
+                email: '',
+                phone: '',
+                subject: '',
+                message: ''
             });
-
-            if (response.ok) {
-                alert("Thank you for reaching out! Your inquiry has been sent to our experts.");
-                e.target.reset();
-            } else {
-                alert("Failed to send message. Please try again later.");
-            }
-        } catch (error) {
-            console.error('Error submitting contact form:', error);
-            alert("Error sending message. Please check your connection.");
-        }
+        }, (err) => {
+            console.error('FAILED...', err);
+            alert("Failed to send message. Please try again later or contact us directly.");
+        });
     };
 
     return (
@@ -94,6 +116,8 @@ function Contact() {
                                         type="text" 
                                         name="first_name"
                                         placeholder="First Name" 
+                                        value={formData.first_name}
+                                        onChange={handleChange}
                                         required 
                                         style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
                                     />
@@ -101,6 +125,8 @@ function Contact() {
                                         type="text" 
                                         name="last_name"
                                         placeholder="Last Name" 
+                                        value={formData.last_name}
+                                        onChange={handleChange}
                                         required 
                                         style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
                                     />
@@ -109,6 +135,8 @@ function Contact() {
                                     type="email" 
                                     name="email"
                                     placeholder="Your Email Address" 
+                                    value={formData.email}
+                                    onChange={handleChange}
                                     required 
                                     style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
                                 />
@@ -116,6 +144,8 @@ function Contact() {
                                     type="tel" 
                                     name="phone"
                                     placeholder="Your Phone Number" 
+                                    value={formData.phone}
+                                    onChange={handleChange}
                                     required 
                                     style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
                                 />
@@ -123,12 +153,16 @@ function Contact() {
                                     type="text" 
                                     name="subject"
                                     placeholder="Subject (e.g., Interested in Buying, Selling...)" 
+                                    value={formData.subject}
+                                    onChange={handleChange}
                                     required 
                                     style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
                                 />
                                 <textarea 
                                     name="message"
                                     placeholder="How can we help you today?" 
+                                    value={formData.message}
+                                    onChange={handleChange}
                                     required 
                                     rows="6" 
                                     style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem', resize: 'vertical' }}
@@ -145,3 +179,4 @@ function Contact() {
 }
 
 export default Contact;
+
