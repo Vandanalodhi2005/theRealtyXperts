@@ -117,7 +117,9 @@ function Home() {
                     </div>
 
                     <div style={{ textAlign: 'center', marginTop: '40px' }}>
-                        <Link to={link} className="btn btn-primary" style={{ padding: '12px 40px' }}>See More</Link>
+                        <Link to={link} className="btn btn-primary" style={{ padding: '12px 40px' }}>
+                            Explore All {title}
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -154,7 +156,7 @@ function Home() {
                                 <div className="cat-card-content">
                                     <i className={`fas ${cat.icon}`}></i>
                                     <h3>{cat.label}</h3>
-                                    <span className="cat-card-btn">View Collection</span>
+                                    <span className="cat-card-btn">View {cat.label} Collection</span>
                                 </div>
                             </div>
                         ))}
