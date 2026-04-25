@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import emailjs from 'emailjs-com';
+import { API_URL } from '../apiConfig';
+import toast from 'react-hot-toast';
 
 function Contact() {
     const [formData, setFormData] = useState({
@@ -10,6 +12,7 @@ function Contact() {
         subject: '',
         message: ''
     });
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -19,44 +22,69 @@ function Contact() {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            ...({ [name]: value })
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitting(true);
 
-        // Combine first and last name for EmailJS template if needed
-        const templateParams = {
-            from_name: `${formData.first_name} ${formData.last_name}`,
-            from_email: formData.email,
-            phone: formData.phone,
-            subject: formData.subject,
-            message: formData.message,
-            to_name: 'The Realty Xperts Team'
-        };
+        const fullName = `${formData.first_name} ${formData.last_name}`;
+        const finalMessage = `Subject: ${formData.subject}\n\n${formData.message}`;
 
-        emailjs.send(
-            import.meta.env.VITE_EMAILJS_SERVICE_ID,
-            import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-            templateParams,
-            import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-        )
-        .then((response) => {
-            console.log('SUCCESS!', response.status, response.text);
-            alert("Thank you for reaching out! Your inquiry has been sent to our experts via EmailJS.");
-            setFormData({
-                first_name: '',
-                last_name: '',
-                email: '',
-                phone: '',
-                subject: '',
-                message: ''
+        try {
+            // 1. Submit to Backend (Leads Management)
+            const backendPromise = fetch(`${API_URL}/api/contact`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: fullName,
+                    email: formData.email,
+                    phone: formData.phone,
+                    message: finalMessage
+                })
             });
-        }, (err) => {
-            console.error('FAILED...', err);
-            alert("Failed to send message. Please try again later or contact us directly.");
-        });
+
+            // 2. Submit to EmailJS (Frontend Backup Notification)
+            const templateParams = {
+                from_name: fullName,
+                from_email: formData.email,
+                phone: formData.phone,
+                subject: formData.subject,
+                message: formData.message,
+                to_name: 'The Realty Xperts Team'
+            };
+
+            const emailJsPromise = emailjs.send(
+                import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+                templateParams,
+                import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+            );
+
+            // Wait for both but prioritize backend success message
+            const [backendRes] = await Promise.all([backendPromise, emailJsPromise]);
+
+            if (backendRes.ok) {
+                toast.success("Thank you! Your message has been received.");
+                setFormData({
+                    first_name: '',
+                    last_name: '',
+                    email: '',
+                    phone: '',
+                    subject: '',
+                    message: ''
+                });
+            } else {
+                throw new Error("Backend submission failed");
+            }
+        } catch (error) {
+            console.error('Submission error:', error);
+            toast.error("Failed to send message. Please contact us directly via phone.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -70,7 +98,7 @@ function Contact() {
                         <p className="section-desc">We are always ready to help you find your dream address or answer any questions.</p>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '40px', marginTop: '40px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px', marginTop: '40px' }}>
                         
                         {/* Contact Information Cards */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -79,8 +107,8 @@ function Contact() {
                                     <i className="fas fa-phone-alt"></i>
                                 </div>
                                 <div>
-                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '5px' }}>Call Us Directly</h3>
-                                    <a href="tel:9264175587" style={{ color: 'var(--color-dark-gray)', textDecoration: 'none', fontSize: '1.1rem' }}>926-417-5587</a>
+                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '5px', color: 'var(--color-navy)' }}>Call Us Directly</h3>
+                                    <a href="tel:9264175587" style={{ color: 'var(--color-dark-gray)', textDecoration: 'none', fontSize: '1.1rem', fontWeight: '600' }}>926-417-5587</a>
                                     <p style={{ color: 'var(--color-gold)', fontSize: '0.9rem', marginTop: '5px' }}>Sameer Tiwari</p>
                                 </div>
                             </div>
@@ -90,8 +118,8 @@ function Contact() {
                                     <i className="fas fa-envelope"></i>
                                 </div>
                                 <div>
-                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '5px' }}>Email Us</h3>
-                                    <a href="mailto:Emailtotrx@gmail.com" style={{ color: 'var(--color-dark-gray)', textDecoration: 'none', fontSize: '1.1rem' }}>Emailtotrx@gmail.com</a>
+                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '5px', color: 'var(--color-navy)' }}>Email Us</h3>
+                                    <a href="mailto:Emailtotrx@gmail.com" style={{ color: 'var(--color-dark-gray)', textDecoration: 'none', fontSize: '1.1rem', fontWeight: '600' }}>Emailtotrx@gmail.com</a>
                                 </div>
                             </div>
 
@@ -100,15 +128,15 @@ function Contact() {
                                     <i className="fas fa-clock"></i>
                                 </div>
                                 <div>
-                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '5px' }}>Business Legacy</h3>
+                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '5px', color: 'var(--color-navy)' }}>Business Legacy</h3>
                                     <p style={{ color: 'var(--color-dark-gray)' }}>Delivering excellence since <strong>2016</strong>.</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Contact Form */}
-                        <div style={{ backgroundColor: 'var(--color-white)', padding: '40px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
-                            <h3 style={{ marginBottom: '25px', fontSize: '1.5rem' }}>Send Us A Message</h3>
+                        <div style={{ backgroundColor: 'var(--color-white)', padding: '40px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', border: '1px solid #eee' }}>
+                            <h3 style={{ marginBottom: '25px', fontSize: '1.5rem', color: 'var(--color-navy)' }}>Send Us A Message</h3>
                             
                             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -119,7 +147,7 @@ function Contact() {
                                         value={formData.first_name}
                                         onChange={handleChange}
                                         required 
-                                        style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
+                                        style={inputStyle} 
                                     />
                                     <input 
                                         type="text" 
@@ -128,7 +156,7 @@ function Contact() {
                                         value={formData.last_name}
                                         onChange={handleChange}
                                         required 
-                                        style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
+                                        style={inputStyle} 
                                     />
                                 </div>
                                 <input 
@@ -138,7 +166,7 @@ function Contact() {
                                     value={formData.email}
                                     onChange={handleChange}
                                     required 
-                                    style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
+                                    style={inputStyle} 
                                 />
                                 <input 
                                     type="tel" 
@@ -147,16 +175,16 @@ function Contact() {
                                     value={formData.phone}
                                     onChange={handleChange}
                                     required 
-                                    style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
+                                    style={inputStyle} 
                                 />
                                 <input 
                                     type="text" 
                                     name="subject"
-                                    placeholder="Subject (e.g., Interested in Buying, Selling...)" 
+                                    placeholder="Subject" 
                                     value={formData.subject}
                                     onChange={handleChange}
                                     required 
-                                    style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem' }} 
+                                    style={inputStyle} 
                                 />
                                 <textarea 
                                     name="message"
@@ -164,10 +192,17 @@ function Contact() {
                                     value={formData.message}
                                     onChange={handleChange}
                                     required 
-                                    rows="6" 
-                                    style={{ padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-gray)', fontFamily: 'inherit', fontSize: '1rem', resize: 'vertical' }}
+                                    rows="5" 
+                                    style={{ ...inputStyle, resize: 'vertical' }}
                                 ></textarea>
-                                <button type="submit" className="btn btn-primary" style={{ padding: '16px', fontSize: '1.1rem' }}>Submit Message</button>
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-primary" 
+                                    disabled={submitting}
+                                    style={{ padding: '16px', fontSize: '1.1rem', opacity: submitting ? 0.7 : 1 }}
+                                >
+                                    {submitting ? 'Sending...' : 'Submit Message'}
+                                </button>
                             </form>
                         </div>
 
@@ -178,5 +213,15 @@ function Contact() {
     );
 }
 
-export default Contact;
+const inputStyle = {
+    padding: '15px',
+    borderRadius: '8px',
+    border: '1px solid #ddd',
+    fontFamily: 'inherit',
+    fontSize: '1rem',
+    outline: 'none',
+    transition: 'border-color 0.3s',
+    backgroundColor: '#fff'
+};
 
+export default Contact;
