@@ -7,11 +7,28 @@ const ProjectDetails = () => {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchProject();
+
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [id]);
+
+  // Helper to split bunched up text (e.g. from admin panel)
+  const formatList = (list) => {
+    if (!list) return [];
+    if (!Array.isArray(list)) return [list];
+    
+    return list.flatMap(item => {
+      if (typeof item !== 'string') return [item];
+      // Split by common delimiters like ✔️, |, •, or newlines
+      return item.split(/[|✔️•\n]+/).map(s => s.trim()).filter(s => s.length > 0);
+    });
+  };
 
   const fetchProject = async () => {
     try {
@@ -49,12 +66,12 @@ const ProjectDetails = () => {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-navy)' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a1c3a' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{
             width: '56px', height: '56px', borderRadius: '50%',
             border: '4px solid rgba(198,156,109,0.2)',
-            borderTopColor: 'var(--color-gold)',
+            borderTopColor: '#c69c6d',
             animation: 'spin 1s linear infinite',
             margin: '0 auto 20px'
           }}></div>
@@ -68,8 +85,8 @@ const ProjectDetails = () => {
   if (!project) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-        <h1 style={{ fontSize: '2.5rem', color: 'var(--color-navy)', marginBottom: '20px', fontWeight: '900' }}>Project Not Found</h1>
-        <button onClick={() => navigate('/projects')} style={{ backgroundColor: 'var(--color-navy)', color: 'white', padding: '14px 40px', borderRadius: '10px', border: 'none', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}>
+        <h1 style={{ fontSize: '2.5rem', color: '#0a1c3a', marginBottom: '20px', fontWeight: '900' }}>Project Not Found</h1>
+        <button onClick={() => navigate('/projects')} style={{ backgroundColor: '#0a1c3a', color: 'white', padding: '14px 40px', borderRadius: '10px', border: 'none', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}>
           Back to Projects
         </button>
       </div>
@@ -77,6 +94,8 @@ const ProjectDetails = () => {
   }
 
   const statusStyle = getStatusStyle(project.status);
+  const formattedHighlights = formatList(project.highlights);
+  const formattedAmenities = formatList(project.amenities);
 
   return (
     <main style={{ backgroundColor: '#f8f9fa' }}>
@@ -84,11 +103,12 @@ const ProjectDetails = () => {
       {/* Hero Section */}
       <section style={{
         position: 'relative',
-        minHeight: '70vh',
+        minHeight: isMobile ? '400px' : '70vh',
         display: 'flex',
         alignItems: 'flex-end',
         overflow: 'hidden',
-        backgroundColor: 'var(--color-navy)'
+        backgroundColor: '#0a1c3a',
+        paddingTop: isMobile ? '60px' : '0'
       }}>
         {project.images && project.images.length > 0 && (
           <img
@@ -103,25 +123,36 @@ const ProjectDetails = () => {
         <button
           onClick={() => navigate(-1)}
           style={{
-            position: 'absolute', top: '100px', left: '30px', zIndex: 10,
+            position: 'absolute', 
+            top: isMobile ? '80px' : '100px', 
+            left: isMobile ? '15px' : '30px', 
+            zIndex: 100,
             display: 'flex', alignItems: 'center', gap: '8px',
             backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255,255,255,0.2)', color: 'white',
-            padding: '10px 20px', borderRadius: '50px', cursor: 'pointer',
-            fontSize: '0.9rem', fontWeight: '600', transition: 'all 0.2s'
+            padding: isMobile ? '8px 16px' : '10px 20px', 
+            borderRadius: '50px', cursor: 'pointer',
+            fontSize: isMobile ? '0.8rem' : '0.9rem', 
+            fontWeight: '600', transition: 'all 0.2s'
           }}
         >
           <i className="fas fa-arrow-left"></i> Back
         </button>
 
-        <div style={{ position: 'relative', zIndex: 5, width: '100%', padding: '60px 40px 80px' }}>
+        <div style={{ position: 'relative', zIndex: 5, width: '100%', padding: isMobile ? '20px 15px 40px' : '60px 40px 80px' }}>
           <div className="container">
             {/* Badges */}
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
+            <div style={{ 
+              display: 'flex', 
+              gap: '8px', 
+              flexWrap: 'wrap', 
+              marginBottom: '15px',
+              marginTop: isMobile ? '40px' : '0' 
+            }}>
               <span style={{
-                backgroundColor: 'rgba(198,156,109,0.2)', color: 'var(--color-gold)',
-                padding: '6px 18px', borderRadius: '50px', fontSize: '0.75rem',
-                fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px',
+                backgroundColor: 'rgba(198,156,109,0.2)', color: '#c69c6d',
+                padding: '5px 14px', borderRadius: '50px', fontSize: '0.7rem',
+                fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px',
                 border: '1px solid rgba(198,156,109,0.3)'
               }}>
                 <i className="fas fa-building" style={{ marginRight: '6px' }}></i>
@@ -129,7 +160,7 @@ const ProjectDetails = () => {
               </span>
               <span style={{
                 backgroundColor: statusStyle.bg, color: statusStyle.color,
-                padding: '6px 18px', borderRadius: '50px', fontSize: '0.75rem',
+                padding: '5px 14px', borderRadius: '50px', fontSize: '0.7rem',
                 fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px',
                 border: `1px solid ${statusStyle.border}`
               }}>
@@ -138,19 +169,21 @@ const ProjectDetails = () => {
             </div>
 
             <h1 style={{
-              fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: '900', color: 'white',
-              lineHeight: 1.15, marginBottom: '24px'
+              fontSize: isMobile ? '1.8rem' : 'clamp(2rem, 5vw, 4rem)', 
+              fontWeight: '900', color: 'white',
+              lineHeight: 1.2, marginBottom: '20px',
+              wordBreak: 'break-word'
             }}>
               {project.title}
             </h1>
 
-            <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: isMobile ? '15px' : '30px', flexWrap: 'wrap', fontSize: isMobile ? '0.85rem' : '1rem' }}>
               <span style={{ color: 'rgba(255,255,255,0.75)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <i className="fas fa-map-marker-alt" style={{ color: 'var(--color-gold)' }}></i>
-                {project.location}, {project.city}
+                <i className="fas fa-map-marker-alt" style={{ color: '#c69c6d' }}></i>
+                {project.location}
               </span>
               <span style={{ color: 'rgba(255,255,255,0.75)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <i className="fas fa-rupee-sign" style={{ color: 'var(--color-gold)' }}></i>
+                <i className="fas fa-rupee-sign" style={{ color: '#c69c6d' }}></i>
                 {project.price}
               </span>
             </div>
@@ -159,18 +192,16 @@ const ProjectDetails = () => {
       </section>
 
       {/* Main Content */}
-      <div className="container" style={{ padding: '60px 20px' }}>
+      <div className="container" style={{ padding: isMobile ? '30px 15px' : '60px 20px' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) 380px',
-          gap: '40px',
+          gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 380px',
+          gap: isMobile ? '30px' : '40px',
           alignItems: 'start'
-        }}
-        className="project-layout-grid"
-        >
+        }}>
 
           {/* LEFT COLUMN */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '30px' : '40px' }}>
 
             {/* Image Gallery */}
             {project.images && project.images.length > 0 && (
@@ -186,11 +217,11 @@ const ProjectDetails = () => {
                       <button
                         onClick={() => setActiveImage(i => (i - 1 + project.images.length) % project.images.length)}
                         style={{
-                          position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)',
-                          width: '44px', height: '44px', borderRadius: '50%',
+                          position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)',
+                          width: isMobile ? '36px' : '44px', height: isMobile ? '36px' : '44px', borderRadius: '50%',
                           backgroundColor: 'rgba(255,255,255,0.95)', border: 'none', cursor: 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontSize: '1rem', color: 'var(--color-navy)'
+                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontSize: '0.9rem', color: '#0a1c3a'
                         }}
                       >
                         <i className="fas fa-chevron-left"></i>
@@ -198,32 +229,29 @@ const ProjectDetails = () => {
                       <button
                         onClick={() => setActiveImage(i => (i + 1) % project.images.length)}
                         style={{
-                          position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)',
-                          width: '44px', height: '44px', borderRadius: '50%',
+                          position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                          width: isMobile ? '36px' : '44px', height: isMobile ? '36px' : '44px', borderRadius: '50%',
                           backgroundColor: 'rgba(255,255,255,0.95)', border: 'none', cursor: 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontSize: '1rem', color: 'var(--color-navy)'
+                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontSize: '0.9rem', color: '#0a1c3a'
                         }}
                       >
                         <i className="fas fa-chevron-right"></i>
                       </button>
-                      <div style={{ position: 'absolute', bottom: '15px', right: '15px', backgroundColor: 'rgba(0,0,0,0.55)', color: 'white', padding: '5px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                        {activeImage + 1} / {project.images.length}
-                      </div>
                     </>
                   )}
                 </div>
 
                 {project.images.length > 1 && (
-                  <div style={{ display: 'flex', gap: '10px', padding: '15px', overflowX: 'auto' }}>
+                  <div style={{ display: 'flex', gap: '8px', padding: '12px', overflowX: 'auto' }}>
                     {project.images.map((img, index) => (
                       <button
                         key={index}
                         onClick={() => setActiveImage(index)}
                         style={{
-                          flexShrink: 0, width: '90px', height: '65px', borderRadius: '10px',
+                          flexShrink: 0, width: isMobile ? '70px' : '90px', height: isMobile ? '50px' : '65px', borderRadius: '8px',
                           overflow: 'hidden', padding: 0,
-                          border: activeImage === index ? '3px solid var(--color-gold)' : '3px solid transparent',
+                          border: activeImage === index ? '2px solid #c69c6d' : '2px solid transparent',
                           cursor: 'pointer', transition: 'all 0.2s',
                           opacity: activeImage === index ? 1 : 0.6
                         }}
@@ -237,38 +265,38 @@ const ProjectDetails = () => {
             )}
 
             {/* About Section */}
-            <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+            <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: isMobile ? '25px 20px' : '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                <div style={{ width: '4px', height: '32px', backgroundColor: 'var(--color-gold)', borderRadius: '2px' }}></div>
-                <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--color-navy)', margin: 0 }}>About This Project</h2>
+                <div style={{ width: '4px', height: '32px', backgroundColor: '#c69c6d', borderRadius: '2px' }}></div>
+                <h2 style={{ fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: '800', color: '#0a1c3a', margin: 0 }}>About This Project</h2>
               </div>
-              <p style={{ color: '#555', lineHeight: '1.9', fontSize: '1rem', margin: 0 }}>
+              <p style={{ color: '#555', lineHeight: '1.8', fontSize: isMobile ? '0.95rem' : '1rem', margin: 0 }}>
                 {project.description || 'No description available.'}
               </p>
             </div>
 
             {/* Highlights */}
-            {project.highlights && project.highlights.length > 0 && (
-              <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+            {formattedHighlights.length > 0 && (
+              <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: isMobile ? '25px 20px' : '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
-                  <div style={{ width: '4px', height: '32px', backgroundColor: 'var(--color-gold)', borderRadius: '2px' }}></div>
-                  <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--color-navy)', margin: 0 }}>Key Highlights</h2>
+                  <div style={{ width: '4px', height: '32px', backgroundColor: '#c69c6d', borderRadius: '2px' }}></div>
+                  <h2 style={{ fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: '800', color: '#0a1c3a', margin: 0 }}>Key Highlights</h2>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '15px' }}>
-                  {project.highlights.map((h, i) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {formattedHighlights.map((h, i) => (
                     <div key={i} style={{
-                      display: 'flex', alignItems: 'flex-start', gap: '14px',
-                      padding: '18px 20px', backgroundColor: '#f8f9fa',
+                      display: 'flex', alignItems: 'flex-start', gap: '12px',
+                      padding: '15px 18px', backgroundColor: '#f8f9fa',
                       borderRadius: '12px', border: '1px solid #eee'
                     }}>
                       <div style={{
-                        width: '32px', height: '32px', borderRadius: '50%',
+                        width: '24px', height: '24px', borderRadius: '50%',
                         backgroundColor: 'rgba(5,150,105,0.1)', flexShrink: 0,
                         display: 'flex', alignItems: 'center', justifyContent: 'center'
                       }}>
-                        <i className="fas fa-check" style={{ color: '#059669', fontSize: '0.8rem' }}></i>
+                        <i className="fas fa-check" style={{ color: '#059669', fontSize: '0.7rem' }}></i>
                       </div>
-                      <span style={{ color: '#333', fontWeight: '600', fontSize: '0.95rem', lineHeight: 1.5 }}>{h}</span>
+                      <span style={{ color: '#333', fontWeight: '600', fontSize: '0.9rem', lineHeight: 1.4 }}>{h}</span>
                     </div>
                   ))}
                 </div>
@@ -276,20 +304,20 @@ const ProjectDetails = () => {
             )}
 
             {/* Amenities */}
-            {project.amenities && project.amenities.length > 0 && (
-              <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+            {formattedAmenities.length > 0 && (
+              <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: isMobile ? '25px 20px' : '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
-                  <div style={{ width: '4px', height: '32px', backgroundColor: 'var(--color-gold)', borderRadius: '2px' }}></div>
-                  <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--color-navy)', margin: 0 }}>Amenities</h2>
+                  <div style={{ width: '4px', height: '32px', backgroundColor: '#c69c6d', borderRadius: '2px' }}></div>
+                  <h2 style={{ fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: '800', color: '#0a1c3a', margin: 0 }}>Amenities</h2>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-                  {project.amenities.map((a, i) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {formattedAmenities.map((a, i) => (
                     <div key={i} style={{
                       display: 'flex', alignItems: 'center', gap: '12px',
-                      padding: '14px 18px', backgroundColor: '#f8f9fa',
+                      padding: '12px 18px', backgroundColor: '#f8f9fa',
                       borderRadius: '10px', border: '1px solid #eee'
                     }}>
-                      <i className="fas fa-star" style={{ color: 'var(--color-gold)', fontSize: '0.75rem', flexShrink: 0 }}></i>
+                      <i className="fas fa-star" style={{ color: '#c69c6d', fontSize: '0.7rem', flexShrink: 0 }}></i>
                       <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>{a}</span>
                     </div>
                   ))}
@@ -299,10 +327,10 @@ const ProjectDetails = () => {
 
             {/* YouTube Video */}
             {project.youtubeUrl && (project.youtubeUrl.includes('youtube.com') || project.youtubeUrl.includes('youtu.be')) && (
-              <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+              <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: isMobile ? '25px 20px' : '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
                   <div style={{ width: '4px', height: '32px', backgroundColor: '#ef4444', borderRadius: '2px' }}></div>
-                  <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--color-navy)', margin: 0 }}>
+                  <h2 style={{ fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: '800', color: '#0a1c3a', margin: 0 }}>
                     <i className="fab fa-youtube" style={{ color: '#ef4444', marginRight: '10px' }}></i>
                     Video Tour
                   </h2>
@@ -320,7 +348,13 @@ const ProjectDetails = () => {
           </div>
 
           {/* RIGHT COLUMN - Sticky Sidebar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', position: 'sticky', top: '110px' }}>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '25px', 
+            position: isMobile ? 'static' : 'sticky', 
+            top: '110px' 
+          }}>
 
             {/* Price & Info Card */}
             <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '30px', boxShadow: '0 8px 30px rgba(0,0,0,0.1)', border: '1px solid #f0f0f0' }}>
@@ -329,15 +363,15 @@ const ProjectDetails = () => {
               {/* Price */}
               <div style={{ padding: '20px 0', borderBottom: '1px solid #f0f0f0', marginBottom: '20px' }}>
                 <p style={{ color: '#888', fontSize: '0.8rem', marginBottom: '5px', fontWeight: '600' }}>PRICE RANGE</p>
-                <p style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--color-navy)', margin: 0 }}>
-                  <i className="fas fa-rupee-sign" style={{ color: 'var(--color-gold)', marginRight: '4px', fontSize: '1.4rem' }}></i>
+                <p style={{ fontSize: isMobile ? '1.5rem' : '1.8rem', fontWeight: '900', color: '#0a1c3a', margin: 0 }}>
+                  <i className="fas fa-rupee-sign" style={{ color: '#c69c6d', marginRight: '4px', fontSize: '1.4rem' }}></i>
                   {project.price}
                 </p>
               </div>
 
               {/* Details */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '8px 0' : '0', borderBottom: isMobile ? '1px solid #f9f9f9' : 'none' }}>
                   <span style={{ color: '#888', fontSize: '0.85rem', fontWeight: '600' }}>Status</span>
                   <span style={{
                     padding: '4px 14px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 'bold',
@@ -346,13 +380,13 @@ const ProjectDetails = () => {
                     {getStatusLabel(project.status)}
                   </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '8px 0' : '0', borderBottom: isMobile ? '1px solid #f9f9f9' : 'none' }}>
                   <span style={{ color: '#888', fontSize: '0.85rem', fontWeight: '600' }}>Type</span>
-                  <span style={{ color: 'var(--color-navy)', fontWeight: '700', fontSize: '0.9rem', textTransform: 'capitalize' }}>{project.type}</span>
+                  <span style={{ color: '#0a1c3a', fontWeight: '700', fontSize: '0.9rem', textTransform: 'capitalize' }}>{project.type}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '8px 0' : '0' }}>
                   <span style={{ color: '#888', fontSize: '0.85rem', fontWeight: '600' }}>Location</span>
-                  <span style={{ color: 'var(--color-navy)', fontWeight: '700', fontSize: '0.9rem' }}>{project.city}</span>
+                  <span style={{ color: '#0a1c3a', fontWeight: '700', fontSize: '0.9rem' }}>{project.city}</span>
                 </div>
               </div>
 
@@ -362,7 +396,7 @@ const ProjectDetails = () => {
                   href="tel:+919264175587"
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                    backgroundColor: 'var(--color-navy)', color: 'white',
+                    backgroundColor: '#0a1c3a', color: 'white',
                     padding: '16px', borderRadius: '12px', fontWeight: 'bold',
                     textDecoration: 'none', fontSize: '0.95rem', transition: 'all 0.2s'
                   }}
@@ -374,7 +408,7 @@ const ProjectDetails = () => {
                   to="/contact"
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                    backgroundColor: 'var(--color-gold)', color: 'white',
+                    backgroundColor: '#c69c6d', color: 'white',
                     padding: '16px', borderRadius: '12px', fontWeight: 'bold',
                     textDecoration: 'none', fontSize: '0.95rem', transition: 'all 0.2s'
                   }}
@@ -387,29 +421,29 @@ const ProjectDetails = () => {
 
             {/* Contact Info Card */}
             <div style={{
-              backgroundColor: 'var(--color-navy)', borderRadius: '20px', padding: '30px',
+              backgroundColor: '#0a1c3a', borderRadius: '20px', padding: '30px',
               color: 'white', boxShadow: '0 8px 30px rgba(10,28,58,0.2)'
             }}>
               <h3 style={{ color: 'white', fontWeight: '800', fontSize: '1.1rem', marginBottom: '20px' }}>
-                <i className="fas fa-headset" style={{ color: 'var(--color-gold)', marginRight: '10px' }}></i>
+                <i className="fas fa-headset" style={{ color: '#c69c6d', marginRight: '10px' }}></i>
                 Need Assistance?
               </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'rgba(198,156,109,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <i className="fas fa-phone" style={{ color: 'var(--color-gold)' }}></i>
+                    <i className="fas fa-phone" style={{ color: '#c69c6d' }}></i>
                   </div>
                   <div>
-                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', marginBottom: '2px', fontWeight: '600', textTransform: 'uppercase' }}>Phone</p>
+                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', marginBottom: '2px', fontWeight: '600', textTransform: 'uppercase' }}>Phone</p>
                     <a href="tel:+919264175587" style={{ color: 'white', fontWeight: '700', textDecoration: 'none', fontSize: '0.95rem' }}>926-417-5587</a>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'rgba(198,156,109,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <i className="fas fa-envelope" style={{ color: 'var(--color-gold)' }}></i>
+                    <i className="fas fa-envelope" style={{ color: '#c69c6d' }}></i>
                   </div>
                   <div>
-                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', marginBottom: '2px', fontWeight: '600', textTransform: 'uppercase' }}>Email</p>
+                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', marginBottom: '2px', fontWeight: '600', textTransform: 'uppercase' }}>Email</p>
                     <a href="mailto:emailtotrx@gmail.com" style={{ color: 'white', fontWeight: '700', textDecoration: 'none', fontSize: '0.85rem' }}>emailtotrx@gmail.com</a>
                   </div>
                 </div>
@@ -420,24 +454,24 @@ const ProjectDetails = () => {
       </div>
 
       {/* Bottom CTA */}
-      <section style={{ backgroundColor: 'var(--color-navy)', padding: '80px 20px', textAlign: 'center', marginTop: '20px' }}>
+      <section style={{ backgroundColor: '#0a1c3a', padding: isMobile ? '50px 20px' : '80px 20px', textAlign: 'center', marginTop: '20px' }}>
         <div className="container">
-          <p style={{ color: 'var(--color-gold)', fontSize: '0.8rem', letterSpacing: '4px', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '15px' }}>Interested in This Project?</p>
-          <h2 style={{ color: 'white', fontSize: 'clamp(1.8rem, 4vw, 3rem)', fontWeight: '900', marginBottom: '30px' }}>
+          <p style={{ color: '#c69c6d', fontSize: '0.75rem', letterSpacing: '3px', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '15px' }}>Interested in This Project?</p>
+          <h2 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : 'clamp(1.8rem, 4vw, 3rem)', fontWeight: '900', marginBottom: '30px', lineHeight: 1.2 }}>
             Get in Touch with Our Experts
           </h2>
-          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/contact" style={{
-              backgroundColor: 'var(--color-gold)', color: 'white',
-              padding: '16px 40px', borderRadius: '12px', fontWeight: 'bold',
-              textDecoration: 'none', fontSize: '0.95rem', display: 'inline-block'
+              backgroundColor: '#c69c6d', color: 'white',
+              padding: isMobile ? '12px 25px' : '16px 40px', borderRadius: '12px', fontWeight: 'bold',
+              textDecoration: 'none', fontSize: '0.9rem', display: 'inline-block'
             }}>
               Contact Us
             </Link>
             <Link to="/projects" style={{
               backgroundColor: 'transparent', color: 'white',
-              padding: '16px 40px', borderRadius: '12px', fontWeight: 'bold',
-              textDecoration: 'none', fontSize: '0.95rem', display: 'inline-block',
+              padding: isMobile ? '12px 25px' : '16px 40px', borderRadius: '12px', fontWeight: 'bold',
+              textDecoration: 'none', fontSize: '0.9rem', display: 'inline-block',
               border: '2px solid rgba(255,255,255,0.3)'
             }}>
               View All Projects
@@ -445,7 +479,6 @@ const ProjectDetails = () => {
           </div>
         </div>
       </section>
-
     </main>
   );
 };

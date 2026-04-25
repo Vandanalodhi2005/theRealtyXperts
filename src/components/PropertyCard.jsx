@@ -79,9 +79,9 @@ const PropertyCard = ({ property }) => {
           <Link 
             to={linkPath} 
             className="btn btn-outline-primary btn-full"
-            style={{ fontWeight: '700' }}
+            style={{ fontWeight: '700', padding: '10px 15px', fontSize: '0.9rem' }}
           >
-            View {isProject ? 'Project' : 'Property'}
+            View Details
          </Link>
       </div>
     </div>

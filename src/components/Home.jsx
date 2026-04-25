@@ -64,7 +64,7 @@ function Home() {
                 const investData = [
                     ...props.filter(p => p.propertyType === 'investment'),
                     ...projs.filter(p => p.type === 'investment'),
-                    ...invs
+                    ...(invs.data || invs)
                 ];
 
                 setCategories({

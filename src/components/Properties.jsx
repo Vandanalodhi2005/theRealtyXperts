@@ -20,7 +20,14 @@ const Properties = ({ category = 'all' }) => {
     furnishing: 'all'
   });
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -32,8 +39,6 @@ const Properties = ({ category = 'all' }) => {
       const propsData = propsRes.ok ? await propsRes.json() : [];
       const projsData = projsRes.ok ? await projsRes.json() : [];
 
-      // Combine both with a flag to identify projects if needed
-      // but PropertyCard handles both based on field existence
       setProperties([...propsData, ...projsData]);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -44,7 +49,8 @@ const Properties = ({ category = 'all' }) => {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    window.scrollTo(0, 0);
+  }, [fetchData, category]);
 
   const handleFilterChange = (e) => {
     setFilters({
@@ -108,7 +114,7 @@ const Properties = ({ category = 'all' }) => {
     if (filters.propertyType !== 'all' && property.propertyType !== filters.propertyType) return false;
     if (filters.minPrice && property.price < parseInt(filters.minPrice)) return false;
     if (filters.maxPrice && property.price > parseInt(filters.maxPrice)) return false;
-    if (filters.location && !property.location.toLowerCase().includes(filters.location.toLowerCase())) return false;
+    if (filters.location && !property.location?.toLowerCase().includes(filters.location.toLowerCase())) return false;
     if (filters.transaction !== 'all' && property.transaction !== filters.transaction) return false;
     if (filters.status !== 'all' && property.status !== filters.status) return false;
     if (filters.bedroom !== 'all' && property.bedroom?.toString() !== filters.bedroom) return false;
@@ -126,157 +132,176 @@ const Properties = ({ category = 'all' }) => {
   }
 
   return (
-    <main style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', paddingTop: '80px' }}>
-      <section className="section-padding">
-        <div className="container">
+    <main style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', paddingTop: isMobile ? '60px' : '100px' }}>
+      <section style={{ padding: isMobile ? '40px 0' : '60px 0' }}>
+        <div className="container" style={{ padding: isMobile ? '0 15px' : '0 24px' }}>
+          
           {/* Header */}
-          <div className="section-header text-center fade-in-up">
-            <span className="subtitle">Real Estate Portfolio</span>
-            <h2>
+          <div style={{ textAlign: 'center', marginBottom: isMobile ? '30px' : '50px' }}>
+            <span style={{ 
+              display: 'inline-block', 
+              color: 'var(--color-teal)', 
+              fontWeight: '600', 
+              textTransform: 'uppercase', 
+              letterSpacing: isMobile ? '2px' : '4px', 
+              fontSize: '0.8rem', 
+              marginBottom: '10px' 
+            }}>
+              Real Estate Portfolio
+            </span>
+            <h2 style={{ 
+              fontSize: isMobile ? '2rem' : '3.5rem', 
+              fontWeight: '800', 
+              color: 'var(--color-navy)', 
+              marginBottom: '15px',
+              lineHeight: 1.2
+            }}>
               {category === 'residential' ? 'Residential Properties' : category === 'commercial' ? 'Commercial Properties' : 'All Properties'}
             </h2>
-            <div className="divider mx-auto"></div>
-            <p className="section-desc">
-              Discover your perfect property from our extensive collection of residential and commercial spaces defined by excellence.
+            <div style={{ 
+              height: '3px', 
+              width: '60px', 
+              background: 'var(--color-gold)', 
+              margin: '0 auto 20px', 
+              borderRadius: '50px' 
+            }}></div>
+            <p style={{ 
+              fontSize: isMobile ? '0.95rem' : '1.1rem', 
+              color: '#666', 
+              maxWidth: '700px', 
+              margin: '0 auto',
+              lineHeight: 1.6
+            }}>
+              Discover your perfect property from our extensive collection of premium spaces defined by excellence.
             </p>
           </div>
 
-          {/* Filters (Modified to match search-bar-container logic) */}
-          <div className="search-bar-container mx-auto fade-in-up" style={{ marginBottom: '40px', maxWidth: '1000px', animationDelay: '0.1s' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--color-gray)', paddingBottom: '10px' }}>
-              <h3 style={{ fontSize: '1.2rem', color: 'var(--color-navy)' }}><i className="fas fa-filter text-gold" style={{ marginRight: '8px' }}></i> Filter Search</h3>
+          {/* Filters Toggle for Mobile */}
+          {isMobile && (
+            <button 
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              style={{
+                width: '100%',
+                padding: '14px',
+                backgroundColor: 'var(--color-navy)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '10px',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                marginBottom: '20px',
+                boxShadow: '0 4px 15px rgba(10,28,58,0.2)'
+              }}
+            >
+              <HiFilter /> {showMobileFilters ? 'Hide Filters' : 'Show Filters'}
+            </button>
+          )}
+
+          {/* Filters Container */}
+          <div style={{ 
+            display: (isMobile && !showMobileFilters) ? 'none' : 'block',
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: isMobile ? '20px' : '30px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+            marginBottom: '40px',
+            border: '1px solid #eee'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+              <h3 style={{ fontSize: '1.1rem', color: 'var(--color-navy)', fontWeight: '700', margin: 0 }}>
+                <i className="fas fa-filter" style={{ color: 'var(--color-gold)', marginRight: '10px' }}></i> Filter Properties
+              </h3>
               {hasActiveFilters && (
-                <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer', fontWeight: 'bold' }}>
+                <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}>
                   Clear All
                 </button>
               )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-              <select
-                name="category"
-                value={filters.category}
-                onChange={handleFilterChange}
-                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
-              >
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(180px, 1fr))', 
+              gap: '15px' 
+            }}>
+              <select name="category" value={filters.category} onChange={handleFilterChange} style={filterInputStyle}>
                 <option value="all">All Categories</option>
                 <option value="residential">Residential</option>
                 <option value="commercial">Commercial</option>
                 <option value="investment">Investment</option>
               </select>
 
-              <select
-                name="propertyType"
-                value={filters.propertyType}
-                onChange={handleFilterChange}
-                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
-              >
+              <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
                 <option value="all">All Types</option>
                 <option value="apartment">Apartment</option>
                 <option value="villa">Villa</option>
                 <option value="plot">Plot</option>
                 <option value="commercial">Commercial</option>
-                <option value="investment">Investment</option>
               </select>
 
-              <select
-                name="transaction"
-                value={filters.transaction}
-                onChange={handleFilterChange}
-                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
-              >
+              <select name="transaction" value={filters.transaction} onChange={handleFilterChange} style={filterInputStyle}>
                 <option value="all">Sale / Rent</option>
                 <option value="sale">For Sale</option>
                 <option value="rent">For Rent</option>
               </select>
 
-              <select
-                name="status"
-                value={filters.status}
-                onChange={handleFilterChange}
-                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
-              >
+              <select name="status" value={filters.status} onChange={handleFilterChange} style={filterInputStyle}>
                 <option value="all">Any Status</option>
                 <option value="available">Available</option>
                 <option value="sold">Sold</option>
                 <option value="rented">Rented</option>
               </select>
 
-              <select
-                name="bedroom"
-                value={filters.bedroom}
-                onChange={handleFilterChange}
-                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
-                disabled={filters.category === 'commercial' || filters.propertyType === 'plot' || filters.propertyType === 'commercial'}
-              >
+              <select name="bedroom" value={filters.bedroom} onChange={handleFilterChange} style={filterInputStyle} disabled={filters.category === 'commercial'}>
                 <option value="all">Bedrooms (Any)</option>
                 <option value="1">1 BHK</option>
                 <option value="2">2 BHK</option>
                 <option value="3">3 BHK</option>
                 <option value="4">4 BHK</option>
-                <option value="5">5+ BHK</option>
               </select>
 
-              <select
-                name="furnishing"
-                value={filters.furnishing}
-                onChange={handleFilterChange}
-                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
-              >
-                <option value="all">Furnishing (Any)</option>
-                <option value="furnished">Furnished</option>
-                <option value="semi-furnished">Semi-Furnished</option>
-                <option value="unfurnished">Unfurnished</option>
-              </select>
-
-              <input
-                type="number"
-                name="minPrice"
-                placeholder="Min Price (₹)"
-                value={filters.minPrice}
-                onChange={handleFilterChange}
-                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
-              />
-              <input
-                type="number"
-                name="maxPrice"
-                placeholder="Max Price (₹)"
-                value={filters.maxPrice}
-                onChange={handleFilterChange}
-                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
-              />
-
-            </div>
-            <div style={{ marginTop: '15px' }}>
-              <input
-                type="text"
-                name="location"
-                placeholder="Search Location..."
-                value={filters.location}
-                onChange={handleFilterChange}
-                style={{ width: '100%', padding: '12px 15px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
-              />
+              <input type="number" name="minPrice" placeholder="Min Price (₹)" value={filters.minPrice} onChange={handleFilterChange} style={filterInputStyle} />
+              <input type="number" name="maxPrice" placeholder="Max Price (₹)" value={filters.maxPrice} onChange={handleFilterChange} style={filterInputStyle} />
+              <input type="text" name="location" placeholder="Search Location..." value={filters.location} onChange={handleFilterChange} style={filterInputStyle} />
             </div>
           </div>
 
           {/* Properties Grid */}
-          <div className="property-grid">
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(320px, 1fr))', 
+            gap: isMobile ? '20px' : '30px' 
+          }}>
             {filteredProperties.map((property) => (
               <PropertyCard key={property._id} property={property} />
             ))}
           </div>
 
           {filteredProperties.length === 0 && (
-            <div className="text-center section-padding fade-in-up">
-              <i className="fas fa-building" style={{ fontSize: '4rem', color: 'var(--color-gray)', marginBottom: '20px' }}></i>
-              <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '10px' }}>No properties found</h3>
-              <p className="text-slate-500">Try adjusting your filters or check back later for new premium listings.</p>
+            <div style={{ textAlign: 'center', padding: '60px 0' }}>
+              <i className="fas fa-search" style={{ fontSize: '3rem', color: '#ddd', marginBottom: '20px' }}></i>
+              <h3 style={{ color: 'var(--color-navy)', fontSize: '1.4rem' }}>No properties match your criteria</h3>
+              <p style={{ color: '#888' }}>Try adjusting your filters or clearing them to see all properties.</p>
             </div>
           )}
         </div>
       </section>
     </main>
   );
+};
+
+const filterInputStyle = {
+  width: '100%',
+  padding: '12px 15px',
+  borderRadius: '8px',
+  border: '1px solid #ddd',
+  outline: 'none',
+  fontSize: '0.9rem',
+  color: '#333',
+  backgroundColor: '#f9f9f9',
+  transition: 'border-color 0.2s'
 };
 
 Properties.propTypes = {

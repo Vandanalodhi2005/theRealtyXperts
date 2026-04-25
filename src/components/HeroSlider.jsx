@@ -31,14 +31,21 @@ const slides = [
 
 const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const navigate = useNavigate();
 
-  // Auto-advance slides every 5 seconds
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 5000);
-    return () => clearInterval(timer);
+    }, 6000);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearInterval(timer);
+    };
   }, []);
 
   const goToSlide = (index) => {
@@ -46,62 +53,152 @@ const HeroSlider = () => {
   };
 
   return (
-    <div className="relative w-full h-[70vh] min-h-[500px] overflow-hidden bg-slate-900 group">
+    <div style={{ 
+      position: 'relative', 
+      width: '100%', 
+      height: isMobile ? '70vh' : '85vh', 
+      minHeight: '500px', 
+      overflow: 'hidden', 
+      backgroundColor: '#0a1c3a' 
+    }}>
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
           key={slide.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-            }`}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            transition: 'opacity 1s ease-in-out',
+            opacity: index === currentSlide ? 1 : 0,
+            zIndex: index === currentSlide ? 10 : 0
+          }}
         >
-          {/* Background Image with Zoom animation */}
-          <div className="absolute inset-0 overflow-hidden">
+          {/* Background Image */}
+          <div style={{ position: 'absolute', inset: 0 }}>
             <img
               src={slide.image}
               alt={slide.title}
-              className={`w-full h-full object-cover transition-transform duration-[10000ms] ease-linear ${index === currentSlide ? 'scale-110' : 'scale-100'
-                }`}
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover',
+                transform: index === currentSlide ? 'scale(1.1)' : 'scale(1)',
+                transition: 'transform 10s linear'
+              }}
             />
           </div>
 
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-transparent" />
+          {/* Gradients */}
+          <div style={{ 
+            position: 'absolute', 
+            inset: 0, 
+            background: 'linear-gradient(to top, rgba(10, 28, 58, 0.9) 0%, rgba(10, 28, 58, 0.4) 50%, transparent 100%)' 
+          }} />
+          <div style={{ 
+            position: 'absolute', 
+            inset: 0, 
+            background: 'linear-gradient(to right, rgba(10, 28, 58, 0.8) 0%, transparent 70%)' 
+          }} />
 
-          {/* Text Content */}
-          <div className="absolute inset-0 flex items-center px-4 sm:px-8 lg:px-16 max-w-7xl mx-auto h-full w-full">
-            <div className={`max-w-xl transition-all duration-1000 transform ${index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-              }`}>
-              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
+          {/* Content Container */}
+          <div style={{ 
+            position: 'absolute', 
+            inset: 0, 
+            display: 'flex', 
+            alignItems: 'center', 
+            padding: isMobile ? '0 20px' : '0 60px',
+            maxWidth: '1280px',
+            margin: '0 auto'
+          }}>
+            <div style={{ 
+              maxWidth: '800px',
+              transition: 'all 1s transform, 1s opacity',
+              transform: index === currentSlide ? 'translateY(0)' : 'translateY(30px)',
+              opacity: index === currentSlide ? 1 : 0
+            }}>
+              <h1 style={{ 
+                fontSize: isMobile ? '2.5rem' : '4.5rem', 
+                fontWeight: '800', 
+                color: 'white', 
+                marginBottom: '20px', 
+                lineHeight: '1.1',
+                textShadow: '0 4px 15px rgba(0,0,0,0.3)'
+              }}>
                 {slide.title}
               </h1>
-              <p className="text-lg sm:text-xl text-slate-200 mb-8 max-w-lg leading-relaxed drop-shadow-md border-l-4 border-blue-500 pl-4">
+              <p style={{ 
+                fontSize: isMobile ? '1rem' : '1.25rem', 
+                color: '#e2e8f0', 
+                marginBottom: '35px', 
+                maxWidth: '600px', 
+                lineHeight: '1.6',
+                borderLeft: '4px solid #c69c6d',
+                paddingLeft: '20px'
+              }}>
                 {slide.subtitle}
               </p>
+              
               <button
                 onClick={() => navigate(slide.link)}
-                className="group/btn relative inline-flex items-center gap-3 bg-[#C69C6D] text-[#0A1C3A] px-10 py-5 rounded-full font-black text-xs uppercase tracking-[0.3em] overflow-hidden transition-all duration-500 hover:bg-[#0A1C3A] hover:text-white hover:shadow-[0_15px_40px_rgba(198,156,109,0.4)] hover:-translate-y-1 active:scale-95"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  backgroundColor: '#c69c6d',
+                  color: '#0a1c3a',
+                  padding: isMobile ? '14px 28px' : '16px 40px',
+                  borderRadius: '50px',
+                  border: 'none',
+                  fontWeight: '700',
+                  fontSize: isMobile ? '0.85rem' : '1rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  boxShadow: '0 10px 20px rgba(198, 156, 109, 0.3)',
+                  whiteSpace: 'nowrap'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-3px)';
+                  e.currentTarget.style.boxShadow = '0 15px 30px rgba(198, 156, 109, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 10px 20px rgba(198, 156, 109, 0.3)';
+                }}
               >
-                <span className="relative z-10">{slide.buttonText}</span>
-                <HiArrowRight className="relative z-10 w-5 h-5 transition-transform duration-500 group-hover/btn:translate-x-2" />
-                <div className="absolute inset-0 bg-[#0A1C3A] translate-y-full transition-transform duration-500 group-hover/btn:translate-y-0" />
+                {slide.buttonText}
+                <HiArrowRight size={20} />
               </button>
             </div>
           </div>
         </div>
       ))}
 
-      {/* Manual Slide Controls/Dots */}
-      <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center gap-3">
+      {/* Navigation Dots */}
+      <div style={{ 
+        position: 'absolute', 
+        bottom: '30px', 
+        left: 0, 
+        right: 0, 
+        zIndex: 20, 
+        display: 'flex', 
+        justifyContent: 'center', 
+        gap: '12px' 
+      }}>
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`transition-all duration-300 rounded-full ${index === currentSlide
-              ? 'w-8 h-2.5 bg-blue-500'
-              : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/80'
-              }`}
-            aria-label={`Go to slide ${index + 1}`}
+            style={{
+              width: index === currentSlide ? '30px' : '10px',
+              height: '10px',
+              borderRadius: '10px',
+              backgroundColor: index === currentSlide ? '#c69c6d' : 'rgba(255,255,255,0.5)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s'
+            }}
           />
         ))}
       </div>

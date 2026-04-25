@@ -42,15 +42,7 @@ function Header() {
                     <Link to="/residential" className={isActive('/residential')}>Residential</Link>
                     <Link to="/commercial" className={isActive('/commercial')}>Commercial</Link>
                     <Link to="/investment" className={isActive('/investment')}>Investment</Link>
-                    
-                    <div className="dropdown">
-                        <Link to="/projects" className={`dropdown-toggle ${isActive('/projects')}`}>Projects</Link>
-                        <div className="dropdown-menu">
-                            <Link to="/projects/residential">Residential Projects</Link>
-                            <Link to="/projects/commercial">Commercial Projects</Link>
-                            <Link to="/projects/investment">Investment Projects</Link>
-                        </div>
-                    </div>
+                    <Link to="/projects" className={isActive('/projects')}>Projects</Link>
                     <Link to="/gallery" className={isActive('/gallery')}>Gallery</Link>
                     <Link to="/services" className={isActive('/services')}>Services</Link>
                     <Link to="/contact" className="btn btn-nav-contact">
