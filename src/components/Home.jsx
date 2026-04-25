@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropertyCard from './PropertyCard';
 import HeroSlider from './HeroSlider';
+import { API_URL } from '../apiConfig';
 
 function Home() {
     const navigate = useNavigate();
@@ -38,9 +39,9 @@ function Home() {
         const fetchData = async () => {
             try {
                 const [propsRes, projsRes, invsRes] = await Promise.all([
-                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`),
-                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects`),
-                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments`)
+                    fetch(`${API_URL}/api/properties`),
+                    fetch(`${API_URL}/api/projects`),
+                    fetch(`${API_URL}/api/investments`)
                 ]);
 
                 const props = propsRes.ok ? await propsRes.json() : [];

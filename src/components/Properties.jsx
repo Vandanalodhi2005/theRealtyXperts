@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { HiHome, HiOfficeBuilding, HiLocationMarker, HiCurrencyRupee, HiFilter, HiX } from 'react-icons/hi';
 import PropTypes from 'prop-types';
 import PropertyCard from './PropertyCard';
+import { API_URL } from '../apiConfig';
 
 const Properties = ({ category = 'all' }) => {
   const [properties, setProperties] = useState([]);
@@ -24,8 +25,8 @@ const Properties = ({ category = 'all' }) => {
   const fetchData = useCallback(async () => {
     try {
       const [propsRes, projsRes] = await Promise.all([
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`),
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects`)
+        fetch(`${API_URL}/api/properties`),
+        fetch(`${API_URL}/api/projects`)
       ]);
 
       const propsData = propsRes.ok ? await propsRes.json() : [];

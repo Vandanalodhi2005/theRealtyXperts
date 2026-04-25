@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropertyCard from './PropertyCard';
+import { API_URL } from '../apiConfig';
 
 const Projects = ({ type = 'all' }) => {
   const [projects, setProjects] = useState([]);
@@ -14,8 +15,8 @@ const Projects = ({ type = 'all' }) => {
   const fetchProjects = async () => {
     try {
       const url = type && type !== 'all' 
-        ? `${import.meta.env.VITE_BACKEND_URL}/api/projects?type=${type}`
-        : `${import.meta.env.VITE_BACKEND_URL}/api/projects`;
+        ? `${API_URL}/api/projects?type=${type}`
+        : `${API_URL}/api/projects`;
         
       const response = await fetch(url);
       if (response.ok) {
