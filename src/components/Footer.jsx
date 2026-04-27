@@ -80,8 +80,8 @@ function Footer() {
                 <div className="footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', padding: '25px 0', marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                     <p style={{ margin: 0, color: 'var(--color-gray)', opacity: 0.8 }}>&copy; {new Date().getFullYear()} The Realty Xperts. All rights reserved.</p>
                     <div style={{ display: 'flex', gap: '20px' }}>
-                        <Link to="#" style={{ color: 'var(--color-gray)', opacity: 0.8, textDecoration: 'none', fontSize: '0.9rem' }}>Privacy Policy</Link>
-                        <Link to="#" style={{ color: 'var(--color-gray)', opacity: 0.8, textDecoration: 'none', fontSize: '0.9rem' }}>Terms of Service</Link>
+                        <Link to="/privacy" style={{ color: 'var(--color-gray)', opacity: 0.8, textDecoration: 'none', fontSize: '0.9rem' }}>Privacy Policy</Link>
+                        <Link to="/terms" style={{ color: 'var(--color-gray)', opacity: 0.8, textDecoration: 'none', fontSize: '0.9rem' }}>Terms of Service</Link>
                         <Link to="/admin/login" style={{ color: 'var(--color-gold)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 'bold' }}>Admin Login</Link>
                     </div>
                 </div>

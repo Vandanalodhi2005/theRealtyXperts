@@ -338,6 +338,50 @@ function About() {
                             <div style={{ height: '3px', width: '35px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
                             <p style={{ fontSize: '0.95rem', color: 'var(--color-dark-gray)', fontStyle: 'italic', lineHeight: '1.6', maxWidth: '240px', margin: '0 auto' }}>"Expertise in high-value property transactions and bespoke client relations."</p>
                         </div>
+
+                        {/* Prashant Chaudhary Card */}
+                        <div className="animate-on-scroll team-card" style={{ 
+                            backgroundColor: 'white', 
+                            borderRadius: 'var(--radius-lg)', 
+                            padding: '45px 30px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+                            textAlign: 'center',
+                            borderTop: '5px solid var(--color-gold)',
+                            transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}>
+                            <div className="team-image-wrapper" style={{ 
+                                width: '170px', 
+                                height: '170px', 
+                                borderRadius: '50%', 
+                                overflow: 'hidden',
+                                margin: '0 auto 25px',
+                                border: '6px solid white',
+                                boxShadow: '0 5px 20px rgba(0,0,0,0.15)',
+                                position: 'relative',
+                                background: '#f0f0f0'
+                            }}>
+                                <img 
+                                    src="/about/prashant.jpeg" 
+                                    alt="Prashant Chaudhary" 
+                                    style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover',
+                                        filter: 'brightness(1.02) contrast(1.08) saturate(1.1)',
+                                        imageRendering: 'auto',
+                                        transition: 'transform 0.5s ease'
+                                    }} 
+                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                />
+                            </div>
+                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '5px', fontWeight: '800' }}>Prashant Chaudhary</h3>
+                            <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>GM Sales</p>
+                            <div style={{ height: '3px', width: '35px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
+                            <p style={{ fontSize: '0.95rem', color: 'var(--color-dark-gray)', fontStyle: 'italic', lineHeight: '1.6', maxWidth: '240px', margin: '0 auto' }}>"Committed to delivering unparalleled real estate solutions and client satisfaction."</p>
+                        </div>
                     </div>
                 </div>
             </section>

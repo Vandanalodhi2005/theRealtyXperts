@@ -1,37 +1,70 @@
+import { useEffect } from 'react';
+
 const TermsAndConditions = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-6 text-center">
-            Terms and Conditions
-          </h1>
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="prose max-w-none">
-              <h2>1. Acceptance of Terms</h2>
-              <p>By accessing and using SunRise Properties website, you accept and agree to be bound by the terms and provision of this agreement.</p>
+    <div className="terms-page" style={{ backgroundColor: '#f8f9fa', padding: '60px 0' }}>
+      <div className="container">
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          {/* Header Section */}
+          <div className="section-header text-center" style={{ marginBottom: '50px' }}>
+            <span className="subtitle" style={{ color: 'var(--color-gold)', letterSpacing: '4px' }}>TRX GUIDELINES</span>
+            <h1 style={{ fontSize: '3rem', color: 'var(--color-navy)', fontWeight: '900' }}>Terms of Service</h1>
+            <div className="divider mx-auto" style={{ background: 'var(--color-gold)' }}></div>
+            <p style={{ color: 'var(--color-dark-gray)', opacity: 0.7 }}>Last Updated: April 2024</p>
+          </div>
 
-              <h2>2. Use License</h2>
-              <p>Permission is granted to temporarily download one copy of the materials on SunRise Properties&apos;s website for personal, non-commercial transitory viewing only.</p>
+          <div style={{ 
+            backgroundColor: 'white', 
+            padding: '50px', 
+            borderRadius: 'var(--radius-lg)', 
+            boxShadow: 'var(--shadow-md)',
+            lineHeight: '1.8',
+            color: 'var(--color-dark-gray)'
+          }}>
+            <section style={{ marginBottom: '40px' }}>
+              <h2 style={{ fontSize: '1.8rem', color: 'var(--color-navy)', marginBottom: '20px' }}>1. Agreement to Terms</h2>
+              <p>By accessing the website at <strong>The Realty Xperts (TRX)</strong>, you are agreeing to be bound by these terms of service, all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws.</p>
+            </section>
 
-              <h2>3. Disclaimer</h2>
-              <p>The materials on SunRise Properties&apos;s website are provided on an &apos;as is&apos; basis. SunRise Properties makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.</p>
+            <section style={{ marginBottom: '40px' }}>
+              <h2 style={{ fontSize: '1.8rem', color: 'var(--color-navy)', marginBottom: '20px' }}>2. Use License</h2>
+              <p>Permission is granted to temporarily view the materials (information or images) on TRX&apos;s website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:</p>
+              <ul style={{ paddingLeft: '20px', marginTop: '10px' }}>
+                <li>Modify or copy the materials;</li>
+                <li>Use the materials for any commercial purpose, or for any public display;</li>
+                <li>Attempt to decompile or reverse engineer any software contained on TRX&apos;s website;</li>
+                <li>Remove any copyright or other proprietary notations from the materials.</li>
+              </ul>
+            </section>
 
-              <h2>4. Limitations</h2>
-              <p>In no event shall SunRise Properties or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on SunRise Properties&apos;s website.</p>
+            <section style={{ marginBottom: '40px' }}>
+              <h2 style={{ fontSize: '1.8rem', color: 'var(--color-navy)', marginBottom: '20px' }}>3. Real Estate Disclaimer</h2>
+              <p>The materials on TRX&apos;s website are provided on an &apos;as is&apos; basis. While we strive for accuracy, TRX makes no warranties, expressed or implied, regarding the completeness or accuracy of property listings, prices, or availability. All real estate investments carry risk, and clients are encouraged to perform their own due diligence.</p>
+            </section>
 
-              <h2>5. Accuracy of Materials</h2>
-              <p>The materials appearing on SunRise Properties&apos;s website could include technical, typographical, or photographic errors. SunRise Properties does not warrant that any of the materials on its website are accurate, complete, or current.</p>
+            <section style={{ marginBottom: '40px' }}>
+              <h2 style={{ fontSize: '1.8rem', color: 'var(--color-navy)', marginBottom: '20px' }}>4. Limitations of Liability</h2>
+              <p>In no event shall TRX or its consultants be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on TRX&apos;s website, even if TRX has been notified orally or in writing of the possibility of such damage.</p>
+            </section>
 
-              <h2>6. Links</h2>
-              <p>SunRise Properties has not reviewed all of the sites linked to its website and is not responsible for the contents of any such linked site.</p>
+            <section style={{ marginBottom: '40px' }}>
+              <h2 style={{ fontSize: '1.8rem', color: 'var(--color-navy)', marginBottom: '20px' }}>5. Accuracy of Property Information</h2>
+              <p>The property materials appearing on TRX&apos;s website could include technical, typographical, or photographic errors. TRX does not warrant that any of the materials on its website are accurate, complete or current. TRX may make changes to the materials contained on its website at any time without notice.</p>
+            </section>
 
-              <h2>7. Modifications</h2>
-              <p>SunRise Properties may revise these terms of service for its website at any time without notice. By using this website you are agreeing to be bound by the then current version of these terms of service.</p>
+            <section style={{ marginBottom: '40px' }}>
+              <h2 style={{ fontSize: '1.8rem', color: 'var(--color-navy)', marginBottom: '20px' }}>6. Governing Law</h2>
+              <p>These terms and conditions are governed by and construed in accordance with the laws of India and you irrevocably submit to the exclusive jurisdiction of the courts in Noida, Uttar Pradesh.</p>
+            </section>
 
-              <h2>8. Governing Law</h2>
-              <p>These terms and conditions are governed by and construed in accordance with the laws of India and you irrevocably submit to the exclusive jurisdiction of the courts in that state or location.</p>
-            </div>
+            <section>
+              <h2 style={{ fontSize: '1.8rem', color: 'var(--color-navy)', marginBottom: '20px' }}>7. Contact Information</h2>
+              <p>For any questions regarding these terms, please contact us at <strong>emailtotrx@gmail.com</strong>.</p>
+            </section>
           </div>
         </div>
       </div>
