@@ -207,88 +207,136 @@ function About() {
                         marginTop: '50px',
                         justifyContent: 'center'
                     }}>
-                        {/* AGM Card */}
-                        <div className="animate-on-scroll" style={{ 
+                        {/* Ashu Tiwari Card */}
+                        <div className="animate-on-scroll team-card" style={{ 
                             backgroundColor: 'white', 
                             borderRadius: 'var(--radius-lg)', 
-                            padding: '50px 30px',
-                            boxShadow: 'var(--shadow-md)',
+                            padding: '45px 30px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                             textAlign: 'center',
                             borderTop: '5px solid var(--color-gold)',
-                            transition: 'all 0.3s ease'
+                            transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
+                            position: 'relative',
+                            overflow: 'hidden'
                         }}>
-                            <div style={{ 
-                                width: '120px', 
-                                height: '120px', 
+                            <div className="team-image-wrapper" style={{ 
+                                width: '170px', 
+                                height: '170px', 
                                 borderRadius: '50%', 
-                                backgroundColor: 'rgba(10, 28, 58, 0.05)', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                margin: '0 auto 30px',
-                                border: '2px solid rgba(198, 156, 109, 0.2)'
+                                overflow: 'hidden',
+                                margin: '0 auto 25px',
+                                border: '6px solid white',
+                                boxShadow: '0 5px 20px rgba(0,0,0,0.15)',
+                                position: 'relative',
+                                background: '#f0f0f0'
                             }}>
-                                <i className="fas fa-user-tie" style={{ fontSize: '3.5rem', color: 'var(--color-gold)' }}></i>
+                                <img 
+                                    src="/about/ashu.jpeg" 
+                                    alt="Ashu Tiwari" 
+                                    style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover',
+                                        filter: 'brightness(1.02) contrast(1.08) saturate(1.1)',
+                                        imageRendering: 'auto',
+                                        transition: 'transform 0.5s ease'
+                                    }} 
+                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                />
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '8px' }}>Mr. Tiwari</h3>
-                            <div style={{ height: '2px', width: '40px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
-                            <p style={{ color: 'var(--color-gold)', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>AGM Manager</p>
+                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '5px', fontWeight: '800' }}>Ashu Tiwari</h3>
+                            <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>GM Sales & Marketing</p>
+                            <div style={{ height: '3px', width: '35px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
+                            <p style={{ fontSize: '0.95rem', color: 'var(--color-dark-gray)', fontStyle: 'italic', lineHeight: '1.6', maxWidth: '240px', margin: '0 auto' }}>"Driving strategic growth and market presence through leadership excellence."</p>
                         </div>
 
-                        {/* HR Card */}
-                        <div className="animate-on-scroll" style={{ 
+                        {/* Pragya Tiwari Card */}
+                        <div className="animate-on-scroll team-card" style={{ 
                             backgroundColor: 'white', 
                             borderRadius: 'var(--radius-lg)', 
-                            padding: '50px 30px',
-                            boxShadow: 'var(--shadow-md)',
+                            padding: '45px 30px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                             textAlign: 'center',
                             borderTop: '5px solid var(--color-gold)',
-                            transition: 'all 0.3s ease'
+                            transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
+                            position: 'relative',
+                            overflow: 'hidden'
                         }}>
-                            <div style={{ 
-                                width: '120px', 
-                                height: '120px', 
+                            <div className="team-image-wrapper" style={{ 
+                                width: '170px', 
+                                height: '170px', 
                                 borderRadius: '50%', 
-                                backgroundColor: 'rgba(10, 28, 58, 0.05)', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                margin: '0 auto 30px',
-                                border: '2px solid rgba(198, 156, 109, 0.2)'
+                                overflow: 'hidden',
+                                margin: '0 auto 25px',
+                                border: '6px solid white',
+                                boxShadow: '0 5px 20px rgba(0,0,0,0.15)',
+                                position: 'relative',
+                                background: '#f0f0f0'
                             }}>
-                                <i className="fas fa-user-circle" style={{ fontSize: '3.5rem', color: 'var(--color-gold)' }}></i>
+                                <img 
+                                    src="/about/pragya.jpeg" 
+                                    alt="Pragya Tiwari" 
+                                    style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover',
+                                        filter: 'brightness(1.02) contrast(1.08) saturate(1.1)',
+                                        imageRendering: 'auto',
+                                        transition: 'transform 0.5s ease'
+                                    }} 
+                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                />
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '8px' }}>Mr. Pragya Tiwari</h3>
-                            <div style={{ height: '2px', width: '40px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
-                            <p style={{ color: 'var(--color-gold)', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>HR Manager</p>
+                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '5px', fontWeight: '800' }}>Pragya Tiwari</h3>
+                            <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>HR Head & Admin</p>
+                            <div style={{ height: '3px', width: '35px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
+                            <p style={{ fontSize: '0.95rem', color: 'var(--color-dark-gray)', fontStyle: 'italic', lineHeight: '1.6', maxWidth: '240px', margin: '0 auto' }}>"Fostering a culture of excellence and operational efficiency."</p>
                         </div>
 
-                        {/* Sales Card */}
-                        <div className="animate-on-scroll" style={{ 
+                        {/* Kundan Jha Card */}
+                        <div className="animate-on-scroll team-card" style={{ 
                             backgroundColor: 'white', 
                             borderRadius: 'var(--radius-lg)', 
-                            padding: '50px 30px',
-                            boxShadow: 'var(--shadow-md)',
+                            padding: '45px 30px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                             textAlign: 'center',
                             borderTop: '5px solid var(--color-gold)',
-                            transition: 'all 0.3s ease'
+                            transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
+                            position: 'relative',
+                            overflow: 'hidden'
                         }}>
-                            <div style={{ 
-                                width: '120px', 
-                                height: '120px', 
+                            <div className="team-image-wrapper" style={{ 
+                                width: '170px', 
+                                height: '170px', 
                                 borderRadius: '50%', 
-                                backgroundColor: 'rgba(10, 28, 58, 0.05)', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                margin: '0 auto 30px',
-                                border: '2px solid rgba(198, 156, 109, 0.2)'
+                                overflow: 'hidden',
+                                margin: '0 auto 25px',
+                                border: '6px solid white',
+                                boxShadow: '0 5px 20px rgba(0,0,0,0.15)',
+                                position: 'relative',
+                                background: '#f0f0f0'
                             }}>
-                                <i className="fas fa-chart-line" style={{ fontSize: '3.5rem', color: 'var(--color-gold)' }}></i>
+                                <img 
+                                    src="/about/kundan.jpeg" 
+                                    alt="Kundan Jha" 
+                                    style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover',
+                                        filter: 'brightness(1.02) contrast(1.08) saturate(1.1)',
+                                        imageRendering: 'auto',
+                                        transition: 'transform 0.5s ease'
+                                    }} 
+                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                />
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '8px' }}>Mr. Deepak Sharma</h3>
-                            <div style={{ height: '2px', width: '40px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
-                            <p style={{ color: 'var(--color-gold)', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Sales Manager</p>
+                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '5px', fontWeight: '800' }}>Kundan Jha</h3>
+                            <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>GM Sales</p>
+                            <div style={{ height: '3px', width: '35px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
+                            <p style={{ fontSize: '0.95rem', color: 'var(--color-dark-gray)', fontStyle: 'italic', lineHeight: '1.6', maxWidth: '240px', margin: '0 auto' }}>"Expertise in high-value property transactions and bespoke client relations."</p>
                         </div>
                     </div>
                 </div>

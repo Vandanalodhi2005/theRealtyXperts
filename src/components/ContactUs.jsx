@@ -47,12 +47,28 @@ function Contact() {
             });
 
             // 2. Submit to EmailJS (Frontend Backup Notification)
+            const professionalMessage = `
+--- NEW CONTACT INQUIRY ---
+
+NAME: ${fullName}
+EMAIL: ${formData.email}
+PHONE: ${formData.phone}
+SUBJECT: ${formData.subject}
+
+MESSAGE CONTENT:
+--------------------------------
+${formData.message}
+--------------------------------
+
+Sent via TRX Website Contact Form
+            `.trim();
+
             const templateParams = {
                 from_name: fullName,
                 from_email: formData.email,
                 phone: formData.phone,
-                subject: formData.subject,
-                message: formData.message,
+                subject: `Website Inquiry: ${formData.subject}`,
+                message: professionalMessage,
                 to_name: 'The Realty Xperts Team'
             };
 
