@@ -14,8 +14,13 @@ function Contact() {
     });
     const [submitting, setSubmitting] = useState(false);
 
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+
     useEffect(() => {
         window.scrollTo(0, 0);
+        const handleResize = () => setIsMobile(window.innerWidth <= 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     const handleChange = (e) => {
@@ -109,53 +114,53 @@ Sent via TRX Website Contact Form
                 <div className="container">
                     <div className="section-header text-center">
                         <span className="subtitle">Get In Touch</span>
-                        <h2>Contact The Realty Xperts</h2>
+                        <h2 style={{ fontSize: isMobile ? '2rem' : '3.5rem' }}>Contact The Realty Xperts</h2>
                         <div className="divider mx-auto"></div>
                         <p className="section-desc">We are always ready to help you find your dream address or answer any questions.</p>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px', marginTop: '40px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px', marginTop: '40px' }}>
                         
                         {/* Contact Information Cards */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            <div style={{ backgroundColor: 'var(--color-white)', padding: '30px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(0,128,128,0.1)', color: 'var(--color-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+                            <div style={{ backgroundColor: 'var(--color-white)', padding: isMobile ? '20px' : '30px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(0,128,128,0.1)', color: 'var(--color-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>
                                     <i className="fas fa-phone-alt"></i>
                                 </div>
                                 <div>
-                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '5px', color: 'var(--color-navy)' }}>Call Us Directly</h3>
-                                    <a href="tel:9264175587" style={{ color: 'var(--color-dark-gray)', textDecoration: 'none', fontSize: '1.1rem', fontWeight: '600' }}>926-417-5587</a>
-                                    <p style={{ color: 'var(--color-gold)', fontSize: '0.9rem', marginTop: '5px' }}>Sameer Tiwari</p>
+                                    <h3 style={{ fontSize: '1.1rem', marginBottom: '5px', color: 'var(--color-navy)' }}>Call Us Directly</h3>
+                                    <a href="tel:9264175587" style={{ color: 'var(--color-dark-gray)', textDecoration: 'none', fontSize: isMobile ? '1rem' : '1.1rem', fontWeight: '600' }}>926-417-5587</a>
+                                    <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', marginTop: '5px' }}>Sameer Tiwari</p>
                                 </div>
                             </div>
 
-                            <div style={{ backgroundColor: 'var(--color-white)', padding: '30px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(0,128,128,0.1)', color: 'var(--color-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+                            <div style={{ backgroundColor: 'var(--color-white)', padding: isMobile ? '20px' : '30px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(0,128,128,0.1)', color: 'var(--color-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>
                                     <i className="fas fa-envelope"></i>
                                 </div>
                                 <div>
-                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '5px', color: 'var(--color-navy)' }}>Email Us</h3>
-                                    <a href="mailto:Emailtotrx@gmail.com" style={{ color: 'var(--color-dark-gray)', textDecoration: 'none', fontSize: '1.1rem', fontWeight: '600' }}>Emailtotrx@gmail.com</a>
+                                    <h3 style={{ fontSize: '1.1rem', marginBottom: '5px', color: 'var(--color-navy)' }}>Email Us</h3>
+                                    <a href="mailto:Emailtotrx@gmail.com" style={{ color: 'var(--color-dark-gray)', textDecoration: 'none', fontSize: isMobile ? '0.95rem' : '1.1rem', fontWeight: '600', wordBreak: 'break-all' }}>Emailtotrx@gmail.com</a>
                                 </div>
                             </div>
 
-                            <div style={{ backgroundColor: 'var(--color-white)', padding: '30px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(0,128,128,0.1)', color: 'var(--color-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+                            <div style={{ backgroundColor: 'var(--color-white)', padding: isMobile ? '20px' : '30px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(0,128,128,0.1)', color: 'var(--color-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>
                                     <i className="fas fa-clock"></i>
                                 </div>
                                 <div>
-                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '5px', color: 'var(--color-navy)' }}>Business Legacy</h3>
-                                    <p style={{ color: 'var(--color-dark-gray)' }}>Delivering excellence since <strong>2016</strong>.</p>
+                                    <h3 style={{ fontSize: '1.1rem', marginBottom: '5px', color: 'var(--color-navy)' }}>Business Legacy</h3>
+                                    <p style={{ color: 'var(--color-dark-gray)', fontSize: '0.95rem' }}>Delivering excellence since <strong>2016</strong>.</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Contact Form */}
-                        <div style={{ backgroundColor: 'var(--color-white)', padding: '40px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', border: '1px solid #eee' }}>
-                            <h3 style={{ marginBottom: '25px', fontSize: '1.5rem', color: 'var(--color-navy)' }}>Send Us A Message</h3>
+                        <div style={{ backgroundColor: 'var(--color-white)', padding: isMobile ? '25px' : '40px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', border: '1px solid #eee' }}>
+                            <h3 style={{ marginBottom: '25px', fontSize: '1.4rem', color: 'var(--color-navy)' }}>Send Us A Message</h3>
                             
                             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
                                     <input 
                                         type="text" 
                                         name="first_name"

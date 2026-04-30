@@ -8,6 +8,7 @@ function Home() {
     const navigate = useNavigate();
 
     const [activeTab, setActiveTab] = useState('residential');
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
     const [categories, setCategories] = useState({
         residential: [],
         commercial: [],
@@ -16,6 +17,10 @@ function Home() {
     });
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+        const handleResize = () => setIsMobile(window.innerWidth <= 1024);
+        window.addEventListener('resize', handleResize);
+        
         // Observer for animations
         const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
         const fadeObserver = new IntersectionObserver((entries, observer) => {
@@ -80,7 +85,10 @@ function Home() {
 
         fetchData();
 
-        return () => fadeObserver.disconnect();
+        return () => {
+            fadeObserver.disconnect();
+            window.removeEventListener('resize', handleResize);
+        };
     }, []);
 
     const handleSearchSubmit = (e) => {
@@ -110,7 +118,7 @@ function Home() {
                         {description && <p className="section-desc">{description}</p>}
                     </div>
 
-                    <div className="property-grid">
+                    <div className="property-grid" style={{ gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(320px, 1fr))' }}>
                         {data.map((item, idx) => (
                             <PropertyCard key={item._id || idx} property={item} />
                         ))}
@@ -163,7 +171,7 @@ function Home() {
                     </div>
 
                     {/* Dynamic Property Grid (The 'Shop' View) */}
-                    <div className="property-grid animate-fade-in" key={activeTab} style={{ marginTop: '60px' }}>
+                    <div className="property-grid animate-fade-in" key={activeTab} style={{ marginTop: '60px', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(320px, 1fr))' }}>
                         {categories[activeTab]?.slice(0, 4).map((item, idx) => (
                             <PropertyCard key={item._id || idx} property={item} />
                         ))}
@@ -221,7 +229,12 @@ function Home() {
             {/* About TRX Section */}
             <section className="section-padding" style={{ backgroundColor: 'white' }}>
                 <div className="container">
-                    <div className="about-highlights-grid">
+                    <div className="about-highlights-grid" style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
+                        gap: isMobile ? '40px' : '80px',
+                        alignItems: 'center'
+                    }}>
                         <div className="about-image-side section-header">
                             <div className="premium-image-container">
                                 <img
@@ -238,20 +251,20 @@ function Home() {
                         </div>
 
                         <div className="about-content-side section-header">
-                            <span className="subtitle" style={{ letterSpacing: '4px' }}>ABOUT REALTY XPERTS</span>
-                            <h2 className="about-title">
+                            <span className="subtitle" style={{ letterSpacing: isMobile ? '2px' : '4px' }}>ABOUT REALTY XPERTS</span>
+                            <h2 style={{ fontSize: isMobile ? '1.8rem' : '2.8rem', color: 'var(--color-navy)', lineHeight: '1.2', fontWeight: '800', marginBottom: '1rem' }}>
                                 Congruence | Consistency | Curator
                             </h2>
-                            <h3 className="about-tagline">
+                            <h3 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', color: 'var(--color-teal)', marginBottom: '1.5rem', fontWeight: '600' }}>
                                 Building Better Lives With Every Home
                             </h3>
                             <div className="divider"></div>
 
-                            <div className="about-text" style={{ textAlign: 'justify' }}>
-                                <p>
+                            <div className="about-text" style={{ textAlign: 'justify', fontSize: isMobile ? '0.9rem' : '1.05rem' }}>
+                                <p style={{ marginBottom: '1rem' }}>
                                     At <strong className="text-navy">The Realty Xperts</strong>, our zeal is to create milestones that meet universal eminence, exemplify the esteem of our organization, and are crafted on a legacy of belief traversed over centuries. We are steered by our foresightedness of <strong className="text-teal">‘Creating a better living’</strong> and trust that real estate transfigures lives. Any place you buy is a springboard for the desire and dreams, for living a flourishing and persuasive life.
                                 </p>
-                                <p>
+                                <p style={{ marginBottom: '1rem' }}>
                                     We have the adroitness to deliver both attribute and commitment, at an inimitable swiftness. By forging the magnificent worldwide confederation, and deploying the finest people and procedures, we generate the best benefits for our consumers beyond landscapes, markets, and customer tranche.
                                 </p>
                                 <p>
@@ -260,7 +273,7 @@ function Home() {
                             </div>
 
                             <div style={{ marginTop: '2.5rem' }}>
-                                <Link to="/about" className="btn btn-primary">Learn Our Legacy</Link>
+                                <Link to="/about" className="btn btn-primary" style={{ padding: isMobile ? '12px 30px' : '14px 40px' }}>Learn Our Legacy</Link>
                             </div>
                         </div>
                     </div>
@@ -272,7 +285,7 @@ function Home() {
                 <div className="container">
                     <div className="section-header text-center" style={{ marginTop: '20px' }}>
                         <span className="subtitle">Welcome</span>
-                        <h2>Find Your Next Address With Us</h2>
+                        <h2>Where Dreams Meet Addresses</h2>
                         <div className="divider mx-auto"></div>
                         <p className="section-desc">Explore our top-tier properties, comprehensive services, and learn about our prestigious legacy.</p>
                     </div>

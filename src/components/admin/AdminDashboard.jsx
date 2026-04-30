@@ -51,6 +51,25 @@ const AdminDashboard = () => {
         confirmPassword: ''
     });
 
+    // Search and Pagination State
+    const [searchTerms, setSearchTerms] = useState({
+        properties: '',
+        investments: '',
+        projects: '',
+        inquiries: '',
+        submissions: '',
+        gallery: ''
+    });
+    const [currentPages, setCurrentPages] = useState({
+        properties: 1,
+        investments: 1,
+        projects: 1,
+        inquiries: 1,
+        submissions: 1,
+        gallery: 1
+    });
+    const ITEMS_PER_PAGE = 25;
+
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
@@ -320,6 +339,73 @@ const AdminDashboard = () => {
         { id: 'gallery', label: 'Gallery', icon: HiPhotograph },
     ];
 
+    // Helper for search and pagination
+    const getPaginatedData = (data, type, searchFields) => {
+        const term = searchTerms[type].toLowerCase();
+        const filtered = data.filter(item => 
+            searchFields.some(field => {
+                const value = field.split('.').reduce((obj, key) => obj?.[key], item);
+                return value?.toString().toLowerCase().includes(term);
+            })
+        );
+        
+        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+        const startIndex = (currentPages[type] - 1) * ITEMS_PER_PAGE;
+        const paginated = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+        
+        return { 
+            data: paginated, 
+            totalPages, 
+            totalItems: filtered.length,
+            currentPage: currentPages[type]
+        };
+    };
+
+    const renderPagination = (type, totalPages) => {
+        if (totalPages <= 1) return null;
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginTop: '20px', padding: '15px 0', borderTop: '1px solid #eee' }}>
+                <button 
+                    disabled={currentPages[type] === 1}
+                    onClick={() => setCurrentPages(prev => ({ ...prev, [type]: prev[type] - 1 }))}
+                    style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #ddd', backgroundColor: currentPages[type] === 1 ? '#f5f5f5' : 'white', cursor: currentPages[type] === 1 ? 'not-allowed' : 'pointer', fontWeight: '600' }}
+                >
+                    Previous
+                </button>
+                <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)' }}>
+                    Page {currentPages[type]} of {totalPages}
+                </span>
+                <button 
+                    disabled={currentPages[type] === totalPages}
+                    onClick={() => setCurrentPages(prev => ({ ...prev, [type]: prev[type] + 1 }))}
+                    style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #ddd', backgroundColor: currentPages[type] === totalPages ? '#f5f5f5' : 'white', cursor: currentPages[type] === totalPages ? 'not-allowed' : 'pointer', fontWeight: '600' }}
+                >
+                    Next
+                </button>
+            </div>
+        );
+    };
+
+    const renderSearchBar = (type, placeholder) => (
+        <div style={{ position: 'relative', marginBottom: '20px', width: '100%', maxWidth: '400px' }}>
+            <input 
+                type="text" 
+                placeholder={placeholder}
+                value={searchTerms[type]}
+                onChange={(e) => {
+                    setSearchTerms(prev => ({ ...prev, [type]: e.target.value }));
+                    setCurrentPages(prev => ({ ...prev, [type]: 1 }));
+                }}
+                style={{ width: '100%', padding: '12px 15px', borderRadius: '10px', border: '1px solid #E6E9EF', fontSize: '14px', outline: 'none', transition: 'border-color 0.3s' }}
+                onFocus={(e) => e.target.style.borderColor = 'var(--color-gold)'}
+                onBlur={(e) => e.target.style.borderColor = '#E6E9EF'}
+            />
+            <div style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: '#90A4AE' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+        </div>
+    );
+
     const renderDashboard = () => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
@@ -421,10 +507,12 @@ const AdminDashboard = () => {
                 </div>
 
                 <div style={mainCardStyle}>
-                    <div style={{ borderBottom: '1px solid #E6E9EF', paddingBottom: '15px' }}>
+                    <div style={{ borderBottom: '1px solid #E6E9EF', paddingBottom: '15px', marginBottom: '15px' }}>
                         <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)' }}>All Properties</h4>
                     </div>
                     
+                    {renderSearchBar('properties', 'Search properties by name, location or status...')}
+
                     <div style={{ overflowX: 'auto', width: '100%' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                             <thead>
@@ -437,42 +525,55 @@ const AdminDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {properties.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="5" style={{ padding: '80px 20px', textAlign: 'center', color: '#90A4AE', fontSize: '14px' }}>
-                                            No properties found. Add your first property!
-                                        </td>
-                                    </tr>
-                                ) : properties.map(p => (
-                                    <tr key={p._id} style={{ borderBottom: '1px solid #F0F0F0' }}>
-                                        <td style={tableCellStyle}>
-                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    {p.images?.[0] ? <img src={p.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <HiOfficeBuilding color="#90A4AE" />}
-                                                </div>
-                                                <span style={{ fontWeight: '600' }}>{p.propertyName || 'Unnamed Listing'}</span>
-                                            </div>
-                                        </td>
-                                        <td style={tableCellStyle}>{p.location}, {p.city}</td>
-                                        <td style={{ ...tableCellStyle, fontWeight: '700', color: 'var(--color-gold)' }}>₹{p.price?.toLocaleString()}</td>
-                                        <td style={tableCellStyle}>
-                                            <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: p.status === 'available' ? '#E8F5E9' : '#FFEBEE', color: p.status === 'available' ? '#4CAF50' : '#F44336', textTransform: 'uppercase' }}>
-                                                {p.status}
-                                            </span>
-                                        </td>
-                                        <td style={{ ...tableCellStyle, textAlign: 'right' }}>
-                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <button 
-                                                    onClick={() => navigate(`/property/${p._id}`)}
-                                                    style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
-                                                >
-                                                    <HiEye />
-                                                </button>
-                                                <button onClick={() => handleDeleteProperty(p._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {(() => {
+                                    const { data: pagedData, totalPages } = getPaginatedData(properties, 'properties', ['propertyName', 'location', 'city', 'status']);
+                                    if (pagedData.length === 0) return (
+                                        <tr>
+                                            <td colSpan="5" style={{ padding: '80px 20px', textAlign: 'center', color: '#90A4AE', fontSize: '14px' }}>
+                                                {searchTerms.properties ? 'No matches found for your search.' : 'No properties found. Add your first property!'}
+                                            </td>
+                                        </tr>
+                                    );
+                                    return (
+                                        <>
+                                            {pagedData.map(p => (
+                                                <tr key={p._id} style={{ borderBottom: '1px solid #F0F0F0' }}>
+                                                    <td style={tableCellStyle}>
+                                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                            <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {p.images?.[0] ? <img src={p.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <HiOfficeBuilding color="#90A4AE" />}
+                                                            </div>
+                                                            <span style={{ fontWeight: '600' }}>{p.propertyName || 'Unnamed Listing'}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td style={tableCellStyle}>{p.location}, {p.city}</td>
+                                                    <td style={{ ...tableCellStyle, fontWeight: '700', color: 'var(--color-gold)' }}>₹{p.price?.toLocaleString()}</td>
+                                                    <td style={tableCellStyle}>
+                                                        <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: p.status === 'available' ? '#E8F5E9' : '#FFEBEE', color: p.status === 'available' ? '#4CAF50' : '#F44336', textTransform: 'uppercase' }}>
+                                                            {p.status}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ ...tableCellStyle, textAlign: 'right' }}>
+                                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                            <button 
+                                                                onClick={() => navigate(`/property/${p._id}`)}
+                                                                style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                                            >
+                                                                <HiEye />
+                                                            </button>
+                                                            <button onClick={() => handleDeleteProperty(p._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            <tr>
+                                                <td colSpan="5">
+                                                    {renderPagination('properties', totalPages)}
+                                                </td>
+                                            </tr>
+                                        </>
+                                    );
+                                })()}
                             </tbody>
                         </table>
                     </div>
@@ -497,9 +598,11 @@ const AdminDashboard = () => {
                 </div>
 
                 <div style={mainCardStyle}>
-                    <div style={{ borderBottom: '1px solid #E6E9EF', paddingBottom: '15px' }}>
+                    <div style={{ borderBottom: '1px solid #E6E9EF', paddingBottom: '15px', marginBottom: '15px' }}>
                         <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)' }}>All Investments</h4>
                     </div>
+
+                    {renderSearchBar('investments', 'Search investments by title, location or land type...')}
                     
                     <div style={{ overflowX: 'auto', width: '100%' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
@@ -514,43 +617,56 @@ const AdminDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {investments.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="6" style={{ padding: '80px 20px', textAlign: 'center', color: '#90A4AE', fontSize: '14px' }}>
-                                            No investments found. Add your first investment!
-                                        </td>
-                                    </tr>
-                                ) : investments.map(i => (
-                                    <tr key={i._id} style={{ borderBottom: '1px solid #F0F0F0' }}>
-                                        <td style={tableCellStyle}>
-                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    {i.images?.[0] ? <img src={i.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <HiGlobe color="#90A4AE" />}
-                                                </div>
-                                                <span style={{ fontWeight: '600' }}>{i.title}</span>
-                                            </div>
-                                        </td>
-                                        <td style={tableCellStyle}>{i.location}, {i.city}</td>
-                                        <td style={{ ...tableCellStyle, textTransform: 'capitalize' }}>{i.landType}</td>
-                                        <td style={{ ...tableCellStyle, fontWeight: '700', color: 'var(--color-gold)' }}>₹{i.totalPrice?.toLocaleString()}</td>
-                                        <td style={tableCellStyle}>
-                                            <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: i.status === 'available' ? '#E8F5E9' : i.status === 'upcoming' ? '#E3F2FD' : '#FFEBEE', color: i.status === 'available' ? '#4CAF50' : i.status === 'upcoming' ? '#2196F3' : '#F44336', textTransform: 'uppercase' }}>
-                                                {i.status}
-                                            </span>
-                                        </td>
-                                        <td style={{ ...tableCellStyle, textAlign: 'right' }}>
-                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <button 
-                                                    onClick={() => navigate(`/investment/${i._id}`)}
-                                                    style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
-                                                >
-                                                    <HiEye />
-                                                </button>
-                                                <button onClick={() => handleDeleteInvestment(i._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {(() => {
+                                    const { data: pagedData, totalPages } = getPaginatedData(investments, 'investments', ['title', 'location', 'city', 'landType', 'status']);
+                                    if (pagedData.length === 0) return (
+                                        <tr>
+                                            <td colSpan="6" style={{ padding: '80px 20px', textAlign: 'center', color: '#90A4AE', fontSize: '14px' }}>
+                                                {searchTerms.investments ? 'No matches found for your search.' : 'No investments found. Add your first investment!'}
+                                            </td>
+                                        </tr>
+                                    );
+                                    return (
+                                        <>
+                                            {pagedData.map(i => (
+                                                <tr key={i._id} style={{ borderBottom: '1px solid #F0F0F0' }}>
+                                                    <td style={tableCellStyle}>
+                                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                            <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {i.images?.[0] ? <img src={i.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <HiGlobe color="#90A4AE" />}
+                                                            </div>
+                                                            <span style={{ fontWeight: '600' }}>{i.title}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td style={tableCellStyle}>{i.location}, {i.city}</td>
+                                                    <td style={{ ...tableCellStyle, textTransform: 'capitalize' }}>{i.landType}</td>
+                                                    <td style={{ ...tableCellStyle, fontWeight: '700', color: 'var(--color-gold)' }}>₹{i.totalPrice?.toLocaleString()}</td>
+                                                    <td style={tableCellStyle}>
+                                                        <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: i.status === 'available' ? '#E8F5E9' : i.status === 'upcoming' ? '#E3F2FD' : '#FFEBEE', color: i.status === 'available' ? '#4CAF50' : i.status === 'upcoming' ? '#2196F3' : '#F44336', textTransform: 'uppercase' }}>
+                                                            {i.status}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ ...tableCellStyle, textAlign: 'right' }}>
+                                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                            <button 
+                                                                onClick={() => navigate(`/investment/${i._id}`)}
+                                                                style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                                            >
+                                                                <HiEye />
+                                                            </button>
+                                                            <button onClick={() => handleDeleteInvestment(i._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            <tr>
+                                                <td colSpan="6">
+                                                    {renderPagination('investments', totalPages)}
+                                                </td>
+                                            </tr>
+                                        </>
+                                    );
+                                })()}
                             </tbody>
                         </table>
                     </div>
@@ -575,9 +691,11 @@ const AdminDashboard = () => {
                 </div>
 
                 <div style={mainCardStyle}>
-                    <div style={{ borderBottom: '1px solid #E6E9EF', paddingBottom: '15px' }}>
+                    <div style={{ borderBottom: '1px solid #E6E9EF', paddingBottom: '15px', marginBottom: '15px' }}>
                         <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)' }}>All Projects</h4>
                     </div>
+
+                    {renderSearchBar('projects', 'Search projects by title, location or status...')}
                     
                     <div style={{ overflowX: 'auto', width: '100%' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
@@ -592,43 +710,56 @@ const AdminDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {projects.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="6" style={{ padding: '80px 20px', textAlign: 'center', color: '#90A4AE', fontSize: '14px' }}>
-                                            No projects found. Add your first project!
-                                        </td>
-                                    </tr>
-                                ) : projects.map(p => (
-                                    <tr key={p._id} style={{ borderBottom: '1px solid #F0F0F0' }}>
-                                        <td style={tableCellStyle}>
-                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    {p.images?.[0] ? <img src={p.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <HiClipboardList color="#90A4AE" />}
-                                                </div>
-                                                <span style={{ fontWeight: '600' }}>{p.title}</span>
-                                            </div>
-                                        </td>
-                                        <td style={tableCellStyle}>{p.location}, {p.city}</td>
-                                        <td style={{ ...tableCellStyle, textTransform: 'capitalize' }}>{p.type}</td>
-                                        <td style={{ ...tableCellStyle, fontWeight: '700', color: 'var(--color-gold)' }}>{p.price}</td>
-                                        <td style={tableCellStyle}>
-                                            <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: p.status === 'completed' ? '#E8F5E9' : p.status === 'under-construction' ? '#FFF3E0' : '#E3F2FD', color: p.status === 'completed' ? '#4CAF50' : p.status === 'under-construction' ? '#EF6C00' : '#2196F3', textTransform: 'uppercase' }}>
-                                                {p.status?.replace(/-/g, ' ')}
-                                            </span>
-                                        </td>
-                                        <td style={{ ...tableCellStyle, textAlign: 'right' }}>
-                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <button 
-                                                    onClick={() => navigate(`/project/${p._id}`)}
-                                                    style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
-                                                >
-                                                    <HiEye />
-                                                </button>
-                                                <button onClick={() => handleDeleteProject(p._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {(() => {
+                                    const { data: pagedData, totalPages } = getPaginatedData(projects, 'projects', ['title', 'location', 'city', 'type', 'status']);
+                                    if (pagedData.length === 0) return (
+                                        <tr>
+                                            <td colSpan="6" style={{ padding: '80px 20px', textAlign: 'center', color: '#90A4AE', fontSize: '14px' }}>
+                                                {searchTerms.projects ? 'No matches found for your search.' : 'No projects found. Add your first project!'}
+                                            </td>
+                                        </tr>
+                                    );
+                                    return (
+                                        <>
+                                            {pagedData.map(p => (
+                                                <tr key={p._id} style={{ borderBottom: '1px solid #F0F0F0' }}>
+                                                    <td style={tableCellStyle}>
+                                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                            <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {p.images?.[0] ? <img src={p.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <HiClipboardList color="#90A4AE" />}
+                                                            </div>
+                                                            <span style={{ fontWeight: '600' }}>{p.title}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td style={tableCellStyle}>{p.location}, {p.city}</td>
+                                                    <td style={{ ...tableCellStyle, textTransform: 'capitalize' }}>{p.type}</td>
+                                                    <td style={{ ...tableCellStyle, fontWeight: '700', color: 'var(--color-gold)' }}>{p.price}</td>
+                                                    <td style={tableCellStyle}>
+                                                        <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: p.status === 'completed' ? '#E8F5E9' : p.status === 'under-construction' ? '#FFF3E0' : '#E3F2FD', color: p.status === 'completed' ? '#4CAF50' : p.status === 'under-construction' ? '#EF6C00' : '#2196F3', textTransform: 'uppercase' }}>
+                                                            {p.status?.replace(/-/g, ' ')}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ ...tableCellStyle, textAlign: 'right' }}>
+                                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                            <button 
+                                                                onClick={() => navigate(`/project/${p._id}`)}
+                                                                style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                                            >
+                                                                <HiEye />
+                                                            </button>
+                                                            <button onClick={() => handleDeleteProject(p._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            <tr>
+                                                <td colSpan="6">
+                                                    {renderPagination('projects', totalPages)}
+                                                </td>
+                                            </tr>
+                                        </>
+                                    );
+                                })()}
                             </tbody>
                         </table>
                     </div>
@@ -688,39 +819,57 @@ const AdminDashboard = () => {
                 </div>
 
                 <div style={mainCardStyle}>
-                    <h4 style={cardHeaderStyle}>Recent Inquiries</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <h4 style={{ ...cardHeaderStyle, margin: 0 }}>All Inquiries</h4>
+                    </div>
+
+                    {renderSearchBar('inquiries', 'Search inquiries by name, email or message...')}
+                    
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {contacts.length === 0 ? <p style={{ textAlign: 'center', color: '#90A4AE', padding: '40px' }}>No inquiries found.</p> : contacts.map(contact => (
-                            <div key={contact._id} style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', backgroundColor: '#F8F9FA', borderRadius: '12px', border: '1px solid #E6E9EF' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                    <div>
-                                        <h5 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)', fontWeight: '800' }}>{contact.name}</h5>
-                                        <p style={{ margin: '5px 0', fontSize: '13px', color: '#607D8B' }}>{contact.email} • {contact.phone}</p>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                                        <span style={{ padding: '4px 12px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', backgroundColor: contact.status === 'unread' ? '#FFEBEE' : contact.status === 'responded' ? '#E8F5E9' : '#E3F2FD', color: contact.status === 'unread' ? '#F44336' : contact.status === 'responded' ? '#4CAF50' : '#2196F3' }}>{contact.status}</span>
-                                        <span style={{ fontSize: '12px', color: '#90A4AE', fontWeight: '500' }}>{new Date(contact.createdAt).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
-                                <div style={{ padding: '15px', backgroundColor: 'white', borderRadius: '8px', borderLeft: '4px solid var(--color-gold)' }}>
-                                    <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64' }}>{contact.message}</p>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                                    <button 
-                                        onClick={() => handleDeleteInquiry(contact._id)}
-                                        style={{ backgroundColor: 'white', border: '1px solid #F44336', color: '#F44336', padding: '8px 15px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
-                                    >
-                                        <HiTrash size={14} />
-                                    </button>
-                                    <button 
-                                        onClick={() => handleViewInquiry(contact)}
-                                        style={{ backgroundColor: 'white', border: '1px solid var(--color-gold)', color: 'var(--color-gold)', padding: '8px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
-                                    >
-                                        View Details
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                        {(() => {
+                            const { data: pagedData, totalPages } = getPaginatedData(contacts, 'inquiries', ['name', 'email', 'phone', 'message', 'status']);
+                            if (pagedData.length === 0) return (
+                                <p style={{ textAlign: 'center', color: '#90A4AE', padding: '40px' }}>
+                                    {searchTerms.inquiries ? 'No inquiries match your search.' : 'No inquiries found.'}
+                                </p>
+                            );
+                            return (
+                                <>
+                                    {pagedData.map(contact => (
+                                        <div key={contact._id} style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', backgroundColor: '#F8F9FA', borderRadius: '12px', border: '1px solid #E6E9EF' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                <div>
+                                                    <h5 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)', fontWeight: '800' }}>{contact.name}</h5>
+                                                    <p style={{ margin: '5px 0', fontSize: '13px', color: '#607D8B' }}>{contact.email} • {contact.phone}</p>
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                                                    <span style={{ padding: '4px 12px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', backgroundColor: contact.status === 'unread' ? '#FFEBEE' : contact.status === 'responded' ? '#E8F5E9' : '#E3F2FD', color: contact.status === 'unread' ? '#F44336' : contact.status === 'responded' ? '#4CAF50' : contact.status === '2196F3' }}>{contact.status}</span>
+                                                    <span style={{ fontSize: '12px', color: '#90A4AE', fontWeight: '500' }}>{new Date(contact.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                            <div style={{ padding: '15px', backgroundColor: 'white', borderRadius: '8px', borderLeft: '4px solid var(--color-gold)' }}>
+                                                <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64' }}>{contact.message}</p>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                                <button 
+                                                    onClick={() => handleDeleteInquiry(contact._id)}
+                                                    style={{ backgroundColor: 'white', border: '1px solid #F44336', color: '#F44336', padding: '8px 15px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                                >
+                                                    <HiTrash size={14} />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleViewInquiry(contact)}
+                                                    style={{ backgroundColor: 'white', border: '1px solid var(--color-gold)', color: 'var(--color-gold)', padding: '8px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+                                                >
+                                                    View Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {renderPagination('inquiries', totalPages)}
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>
@@ -751,44 +900,62 @@ const AdminDashboard = () => {
                 </div>
 
                 <div style={mainCardStyle}>
-                    <h4 style={cardHeaderStyle}>Recent Submissions</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <h4 style={{ ...cardHeaderStyle, margin: 0 }}>All Submissions</h4>
+                    </div>
+
+                    {renderSearchBar('submissions', 'Search submissions by title, contact name or location...')}
+                    
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {submissions.length === 0 ? <p style={{ textAlign: 'center', color: '#90A4AE', padding: '40px' }}>No submissions found.</p> : submissions.map(sub => (
-                            <div key={sub._id} style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '25px', backgroundColor: '#F8F9FA', borderRadius: '15px', border: '1px solid #E6E9EF' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
-                                    <div>
-                                        <h5 style={{ margin: 0, fontSize: '18px', color: 'var(--color-navy)', fontWeight: '800' }}>{sub.title}</h5>
-                                        <p style={{ margin: '5px 0', fontSize: '14px', color: '#607D8B' }}>{sub.contactName} • {sub.contactEmail} • {sub.contactPhone}</p>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                                        <span style={{ padding: '6px 15px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', backgroundColor: sub.status === 'pending' ? '#FFF3E0' : sub.status === 'approved' ? '#E8F5E9' : sub.status === 'rejected' ? '#FFEBEE' : '#E3F2FD', color: sub.status === 'pending' ? '#EF6C00' : sub.status === 'approved' ? '#4CAF50' : sub.status === 'rejected' ? '#F44336' : '#2196F3' }}>
-                                            {sub.status}
-                                        </span>
-                                        <span style={{ fontSize: '12px', color: '#90A4AE' }}>{new Date(sub.createdAt).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '20px', padding: '15px', backgroundColor: 'white', borderRadius: '10px' }}>
-                                    <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Category</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)', textTransform: 'capitalize' }}>{sub.category}</p></div>
-                                    <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Type</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)', textTransform: 'capitalize' }}>{sub.type}</p></div>
-                                    <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Price</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-gold)' }}>₹{sub.price?.toLocaleString()}</p></div>
-                                    <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Location</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)' }}>{sub.location}</p></div>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                                    <button 
-                                        onClick={() => handleDeleteSubmission(sub._id)}
-                                        style={{ backgroundColor: 'white', border: '1px solid #F44336', color: '#F44336', padding: '10px 15px', borderRadius: '10px', fontSize: '13px', fontWeight: '800', cursor: 'pointer' }}
-                                    >
-                                        <HiTrash size={16} />
-                                    </button>
-                                    <button 
-                                        onClick={() => setSelectedSubmission(sub)}
-                                        style={{ backgroundColor: 'white', border: '1px solid var(--color-navy)', color: 'var(--color-navy)', padding: '10px 25px', borderRadius: '10px', fontSize: '13px', fontWeight: '800', cursor: 'pointer', transition: 'all 0.2s' }}
-                                    >
-                                        View Details
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                        {(() => {
+                            const { data: pagedData, totalPages } = getPaginatedData(submissions, 'submissions', ['title', 'contactName', 'contactEmail', 'location', 'category', 'status']);
+                            if (pagedData.length === 0) return (
+                                <p style={{ textAlign: 'center', color: '#90A4AE', padding: '40px' }}>
+                                    {searchTerms.submissions ? 'No submissions match your search.' : 'No submissions found.'}
+                                </p>
+                            );
+                            return (
+                                <>
+                                    {pagedData.map(sub => (
+                                        <div key={sub._id} style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '25px', backgroundColor: '#F8F9FA', borderRadius: '15px', border: '1px solid #E6E9EF' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
+                                                <div>
+                                                    <h5 style={{ margin: 0, fontSize: '18px', color: 'var(--color-navy)', fontWeight: '800' }}>{sub.title}</h5>
+                                                    <p style={{ margin: '5px 0', fontSize: '14px', color: '#607D8B' }}>{sub.contactName} • {sub.contactEmail} • {sub.contactPhone}</p>
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                                                    <span style={{ padding: '6px 15px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', backgroundColor: sub.status === 'pending' ? '#FFF3E0' : sub.status === 'approved' ? '#E8F5E9' : sub.status === 'rejected' ? '#FFEBEE' : '#E3F2FD', color: sub.status === 'pending' ? '#EF6C00' : sub.status === 'approved' ? '#4CAF50' : sub.status === 'rejected' ? '#F44336' : '#2196F3' }}>
+                                                        {sub.status}
+                                                    </span>
+                                                    <span style={{ fontSize: '12px', color: '#90A4AE' }}>{new Date(sub.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '20px', padding: '15px', backgroundColor: 'white', borderRadius: '10px' }}>
+                                                <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Category</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)', textTransform: 'capitalize' }}>{sub.category}</p></div>
+                                                <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Type</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)', textTransform: 'capitalize' }}>{sub.type}</p></div>
+                                                <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Price</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-gold)' }}>₹{sub.price?.toLocaleString()}</p></div>
+                                                <div><p style={{ fontSize: '10px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Location</p><p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)' }}>{sub.location}</p></div>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                                <button 
+                                                    onClick={() => handleDeleteSubmission(sub._id)}
+                                                    style={{ backgroundColor: 'white', border: '1px solid #F44336', color: '#F44336', padding: '10px 15px', borderRadius: '10px', fontSize: '13px', fontWeight: '800', cursor: 'pointer' }}
+                                                >
+                                                    <HiTrash size={16} />
+                                                </button>
+                                                <button 
+                                                    onClick={() => setSelectedSubmission(sub)}
+                                                    style={{ backgroundColor: 'white', border: '1px solid var(--color-navy)', color: 'var(--color-navy)', padding: '10px 25px', borderRadius: '10px', fontSize: '13px', fontWeight: '800', cursor: 'pointer', transition: 'all 0.2s' }}
+                                                >
+                                                    View Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {renderPagination('submissions', totalPages)}
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>

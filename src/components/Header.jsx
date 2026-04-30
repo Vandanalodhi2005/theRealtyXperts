@@ -1,10 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { PhoneCall } from 'lucide-react';
+import { PhoneCall, Search, X } from 'lucide-react';
 
 function Header() {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const location = useLocation();
 
     useEffect(() => {
@@ -28,6 +30,16 @@ function Header() {
         setMobileMenuOpen(!mobileMenuOpen);
     };
 
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchTerm.trim()) {
+            // Redirect to a global search or properties page with query
+            window.location.href = `/properties?search=${encodeURIComponent(searchTerm.trim())}`;
+        }
+    };
+
+    const isHomePage = location.pathname === '/';
+
     return (
         <>
         <div style={{ height: '80px' }}></div>
@@ -45,13 +57,47 @@ function Header() {
                     <Link to="/projects" className={isActive('/projects')}>Projects</Link>
                     <Link to="/gallery" className={isActive('/gallery')}>Gallery</Link>
                     <Link to="/services" className={isActive('/services')}>Services</Link>
+
                     <Link to="/contact" className="btn btn-nav-contact">
                         <PhoneCall size={18} />
                         <span>Contact Us</span>
                     </Link>
                 </nav>
-                <div className="mobile-menu-toggle" onClick={toggleMobileMenu}>
-                    <i className={mobileMenuOpen ? "fas fa-times" : "fas fa-bars"}></i>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    {isHomePage && (
+                        <button 
+                            className="nav-search-trigger" 
+                            onClick={() => setIsSearchOpen(true)}
+                            aria-label="Search"
+                        >
+                            <Search size={22} />
+                        </button>
+                    )}
+
+                    <div className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+                        <i className={mobileMenuOpen ? "fas fa-times" : "fas fa-bars"}></i>
+                    </div>
+                </div>
+            </div>
+
+            {/* Professional Search Overlay */}
+            <div className={`search-overlay ${isSearchOpen ? 'active' : ''}`}>
+                <div className="container search-overlay-content">
+                    <form onSubmit={handleSearchSubmit} className="search-overlay-form">
+                        <Search className="search-icon" size={24} />
+                        <input 
+                            type="text" 
+                            placeholder="Search properties, projects, or locations..." 
+                            className="search-overlay-input"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            autoFocus={isSearchOpen}
+                        />
+                        <button type="button" className="search-close-btn" onClick={() => setIsSearchOpen(false)}>
+                            <X size={24} />
+                        </button>
+                    </form>
                 </div>
             </div>
         </header>

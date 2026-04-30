@@ -10,13 +10,13 @@ const PropertyDetails = () => {
   const [relatedProperties, setRelatedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchProperty();
 
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => setIsMobile(window.innerWidth <= 1024);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [id]);
@@ -105,136 +105,171 @@ const PropertyDetails = () => {
   }
 
   if (!property) return null;
-
   const statusStyle = getStatusStyle(property.status);
   const propertyTitle = property.propertyName || `${property.bedroom ? property.bedroom + ' BHK ' : ''}${property.propertyType}`;
   const formattedAmenities = formatList(property.amenities);
 
   return (
-    <main style={{ backgroundColor: '#f8f9fa' }}>
+    <main style={{ backgroundColor: '#f8f9fa', paddingBottom: isMobile ? '80px' : '0' }}>
 
       {/* Hero Section */}
       <section style={{
         position: 'relative',
-        minHeight: isMobile ? '400px' : '70vh',
+        height: isMobile ? '350px' : '65vh',
+        minHeight: '350px',
         display: 'flex',
         alignItems: 'flex-end',
         overflow: 'hidden',
-        backgroundColor: '#0a1c3a',
-        paddingTop: isMobile ? '60px' : '0'
+        backgroundColor: '#0a1c3a'
       }}>
         {property.images && property.images.length > 0 && (
           <img
             src={property.images[0]}
             alt={propertyTitle}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.35 }}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45 }}
           />
         )}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,28,58,1) 30%, rgba(10,28,58,0.5) 100%)' }}></div>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,28,58,1) 0%, rgba(10,28,58,0.5) 60%, transparent 100%)' }}></div>
 
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
           style={{
             position: 'absolute', 
-            top: isMobile ? '80px' : '100px', 
+            top: isMobile ? '90px' : '30px', 
             left: isMobile ? '15px' : '30px', 
             zIndex: 100,
             display: 'flex', alignItems: 'center', gap: '8px',
-            backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(12px)',
             border: '1px solid rgba(255,255,255,0.2)', color: 'white',
-            padding: isMobile ? '8px 16px' : '10px 20px', 
+            padding: isMobile ? '8px 16px' : '10px 22px', 
             borderRadius: '50px', cursor: 'pointer',
-            fontSize: isMobile ? '0.8rem' : '0.9rem', 
-            fontWeight: '600', transition: 'all 0.2s'
+            fontSize: isMobile ? '0.75rem' : '0.9rem', 
+            fontWeight: '700', transition: 'all 0.3s',
+            textTransform: 'uppercase', letterSpacing: '1px'
           }}
         >
           <i className="fas fa-arrow-left"></i> Back
         </button>
 
-        <div style={{ position: 'relative', zIndex: 5, width: '100%', padding: isMobile ? '20px 15px 40px' : '60px 40px 80px' }}>
+        <div style={{ position: 'relative', zIndex: 5, width: '100%', boxSizing: 'border-box', padding: isMobile ? '20px 15px 30px' : '60px 40px 60px' }}>
           <div className="container">
             {/* Badges */}
             <div style={{ 
               display: 'flex', 
-              gap: '12px', 
+              gap: '10px', 
               flexWrap: 'wrap', 
-              marginBottom: '20px',
-              marginTop: isMobile ? '40px' : '0' 
+              marginBottom: '15px'
             }}>
               <span style={{
-                backgroundColor: 'rgba(198,156,109,0.2)', color: '#c69c6d',
-                padding: '6px 18px', borderRadius: '50px', fontSize: '0.75rem',
-                fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px',
-                border: '1px solid rgba(198,156,109,0.3)'
+                backgroundColor: 'rgba(198,156,109,0.25)', color: '#c69c6d',
+                padding: '5px 15px', borderRadius: '50px', fontSize: '0.65rem',
+                fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px',
+                border: '1px solid rgba(198,156,109,0.3)', backdropFilter: 'blur(5px)'
               }}>
                 <i className="fas fa-home" style={{ marginRight: '6px' }}></i>
                 {property.propertyType}
               </span>
               <span style={{
                 backgroundColor: statusStyle.bg, color: statusStyle.color,
-                padding: '6px 18px', borderRadius: '50px', fontSize: '0.75rem',
-                fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px',
-                border: `1px solid ${statusStyle.border}`
+                padding: '5px 15px', borderRadius: '50px', fontSize: '0.65rem',
+                fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px',
+                border: `1px solid ${statusStyle.border}`, backdropFilter: 'blur(5px)'
               }}>
                 {getStatusLabel(property.status)}
               </span>
             </div>
 
             <h1 style={{
-              fontSize: isMobile ? '1.8rem' : 'clamp(2.3rem, 5vw, 4rem)', 
+              fontSize: isMobile ? '1.8rem' : '3.5rem', 
               fontWeight: '900', color: 'white',
-              lineHeight: 1.15, marginBottom: '24px',
-              wordBreak: 'break-word'
+              lineHeight: 1.2, marginBottom: '20px',
+              textShadow: '0 4px 15px rgba(0,0,0,0.4)',
+              maxWidth: '900px'
             }}>
               {propertyTitle}
             </h1>
 
-            <div style={{ display: 'flex', gap: isMobile ? '15px' : '30px', flexWrap: 'wrap' }}>
-              <span style={{ color: 'rgba(255,255,255,0.75)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: isMobile ? '0.85rem' : '1rem' }}>
+            <div style={{ display: 'flex', gap: isMobile ? '15px' : '25px', flexWrap: 'wrap', opacity: 0.9 }}>
+              <span style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '8px', fontSize: isMobile ? '0.85rem' : '1.1rem', fontWeight: '500' }}>
                 <i className="fas fa-map-marker-alt" style={{ color: '#c69c6d' }}></i>
                 {property.location}, {property.city}
               </span>
-              <span style={{ color: 'rgba(255,255,255,0.75)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: isMobile ? '0.85rem' : '1rem' }}>
-                <i className="fas fa-rupee-sign" style={{ color: '#c69c6d' }}></i>
-                ₹{property.price?.toLocaleString()}
+              <span style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '8px', fontSize: isMobile ? '0.85rem' : '1.1rem', fontWeight: '500' }}>
+                <i className="fas fa-expand-arrows-alt" style={{ color: '#c69c6d' }}></i>
+                {property.area?.toLocaleString()} {property.areaUnit || 'sq.ft'}
               </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Main Content */}
-      <div className="container" style={{ padding: isMobile ? '30px 15px' : '60px 20px' }}>
+      {/* Sticky Mobile Bottom CTA */}
+      {isMobile && (
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 380px',
-          gap: isMobile ? '30px' : '40px',
-          alignItems: 'start'
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          backgroundColor: 'white', padding: '12px 15px',
+          display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', zIndex: 1000,
+          boxShadow: '0 -10px 25px rgba(0,0,0,0.1)',
+          borderTop: '1px solid #eee',
+          boxSizing: 'border-box'
         }}>
+          <a href="tel:+919264175587" style={{
+            backgroundColor: '#0a1c3a', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+            padding: '14px 2px', borderRadius: '12px', textDecoration: 'none',
+            fontWeight: '800', fontSize: '0.7rem', textTransform: 'uppercase'
+          }}>
+            <i className="fas fa-phone-alt"></i> Call Now
+          </a>
+          <Link to="/contact" style={{
+            backgroundColor: '#c69c6d', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+            padding: '14px 2px', borderRadius: '12px', textDecoration: 'none',
+            fontWeight: '800', fontSize: '0.7rem', textTransform: 'uppercase'
+          }}>
+            <i className="fas fa-envelope"></i> Enquire
+          </Link>
+        </div>
+      )}
+
+      {/* Main Content Layout */}
+      <div className="container" style={{ padding: isMobile ? '30px 15px' : '60px 24px' }}>
+        <div className="project-layout-grid">
 
           {/* LEFT COLUMN */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '30px' : '40px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '25px' : '40px' }}>
 
             {/* Image Gallery */}
             {property.images && property.images.length > 0 && (
-              <div style={{ backgroundColor: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 30px rgba(0,0,0,0.08)' }}>
-                <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: 'white', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.06)', border: '1px solid #eee' }}>
+                <div style={{ position: 'relative', aspectRatio: isMobile ? '4/3' : '16/9', overflow: 'hidden', backgroundColor: '#0a1c3a' }}>
                   <img
                     src={property.images[activeImage]}
                     alt={propertyTitle}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.4s ease' }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
+                  
+                  {/* Image Counter */}
+                  <div style={{
+                    position: 'absolute', bottom: '20px', right: '20px',
+                    backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)',
+                    color: 'white', padding: '6px 14px', borderRadius: '50px',
+                    fontSize: '0.75rem', fontWeight: '800', zIndex: 10
+                  }}>
+                    {activeImage + 1} / {property.images.length}
+                  </div>
+
                   {property.images.length > 1 && (
                     <>
                       <button
                         onClick={() => setActiveImage(i => (i - 1 + property.images.length) % property.images.length)}
                         style={{
-                          position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)',
-                          width: isMobile ? '36px' : '44px', height: isMobile ? '36px' : '44px', borderRadius: '50%',
-                          backgroundColor: 'rgba(255,255,255,0.95)', border: 'none', cursor: 'pointer',
+                          position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)',
+                          width: '40px', height: '40px', borderRadius: '50%',
+                          backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', cursor: 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontSize: '1rem', color: '#0a1c3a'
+                          boxShadow: '0 4px 15px rgba(0,0,0,0.1)', color: '#0a1c3a', zIndex: 10
                         }}
                       >
                         <i className="fas fa-chevron-left"></i>
@@ -242,11 +277,11 @@ const PropertyDetails = () => {
                       <button
                         onClick={() => setActiveImage(i => (i + 1) % property.images.length)}
                         style={{
-                          position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
-                          width: isMobile ? '36px' : '44px', height: isMobile ? '36px' : '44px', borderRadius: '50%',
-                          backgroundColor: 'rgba(255,255,255,0.95)', border: 'none', cursor: 'pointer',
+                          position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)',
+                          width: '40px', height: '40px', borderRadius: '50%',
+                          backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', cursor: 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontSize: '1rem', color: '#0a1c3a'
+                          boxShadow: '0 4px 15px rgba(0,0,0,0.1)', color: '#0a1c3a', zIndex: 10
                         }}
                       >
                         <i className="fas fa-chevron-right"></i>
@@ -255,21 +290,22 @@ const PropertyDetails = () => {
                   )}
                 </div>
 
+                {/* Thumbnails */}
                 {property.images.length > 1 && (
-                  <div style={{ display: 'flex', gap: '8px', padding: '12px', overflowX: 'auto' }}>
+                  <div style={{ display: 'flex', gap: '10px', padding: '15px', overflowX: 'auto', backgroundColor: '#fcfcfc' }}>
                     {property.images.map((img, index) => (
                       <button
                         key={index}
                         onClick={() => setActiveImage(index)}
                         style={{
-                          flexShrink: 0, width: isMobile ? '70px' : '90px', height: isMobile ? '50px' : '65px', borderRadius: '10px',
-                          overflow: 'hidden', padding: 0,
-                          border: activeImage === index ? '3px solid #c69c6d' : '3px solid transparent',
+                          flexShrink: 0, width: isMobile ? '70px' : '100px', height: isMobile ? '50px' : '70px', 
+                          borderRadius: '12px', overflow: 'hidden', padding: 0,
+                          border: activeImage === index ? '3px solid #c69c6d' : '3px solid #eee',
                           cursor: 'pointer', transition: 'all 0.2s',
-                          opacity: activeImage === index ? 1 : 0.6
+                          transform: activeImage === index ? 'scale(0.95)' : 'scale(1)'
                         }}
                       >
-                        <img src={img} alt={`View ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={img} alt={`Thumbnail ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </button>
                     ))}
                   </div>
@@ -277,50 +313,50 @@ const PropertyDetails = () => {
               </div>
             )}
 
-            {/* About Section */}
-            <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: isMobile ? '25px 20px' : '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                <div style={{ width: '4px', height: '32px', backgroundColor: '#c69c6d', borderRadius: '2px' }}></div>
-                <h2 style={{ fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: '800', color: '#0a1c3a', margin: 0 }}>About This Property</h2>
+            {/* Description Card */}
+            <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: isMobile ? '25px 20px' : '40px', boxShadow: '0 10px 40px rgba(0,0,0,0.04)', border: '1px solid #eee' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
+                <div style={{ width: '5px', height: '35px', backgroundColor: '#c69c6d', borderRadius: '5px' }}></div>
+                <h2 style={{ fontSize: isMobile ? '1.4rem' : '1.8rem', fontWeight: '900', color: '#0a1c3a', margin: 0, letterSpacing: '-0.5px' }}>Property Overview</h2>
               </div>
-              <p style={{ color: '#555', lineHeight: '1.8', fontSize: isMobile ? '0.95rem' : '1rem', margin: 0 }}>
+              <p style={{ color: '#444', lineHeight: '1.9', fontSize: isMobile ? '0.95rem' : '1.1rem', margin: 0, whiteSpace: 'pre-wrap' }}>
                 {property.propertyDescription || property.description || 'No description available.'}
               </p>
             </div>
 
-            {/* Amenities */}
+            {/* Amenities Grid */}
             {formattedAmenities.length > 0 && (
-              <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: isMobile ? '25px 20px' : '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
-                  <div style={{ width: '4px', height: '32px', backgroundColor: '#c69c6d', borderRadius: '2px' }}></div>
-                  <h2 style={{ fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: '800', color: '#0a1c3a', margin: 0 }}>Amenities</h2>
+              <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: isMobile ? '25px 20px' : '40px', boxShadow: '0 10px 40px rgba(0,0,0,0.04)', border: '1px solid #eee' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '30px' }}>
+                  <div style={{ width: '5px', height: '35px', backgroundColor: '#c69c6d', borderRadius: '5px' }}></div>
+                  <h2 style={{ fontSize: isMobile ? '1.4rem' : '1.8rem', fontWeight: '900', color: '#0a1c3a', margin: 0, letterSpacing: '-0.5px' }}>Exclusive Amenities</h2>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '15px' }}>
                   {formattedAmenities.map((a, i) => (
                     <div key={i} style={{
-                      display: 'flex', alignItems: 'center', gap: '12px',
-                      padding: '14px 18px', backgroundColor: '#f8f9fa',
-                      borderRadius: '10px', border: '1px solid #eee'
+                      display: 'flex', alignItems: 'center', gap: '15px',
+                      padding: '18px 22px', backgroundColor: '#fcfcfc',
+                      borderRadius: '16px', border: '1px solid #f0f0f0',
+                      transition: 'all 0.3s ease'
                     }}>
-                      <i className="fas fa-star" style={{ color: '#c69c6d', fontSize: '0.75rem', flexShrink: 0 }}></i>
-                      <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>{a}</span>
+                      <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#c69c6d' }}></div>
+                      <span style={{ color: '#333', fontWeight: '700', fontSize: '1rem' }}>{a}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* YouTube Video tour */}
+            {/* Video Tour */}
             {property.youtubeUrl && (property.youtubeUrl.includes('youtube.com') || property.youtubeUrl.includes('youtu.be')) && (
-              <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: isMobile ? '25px 20px' : '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
-                  <div style={{ width: '4px', height: '32px', backgroundColor: '#ef4444', borderRadius: '2px' }}></div>
-                  <h2 style={{ fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: '800', color: '#0a1c3a', margin: 0 }}>
-                    <i className="fab fa-youtube" style={{ color: '#ef4444', marginRight: '10px' }}></i>
-                    Video Tour
+              <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: isMobile ? '25px 20px' : '40px', boxShadow: '0 10px 40px rgba(0,0,0,0.04)', border: '1px solid #eee' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '30px' }}>
+                  <div style={{ width: '5px', height: '35px', backgroundColor: '#ef4444', borderRadius: '5px' }}></div>
+                  <h2 style={{ fontSize: isMobile ? '1.4rem' : '1.8rem', fontWeight: '900', color: '#0a1c3a', margin: 0, letterSpacing: '-0.5px' }}>
+                    Experience in Motion
                   </h2>
                 </div>
-                <div style={{ borderRadius: '14px', overflow: 'hidden', aspectRatio: '16/9' }}>
+                <div style={{ borderRadius: '20px', overflow: 'hidden', aspectRatio: '16/9', boxShadow: '0 15px 40px rgba(0,0,0,0.15)' }}>
                   <iframe
                     src={property.youtubeUrl.replace('watch?v=', 'embed/').split('&')[0]}
                     title="Property Video Tour"
@@ -333,121 +369,103 @@ const PropertyDetails = () => {
           </div>
 
           {/* RIGHT COLUMN - Sticky Sidebar */}
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '25px', 
-            position: isMobile ? 'static' : 'sticky', 
-            top: '110px' 
-          }}>
-
-            {/* Price & Info Card */}
-            <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '30px', boxShadow: '0 8px 30px rgba(0,0,0,0.1)', border: '1px solid #f0f0f0' }}>
-              <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#999', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '15px' }}>Investment Overview</p>
-
-              {/* Price */}
-              <div style={{ padding: '20px 0', borderBottom: '1px solid #f0f0f0', marginBottom: '20px' }}>
-                <p style={{ color: '#888', fontSize: '0.8rem', marginBottom: '5px', fontWeight: '600' }}>PRICE RANGE</p>
-                <p style={{ fontSize: isMobile ? '1.5rem' : '1.8rem', fontWeight: '900', color: '#0a1c3a', margin: 0 }}>
-                  <i className="fas fa-rupee-sign" style={{ color: '#c69c6d', marginRight: '4px', fontSize: '1.4rem' }}></i>
-                  ₹{property.price?.toLocaleString()}
-                </p>
-              </div>
-
-              {/* Details */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '8px 0' : '0', borderBottom: isMobile ? '1px solid #f9f9f9' : 'none' }}>
-                  <span style={{ color: '#888', fontSize: '0.85rem', fontWeight: '600' }}>Status</span>
-                  <span style={{
-                    padding: '4px 14px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 'bold',
-                    backgroundColor: statusStyle.bg, color: statusStyle.color, border: `1px solid ${statusStyle.border}`
-                  }}>
-                    {getStatusLabel(property.status)}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '8px 0' : '0', borderBottom: isMobile ? '1px solid #f9f9f9' : 'none' }}>
-                  <span style={{ color: '#888', fontSize: '0.85rem', fontWeight: '600' }}>Type</span>
-                  <span style={{ color: '#0a1c3a', fontWeight: '700', fontSize: '0.9rem', textTransform: 'capitalize' }}>{property.propertyType}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '8px 0' : '0' }}>
-                  <span style={{ color: '#888', fontSize: '0.85rem', fontWeight: '600' }}>Area</span>
-                  <span style={{ color: '#0a1c3a', fontWeight: '700', fontSize: '0.9rem' }}>{property.area?.toLocaleString()} sq.ft</span>
-                </div>
-              </div>
-
-              {/* CTA Buttons */}
-              <div style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <a
-                  href="tel:+919264175587"
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                    backgroundColor: '#0a1c3a', color: 'white',
-                    padding: '16px', borderRadius: '12px', fontWeight: 'bold',
-                    textDecoration: 'none', fontSize: '0.95rem', transition: 'all 0.2s'
-                  }}
-                >
-                  <i className="fas fa-phone-alt"></i>
-                  Call Now
-                </a>
-                <Link
-                  to="/contact"
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                    backgroundColor: '#c69c6d', color: 'white',
-                    padding: '16px', borderRadius: '12px', fontWeight: 'bold',
-                    textDecoration: 'none', fontSize: '0.95rem', transition: 'all 0.2s'
-                  }}
-                >
-                  <i className="fas fa-envelope"></i>
-                  Enquire Now
-                </Link>
-              </div>
-            </div>
-
-            {/* Contact Info Card */}
-            <div style={{
-              backgroundColor: '#0a1c3a', borderRadius: '20px', padding: '30px',
-              color: 'white', boxShadow: '0 8px 30px rgba(10,28,58,0.2)'
+          <aside style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            
+            {/* Price & Summary Card */}
+            <div style={{ 
+              backgroundColor: 'white', borderRadius: '24px', padding: '35px', 
+              boxShadow: '0 20px 50px rgba(10,28,58,0.08)', border: '1px solid #eee',
+              position: isMobile ? 'static' : 'sticky', top: '110px'
             }}>
-              <h3 style={{ color: 'white', fontWeight: '800', fontSize: '1.1rem', marginBottom: '20px' }}>
-                <i className="fas fa-headset" style={{ color: '#c69c6d', marginRight: '10px' }}></i>
-                Need Assistance?
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'rgba(198,156,109,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <i className="fas fa-phone" style={{ color: '#c69c6d' }}></i>
-                  </div>
-                  <div>
-                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', marginBottom: '2px', fontWeight: '600', textTransform: 'uppercase' }}>Phone</p>
-                    <a href="tel:+919264175587" style={{ color: 'white', fontWeight: '700', textDecoration: 'none', fontSize: '0.95rem' }}>926-417-5587</a>
-                  </div>
+              <p style={{ fontSize: '0.7rem', fontWeight: '900', color: '#c69c6d', textTransform: 'uppercase', letterSpacing: '2.5px', marginBottom: '25px' }}>Premium Valuation</p>
+              
+              <div style={{ marginBottom: '30px', paddingBottom: '25px', borderBottom: '1px solid #f0f0f0' }}>
+                <p style={{ color: '#888', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px' }}>OFFERING PRICE</p>
+                <h3 style={{ fontSize: '2.2rem', fontWeight: '900', color: '#0a1c3a', margin: 0, display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                   <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#c69c6d' }}>₹</span>
+                   {property.price?.toLocaleString()}
+                </h3>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginBottom: '35px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#666', fontWeight: '600', fontSize: '0.95rem' }}>Area Size</span>
+                  <span style={{ color: '#0a1c3a', fontWeight: '800', fontSize: '1.05rem' }}>{property.area?.toLocaleString()} {property.areaUnit || 'sq.ft'}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'rgba(198,156,109,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <i className="fas fa-envelope" style={{ color: '#c69c6d' }}></i>
-                  </div>
-                  <div>
-                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', marginBottom: '2px', fontWeight: '600', textTransform: 'uppercase' }}>Email</p>
-                    <a href="mailto:emailtotrx@gmail.com" style={{ color: 'white', fontWeight: '700', textDecoration: 'none', fontSize: '0.85rem' }}>emailtotrx@gmail.com</a>
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#666', fontWeight: '600', fontSize: '0.95rem' }}>Property Type</span>
+                  <span style={{ color: '#0a1c3a', fontWeight: '800', fontSize: '1.05rem', textTransform: 'capitalize' }}>{property.propertyType}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#666', fontWeight: '600', fontSize: '0.95rem' }}>Transaction</span>
+                  <span style={{ color: '#c69c6d', fontWeight: '800', fontSize: '1.05rem', textTransform: 'uppercase' }}>For {property.transaction || 'Sale'}</span>
                 </div>
               </div>
+
+              {!isMobile && (
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <a href="tel:+919264175587" className="btn btn-primary" style={{ 
+                    flex: 1, 
+                    padding: '15px 5px', 
+                    borderRadius: '12px', 
+                    fontWeight: '800', 
+                    textTransform: 'uppercase', 
+                    fontSize: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}>
+                    <i className="fas fa-phone-alt"></i> Call Now
+                  </a>
+                  <Link to="/contact" className="btn btn-outline-primary" style={{ 
+                    flex: 1, 
+                    padding: '15px 5px', 
+                    borderRadius: '12px', 
+                    fontWeight: '800', 
+                    textTransform: 'uppercase', 
+                    fontSize: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}>
+                    <i className="fas fa-envelope"></i> Enquire
+                  </Link>
+                </div>
+              )}
+              
+              {/* Secondary Contact Info */}
+              <div style={{ marginTop: '30px', paddingTop: '25px', borderTop: '1px solid #f0f0f0' }}>
+                 <h4 style={{ fontSize: '0.9rem', fontWeight: '800', color: '#0a1c3a', marginBottom: '15px' }}>Direct Support</h4>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'rgba(198,156,109,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c69c6d' }}>
+                      <i className="fas fa-phone-alt" style={{ fontSize: '0.8rem' }}></i>
+                    </div>
+                    <a href="tel:+919264175587" style={{ color: '#444', fontWeight: '700', textDecoration: 'none', fontSize: '0.9rem' }}>+91 926-417-5587</a>
+                 </div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'rgba(0,128,128,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#008080' }}>
+                      <i className="fas fa-envelope" style={{ fontSize: '0.8rem' }}></i>
+                    </div>
+                    <a href="mailto:emailtotrx@gmail.com" style={{ color: '#444', fontWeight: '700', textDecoration: 'none', fontSize: '0.9rem' }}>emailtotrx@gmail.com</a>
+                 </div>
+              </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
 
-      {/* Recommended Assets */}
+      {/* Recommended Section */}
       {relatedProperties.length > 0 && (
-        <section style={{ backgroundColor: 'white', padding: isMobile ? '40px 15px' : '80px 20px', borderTop: '1px solid #f0f0f0' }}>
+        <section style={{ backgroundColor: 'white', padding: isMobile ? '60px 15px' : '100px 24px', borderTop: '1px solid #f0f0f0' }}>
           <div className="container">
-             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                <span style={{ color: '#c69c6d', fontSize: '0.8rem', letterSpacing: '4px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '10px' }}>Recommended Assets</span>
-                <h2 style={{ color: '#0a1c3a', fontSize: isMobile ? '1.8rem' : '2.5rem', fontWeight: '900', margin: 0 }}>You Might Also Admire</h2>
-                <div style={{ width: '60px', height: '3px', backgroundColor: '#c69c6d', margin: '20px auto' }}></div>
+             <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                <span style={{ color: '#c69c6d', fontSize: '0.75rem', letterSpacing: '5px', textTransform: 'uppercase', fontWeight: '900', display: 'block', marginBottom: '15px' }}>Curation</span>
+                <h2 style={{ color: '#0a1c3a', fontSize: isMobile ? '1.8rem' : '3rem', fontWeight: '900', margin: 0, letterSpacing: '-1px' }}>Related Properties</h2>
+                <div style={{ width: '80px', height: '4px', backgroundColor: '#c69c6d', margin: '25px auto', borderRadius: '2px' }}></div>
              </div>
-             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
+             <div className="property-grid" style={{ gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))' }}>
                 {relatedProperties.map(p => (
                   <PropertyCard key={p._id} property={p} />
                 ))}
@@ -456,28 +474,29 @@ const PropertyDetails = () => {
         </section>
       )}
 
-      {/* Bottom CTA */}
-      <section style={{ backgroundColor: '#0a1c3a', padding: isMobile ? '50px 20px' : '80px 20px', textAlign: 'center' }}>
+      {/* Bottom Visual Banner */}
+      <section style={{ 
+        backgroundColor: '#0a1c3a', 
+        padding: isMobile ? '60px 15px' : '120px 24px', 
+        textAlign: 'center',
+        backgroundImage: "linear-gradient(rgba(10,28,58,0.95), rgba(10,28,58,0.95)), url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
         <div className="container">
-          <p style={{ color: '#c69c6d', fontSize: '0.8rem', letterSpacing: '4px', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '15px' }}>Interested in This Property?</p>
-          <h2 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : 'clamp(1.8rem, 4vw, 3rem)', fontWeight: '900', marginBottom: '30px', lineHeight: 1.2 }}>
-            Get in Touch with Our Experts
+          <span style={{ color: '#c69c6d', fontSize: '0.8rem', letterSpacing: '6px', textTransform: 'uppercase', fontWeight: '900', marginBottom: '20px', display: 'block' }}>Exclusive Enquiry</span>
+          <h2 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '3.5rem', fontWeight: '900', marginBottom: '40px', lineHeight: 1.1, maxWidth: '900px', margin: '0 auto 40px' }}>
+            Looking for Similar Premium Assets?
           </h2>
-          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/contact" style={{
-              backgroundColor: '#c69c6d', color: 'white',
-              padding: isMobile ? '12px 25px' : '16px 40px', borderRadius: '12px', fontWeight: 'bold',
-              textDecoration: 'none', fontSize: '0.95rem', display: 'inline-block'
-            }}>
-              Contact Us
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: isMobile ? 'nowrap' : 'wrap' }}>
+            <Link to="/contact" className="btn btn-secondary" style={{ flex: 1, padding: isMobile ? '16px 10px' : '18px 50px', borderRadius: '50px', fontWeight: '800', fontSize: isMobile ? '0.8rem' : '1rem', whiteSpace: 'nowrap' }}>
+              {isMobile ? 'Consult Us' : 'Consult Our Xperts'}
             </Link>
-            <Link to="/properties" style={{
-              backgroundColor: 'transparent', color: 'white',
-              padding: isMobile ? '12px 25px' : '16px 40px', borderRadius: '12px', fontWeight: 'bold',
-              textDecoration: 'none', fontSize: '0.95rem', display: 'inline-block',
-              border: '2px solid rgba(255,255,255,0.3)'
-            }}>
-              View All Properties
+            <Link to="/properties" className="btn" style={{ flex: 1, padding: isMobile ? '16px 10px' : '18px 50px', borderRadius: '50px', fontWeight: '800', fontSize: isMobile ? '0.8rem' : '1rem', border: '2px solid rgba(255,255,255,0.3)', color: 'white', whiteSpace: 'nowrap' }}>
+              {isMobile ? 'Explore' : 'Explore Collection'}
             </Link>
           </div>
         </div>

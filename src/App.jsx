@@ -25,9 +25,9 @@ import ScrollToTop from './components/ScrollToTop';
 
 // User Layout Component
 const UserLayout = ({ children }) => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
+  <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', overflowX: 'hidden', width: '100%' }} className="bg-gradient-to-br from-slate-50 via-white to-slate-100">
     <Header />
-    <main className="flex-grow">
+    <main style={{ flexGrow: 1, width: '100%', overflowX: 'hidden' }}>
       {children}
     </main>
     <Footer />

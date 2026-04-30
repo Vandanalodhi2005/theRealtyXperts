@@ -8,7 +8,11 @@ function Footer() {
             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(0,128,128,0.1) 0%, transparent 70%)', transform: 'translate(-30%, 30%)' }}></div>
 
             <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-                <div className="footer-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '50px' }}>
+                <div className="footer-grid" style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', 
+                    gap: '40px' 
+                }}>
 
                     {/* Brand Column */}
                     <div className="footer-brand" style={{ paddingRight: '20px' }}>

@@ -31,11 +31,11 @@ const slides = [
 
 const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => setIsMobile(window.innerWidth <= 1024);
     window.addEventListener('resize', handleResize);
     
     const timer = setInterval(() => {
@@ -116,6 +116,21 @@ const HeroSlider = () => {
               transform: index === currentSlide ? 'translateY(0)' : 'translateY(30px)',
               opacity: index === currentSlide ? 1 : 0
             }}>
+              <div style={{ 
+                display: 'inline-block',
+                padding: '6px 15px',
+                backgroundColor: 'rgba(198, 156, 109, 0.15)',
+                borderLeft: '3px solid #c69c6d',
+                color: '#c69c6d',
+                fontSize: '0.9rem',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+                marginBottom: '20px',
+                borderRadius: '0 4px 4px 0'
+              }}>
+                Where Dreams Meet Addresses
+              </div>
               <h1 style={{ 
                 fontSize: isMobile ? '2.5rem' : '4.5rem', 
                 fontWeight: '800', 

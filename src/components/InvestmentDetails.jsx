@@ -12,13 +12,13 @@ const InvestmentDetails = () => {
   const [error, setError] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
   const [retrying, setRetrying] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchInvestment();
 
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => setIsMobile(window.innerWidth <= 1024);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [id]);
@@ -275,15 +275,14 @@ const InvestmentDetails = () => {
               </div>
             </div>
 
-            {/* CTA Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
               <a
                 href="tel:+919406650197"
                 style={{
-                  width: '100%',
+                  flex: 1,
                   background: 'linear-gradient(to right, #2563eb, #1d4ed8)',
                   color: 'white',
-                  padding: '12px',
+                  padding: '12px 5px',
                   borderRadius: '10px',
                   textDecoration: 'none',
                   fontWeight: 'bold',
@@ -291,27 +290,33 @@ const InvestmentDetails = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
-                  fontSize: '0.9rem'
+                  gap: '6px',
+                  fontSize: '0.8rem',
+                  textTransform: 'uppercase'
                 }}
               >
-                <HiPhone style={{ width: '18px', height: '18px' }} />
-                Call Now
+                <HiPhone style={{ width: '16px', height: '16px' }} />
+                Call
               </a>
               <a
                 href="https://wa.me/919406650197?text=Hi%20I%20am%20interested%20in%20this%20investment"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  width: '100%',
+                  flex: 1,
                   background: 'linear-gradient(to right, #16a34a, #15803d)',
                   color: 'white',
-                  padding: '12px',
+                  padding: '12px 5px',
                   borderRadius: '10px',
                   textDecoration: 'none',
                   fontWeight: 'bold',
                   textAlign: 'center',
-                  fontSize: '0.9rem'
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  fontSize: '0.8rem',
+                  textTransform: 'uppercase'
                 }}
               >
                 💬 WhatsApp
@@ -388,8 +393,36 @@ const InvestmentDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      {/* Sticky Mobile Bottom CTA */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          backgroundColor: 'white', padding: '12px 15px',
+          display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', zIndex: 1000,
+          boxShadow: '0 -10px 25px rgba(0,0,0,0.1)',
+          borderTop: '1px solid #eee',
+          boxSizing: 'border-box'
+        }}>
+          <a href="tel:+919406650197" style={{
+            backgroundColor: '#0a1c3a', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+            padding: '14px 2px', borderRadius: '12px', textDecoration: 'none',
+            fontWeight: '800', fontSize: '0.7rem', textTransform: 'uppercase'
+          }}>
+            <HiPhone style={{ width: '16px', height: '16px' }} /> Call Now
+          </a>
+          <a href="https://wa.me/919406650197" target="_blank" rel="noopener noreferrer" style={{
+            backgroundColor: '#16a34a', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+            padding: '14px 2px', borderRadius: '12px', textDecoration: 'none',
+            fontWeight: '800', fontSize: '0.7rem', textTransform: 'uppercase'
+          }}>
+            💬 WhatsApp
+          </a>
+        </div>
+      )}
     </div>
+  </div>
   );
 };
 

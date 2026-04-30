@@ -6,10 +6,14 @@ const Gallery = () => {
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(9);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
   useEffect(() => {
     fetchImages();
     window.scrollTo(0, 0);
+    const handleResize = () => setIsMobile(window.innerWidth <= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const fetchImages = async () => {
@@ -30,155 +34,170 @@ const Gallery = () => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
-        <div className="w-10 h-10 border-2 border-gold/20 border-t-gold rounded-full animate-spin"></div>
+      <div style={{ position: 'fixed', inset: 0, backgroundColor: 'white', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '40px', height: '40px', border: '3px solid #eee', borderTopColor: 'var(--color-gold)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F9F9] mb-10 font-sans selection:bg-gold/20">
+    <div style={{ minHeight: '100vh', backgroundColor: '#F9F9F9', marginBottom: '40px' }}>
       
       {/* Refined Hero Section */}
-      <section className="relative h-[35vh] flex items-center justify-center bg-navy">
-        <div className="absolute inset-0 z-0 opacity-30">
+      <section style={{ 
+        position: 'relative', 
+        height: isMobile ? '25vh' : '35vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        backgroundColor: 'var(--color-navy)',
+        overflow: 'hidden'
+      }}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0.3 }}>
           <img 
             src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070" 
-            className="w-full h-full object-cover"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             alt=""
           />
         </div>
-        <div className="container relative z-10 px-6 text-center">
-           <h1 className="text-4xl md:text-6xl font-bold text-white tracking-[0.2em] uppercase">
-              Portfolio
+        <div className="container" style={{ relative: 'zIndex 10', padding: '0 24px', textAlign: 'center' }}>
+           <h1 style={{ 
+             fontSize: isMobile ? '2rem' : '4rem', 
+             fontWeight: 'bold', 
+             color: 'white', 
+             letterSpacing: isMobile ? '0.1em' : '0.2em', 
+             textTransform: 'uppercase',
+             margin: 0
+           }}>
+              Our Gallery
            </h1>
-           <div className="w-16 h-1 bg-gold mx-auto mt-6"></div>
+           <div style={{ width: '60px', height: '4px', backgroundColor: 'var(--color-gold)', margin: '20px auto' }}></div>
         </div>
       </section>
 
       {/* Main Gallery Grid */}
-      <section className="py-32">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 sm:gap-16">
+      <section style={{ padding: isMobile ? '40px 0' : '80px 0' }}>
+        <div className="container">
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(320px, 1fr))', 
+            gap: isMobile ? '20px' : '40px' 
+          }}>
             {displayedImages.length > 0 ? (
               displayedImages.map((image, index) => (
                 <div 
                   key={image._id || index}
-                  className="group relative flex flex-col items-center animate-fade-in-up"
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  className="animate-on-scroll"
+                  style={{ opacity: 0, transition: 'all 0.8s ease-out', transitionDelay: `${(index % 3) * 100}ms` }}
+                  onLoad={(e) => e.currentTarget.style.opacity = 1}
                 >
-                  {/* PURE WHITE FRAME - object-contain ensures NO CROPPING */}
                   <div 
-                    className="relative w-full aspect-square bg-white shadow-2xl transition-all duration-700 cursor-pointer overflow-hidden p-6 border border-slate-100"
+                    style={{ 
+                      position: 'relative', 
+                      width: '100%', 
+                      aspectRatio: '1/1', 
+                      backgroundColor: 'white', 
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.05)', 
+                      cursor: 'pointer', 
+                      overflow: 'hidden', 
+                      padding: '15px', 
+                      border: '1px solid #eee',
+                      borderRadius: '12px'
+                    }}
                     onClick={() => setSelectedImage(image)}
                   >
-                    {/* Image Container with contain - NO CUTTING */}
-                    <div className="relative w-full h-full overflow-hidden bg-slate-50 flex items-center justify-center">
+                    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', backgroundColor: '#fcfcfc', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}>
                       <img 
                         src={image.imageUrl} 
                         alt="" 
-                        className="max-w-full max-h-full w-auto h-auto object-contain transition-transform duration-1000 ease-out group-hover:scale-110"
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', transition: 'transform 0.6s ease' }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       />
                       
-                      {/* Interaction Overlay */}
-                      <div className="absolute inset-0 bg-[#0A1C3A]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                         <HiArrowsExpand size={28} className="text-[#0A1C3A]/20" />
+                      <div className="gallery-overlay" style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,28,58,0.03)', opacity: 0, transition: 'opacity 0.3s' }}>
+                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                            <HiArrowsExpand size={24} style={{ color: 'rgba(10,28,58,0.2)' }} />
+                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="col-span-full py-40 text-center flex flex-col items-center">
-                <HiOutlinePhotograph className="w-10 h-10 text-slate-200 mb-4" />
-                <p className="text-xs font-bold text-[#0A1C3A]/20 uppercase tracking-widest">Gallery Empty</p>
+              <div style={{ gridColumn: '1 / -1', padding: '100px 0', textAlign: 'center' }}>
+                <HiOutlinePhotograph style={{ width: '40px', height: '40px', color: '#ddd', marginBottom: '20px' }} />
+                <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'rgba(10,28,58,0.2)', textTransform: 'uppercase', letterSpacing: '2px' }}>Gallery Empty</p>
               </div>
             )}
           </div>
 
-          {/* Ultra-Minimal Premium Load More Button */}
+          {/* Load More Button */}
           {visibleCount < images.length && (
-            <div className="flex justify-center my-40 px-6">
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: isMobile ? '50px' : '80px' }}>
               <button 
                 onClick={() => setVisibleCount(prev => prev + 9)}
-                className="group relative px-20 py-6 transition-all duration-500 overflow-hidden"
                 style={{ 
-                  backgroundColor: '#0A1C3A', 
-                  color: '#FFFFFF',
-                  border: '1px solid #C69C6D',
-                  letterSpacing: '0.4em',
-                  fontSize: '11px',
-                  fontWeight: '900',
+                  backgroundColor: 'var(--color-navy)', 
+                  color: 'white',
+                  border: '1px solid var(--color-gold)',
+                  letterSpacing: '0.2em',
+                  fontSize: '0.8rem',
+                  fontWeight: '800',
                   textTransform: 'uppercase',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  padding: '16px 50px',
+                  borderRadius: '50px',
                   cursor: 'pointer',
-                  minWidth: '280px',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                  transition: 'all 0.3s'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#C69C6D';
-                  e.currentTarget.style.color = '#0A1C3A';
-                  e.currentTarget.style.boxShadow = '0 20px 50px rgba(198, 156, 109, 0.3)';
+                  e.currentTarget.style.backgroundColor = 'var(--color-gold)';
+                  e.currentTarget.style.color = 'var(--color-navy)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#0A1C3A';
-                  e.currentTarget.style.color = '#FFFFFF';
-                  e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+                  e.currentTarget.style.backgroundColor = 'var(--color-navy)';
+                  e.currentTarget.style.color = 'white';
                 }}
               >
-                <span>Discover More</span>
+                Explore More
               </button>
             </div>
           )}
         </div>
       </section>
 
-      {/* Fullscreen Modal - Clean */}
+      {/* Lightbox Modal */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 bg-navy/98 backdrop-blur-3xl z-[9999] flex items-center justify-center p-4 md:p-12 animate-fade-in"
+          style={{ 
+            position: 'fixed', inset: 0, 
+            backgroundColor: 'rgba(10,28,58,0.98)', 
+            backdropFilter: 'blur(10px)', 
+            zIndex: 9999, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: isMobile ? '20px' : '40px' 
+          }}
           onClick={() => setSelectedImage(null)}
         >
-          <button className="absolute top-10 right-10 text-white/40 hover:text-white transition-all">
+          <button style={{ position: 'absolute', top: '30px', right: '30px', background: 'none', border: 'none', color: 'white', cursor: 'pointer', opacity: 0.6 }}>
             <HiX size={32} />
           </button>
 
-          <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
-             <div className="bg-white p-2 shadow-2xl animate-scale-up">
+          <div style={{ maxWidth: '1200px', width: '100%', maxHeight: '90vh', position: 'relative' }} onClick={e => e.stopPropagation()}>
+             <div style={{ backgroundColor: 'white', padding: '10px', borderRadius: '8px', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
                 <img 
                   src={selectedImage.imageUrl} 
-                  className="max-h-[85vh] w-auto mx-auto object-contain" 
+                  style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain' }} 
                   alt="" 
                 />
              </div>
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes scale-up {
-          from { opacity: 0; transform: scale(0.98); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
-        .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
-        .animate-scale-up { animation: scale-up 0.5s ease-out forwards; }
-        
-        .text-navy { color: #0A1C3A; }
-        .bg-navy { background-color: #0A1C3A; }
-        .text-gold { color: #C69C6D; }
-        .bg-gold { background-color: #C69C6D; }
-      `}</style>
     </div>
   );
 };

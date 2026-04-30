@@ -1,9 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'
 
 function About() {
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+
     useEffect(() => {
         window.scrollTo(0, 0);
+        
+        const handleResize = () => setIsMobile(window.innerWidth <= 1024);
+        window.addEventListener('resize', handleResize);
         
         // Trigger animations on scroll
         const observerOptions = { threshold: 0.1 };
@@ -16,15 +21,18 @@ function About() {
         }, observerOptions);
 
         document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-        return () => observer.disconnect();
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('resize', handleResize);
+        };
     }, []);
 
     return (
         <main className="about-page-wrapper">
             {/* Hero Section */}
             <section className="about-hero" style={{
-                height: '50vh',
-                minHeight: '400px',
+                height: isMobile ? '40vh' : '50vh',
+                minHeight: isMobile ? '300px' : '400px',
                 backgroundImage: "linear-gradient(rgba(10, 28, 58, 0.85), rgba(10, 28, 58, 0.85)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop')",
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -36,31 +44,31 @@ function About() {
                 paddingTop: '80px'
             }}>
                 <div className="container animate-on-scroll" style={{ opacity: 0 }}>
-                    <span className="subtitle" style={{ color: 'var(--color-gold)', letterSpacing: '6px' }}>ESTABLISHED 2016</span>
-                    <h1 style={{ fontSize: '4rem', fontWeight: '900',color: 'white', marginBottom: '1rem' }}>Our Legacy of Trust</h1>
+                    <span className="subtitle" style={{ color: 'var(--color-gold)', letterSpacing: isMobile ? '3px' : '6px', fontSize: isMobile ? '0.7rem' : '0.9rem' }}>ESTABLISHED 2016</span>
+                    <h1 style={{ fontSize: isMobile ? '2.2rem' : '4rem', fontWeight: '900',color: 'white', marginBottom: '1rem', lineHeight: '1.2' }}>Our Legacy of Trust</h1>
                     <div className="divider mx-auto" style={{ background: 'var(--color-gold)' }}></div>
                 </div>
             </section>
 
             {/* Quick Stats Bar */}
-            <section style={{ backgroundColor: 'var(--color-navy)', color: 'white', padding: '40px 0' }}>
+            <section style={{ backgroundColor: 'var(--color-navy)', color: 'white', padding: isMobile ? '30px 0' : '40px 0' }}>
                 <div className="container">
-                    <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '30px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: isMobile ? '20px' : '30px' }}>
                         <div style={{ textAlign: 'center' }}>
-                            <h2 style={{ color: 'var(--color-gold)', fontSize: '2.5rem', marginBottom: '5px' }}>8+</h2>
-                            <p style={{ opacity: 0.8, textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Years Experience</p>
+                            <h2 style={{ color: 'var(--color-gold)', fontSize: isMobile ? '1.8rem' : '2.5rem', marginBottom: '5px' }}>8+</h2>
+                            <p style={{ opacity: 0.8, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '1px' }}>Years Experience</p>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <h2 style={{ color: 'var(--color-gold)', fontSize: '2.5rem', marginBottom: '5px' }}>1500+</h2>
-                            <p style={{ opacity: 0.8, textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Happy Families</p>
+                            <h2 style={{ color: 'var(--color-gold)', fontSize: isMobile ? '1.8rem' : '2.5rem', marginBottom: '5px' }}>1500+</h2>
+                            <p style={{ opacity: 0.8, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '1px' }}>Happy Families</p>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <h2 style={{ color: 'var(--color-gold)', fontSize: '2.5rem', marginBottom: '5px' }}>50+</h2>
-                            <p style={{ opacity: 0.8, textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Expert Consultants</p>
+                            <h2 style={{ color: 'var(--color-gold)', fontSize: isMobile ? '1.8rem' : '2.5rem', marginBottom: '5px' }}>50+</h2>
+                            <p style={{ opacity: 0.8, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '1px' }}>Expert Consultants</p>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <h2 style={{ color: 'var(--color-gold)', fontSize: '2.5rem', marginBottom: '5px' }}>100%</h2>
-                            <p style={{ opacity: 0.8, textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Transparency</p>
+                            <h2 style={{ color: 'var(--color-gold)', fontSize: isMobile ? '1.8rem' : '2.5rem', marginBottom: '5px' }}>100%</h2>
+                            <p style={{ opacity: 0.8, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '1px' }}>Transparency</p>
                         </div>
                     </div>
                 </div>
@@ -72,9 +80,9 @@ function About() {
                     <div className="about-highlights-grid">
                         <div className="animate-on-scroll">
                             <span className="subtitle">THE TRX STORY</span>
-                            <h2 style={{ fontSize: '2.5rem', color: 'var(--color-navy)' }}>Eight Years of Redefining Real Estate</h2>
+                            <h2 style={{ fontSize: isMobile ? '1.8rem' : '2.5rem', color: 'var(--color-navy)', lineHeight: '1.2' }}>Eight Years of Redefining Real Estate</h2>
                             <div className="divider"></div>
-                            <div style={{ fontSize: '1.1rem', color: 'var(--color-dark-gray)', lineHeight: '1.8' }}>
+                            <div style={{ fontSize: isMobile ? '0.95rem' : '1.1rem', color: 'var(--color-dark-gray)', lineHeight: '1.8' }}>
                                 <p style={{ marginBottom: '20px' }}>
                                     At <strong className="text-navy">The Realty Xperts (TRX)</strong>, we believe that every dream deserves the right address. Since our inception in 2016, we have transitioned from a promising startup to a cornerstone of trust in the real estate landscape.
                                 </p>
@@ -164,9 +172,9 @@ function About() {
 
                         <div className="animate-on-scroll">
                             <span className="subtitle">THE VISIONARY</span>
-                            <h2 style={{ fontSize: '2.5rem' }}>Leading with 18+ Years of Insight</h2>
+                            <h2 style={{ fontSize: isMobile ? '1.8rem' : '2.5rem', lineHeight: '1.2' }}>Leading with 18+ Years of Insight</h2>
                             <div className="divider"></div>
-                            <div style={{ fontSize: '1.05rem', color: 'var(--color-dark-gray)', lineHeight: '1.8' }}>
+                            <div style={{ fontSize: isMobile ? '0.95rem' : '1.05rem', color: 'var(--color-dark-gray)', lineHeight: '1.8' }}>
                                 <p style={{ marginBottom: '20px' }}>
                                     <strong>Mr. Sanjeev Kumar</strong> is the force behind TRX's excellence. With nearly two decades of leadership roles at global giants like <strong>IBM, United Health Group, and Capgemini</strong>, he brings an unmatched corporate sophistication to the Indian real estate market.
                                 </p>

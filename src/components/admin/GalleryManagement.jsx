@@ -7,6 +7,9 @@ const GalleryManagement = () => {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 25;
 
     const fetchGallery = async () => {
         setLoading(true);
@@ -57,6 +60,17 @@ const GalleryManagement = () => {
     const tableHeaderStyle = { textAlign: 'left', padding: '12px 15px', fontSize: '10px', color: '#90A4AE', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', backgroundColor: '#F8F9FA' };
     const tableCellStyle = { padding: '15px', fontSize: '13px', color: '#455A64', borderBottom: '1px solid #F0F0F0' };
 
+    // Search and Pagination Logic
+    const filteredImages = images.filter(img => 
+        (img.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+         img.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         img._id?.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    const totalPages = Math.ceil(filteredImages.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedImages = filteredImages.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
     if (showAddForm) {
         return <AddGalleryForm onImageAdded={() => { setShowAddForm(false); fetchGallery(); }} onCancel={() => setShowAddForm(false)} />;
     }
@@ -76,8 +90,22 @@ const GalleryManagement = () => {
 
             {/* Gallery Table Card */}
             <div style={mainCardStyle}>
-                <div style={{ borderBottom: '1px solid #E6E9EF', paddingBottom: '15px', marginBottom: '10px' }}>
+                <div style={{ borderBottom: '1px solid #E6E9EF', paddingBottom: '15px', marginBottom: '20px' }}>
                     <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)', fontWeight: '700' }}>Visual Media Portfolio</h4>
+                </div>
+
+                {/* Search Bar */}
+                <div style={{ position: 'relative', marginBottom: '20px', width: '100%', maxWidth: '400px' }}>
+                    <input 
+                        type="text" 
+                        placeholder="Search by title, category or ID..."
+                        value={searchTerm}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setCurrentPage(1);
+                        }}
+                        style={{ width: '100%', padding: '12px 15px', borderRadius: '10px', border: '1px solid #E6E9EF', fontSize: '14px', outline: 'none' }}
+                    />
                 </div>
 
                 <div style={{ overflowX: 'auto', width: '100%' }}>
@@ -94,38 +122,67 @@ const GalleryManagement = () => {
                         <tbody>
                             {loading ? (
                                 <tr><td colSpan="5" style={{ padding: '60px', textAlign: 'center', color: '#90A4AE' }}>Loading media vault...</td></tr>
-                            ) : images.length === 0 ? (
+                            ) : paginatedImages.length === 0 ? (
                                 <tr>
                                     <td colSpan="5" style={{ padding: '80px 20px', textAlign: 'center', color: '#90A4AE', fontSize: '14px' }}>
                                         <HiOutlinePhotograph size={48} style={{ opacity: 0.2, marginBottom: '15px' }} />
-                                        <p>No gallery assets found. Start building your portfolio!</p>
+                                        <p>{searchTerm ? 'No assets match your search.' : 'No gallery assets found. Start building your portfolio!'}</p>
                                     </td>
                                 </tr>
-                            ) : images.map(img => (
-                                <tr key={img._id}>
-                                    <td style={tableCellStyle}>
-                                        <div style={{ width: '80px', height: '60px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#F8F9FA' }}>
-                                            <img src={img.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Preview" />
-                                        </div>
-                                    </td>
-                                    <td style={tableCellStyle}>
-                                        <p style={{ fontWeight: '600', margin: 0 }}>{img.title || 'Architectural capture'}</p>
-                                        <p style={{ fontSize: '10px', color: '#90A4AE', margin: 0 }}>ID: {img._id?.slice(-8).toUpperCase()}</p>
-                                    </td>
-                                    <td style={tableCellStyle}>
-                                        <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: '#E3F2FD', color: '#2196F3', textTransform: 'uppercase' }}>
-                                            {img.category || 'General'}
-                                        </span>
-                                    </td>
-                                    <td style={tableCellStyle}>{new Date(img.createdAt || Date.now()).toLocaleDateString()}</td>
-                                    <td style={{ ...tableCellStyle, textAlign: 'right' }}>
-                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                            <a href={img.imageUrl} target="_blank" rel="noreferrer" style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><HiEye /></a>
-                                            <button onClick={() => handleDelete(img._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}><HiTrash /></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                            ) : (
+                                <>
+                                    {paginatedImages.map(img => (
+                                        <tr key={img._id}>
+                                            <td style={tableCellStyle}>
+                                                <div style={{ width: '80px', height: '60px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#F8F9FA' }}>
+                                                    <img src={img.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Preview" />
+                                                </div>
+                                            </td>
+                                            <td style={tableCellStyle}>
+                                                <p style={{ fontWeight: '600', margin: 0 }}>{img.title || 'Architectural capture'}</p>
+                                                <p style={{ fontSize: '10px', color: '#90A4AE', margin: 0 }}>ID: {img._id?.slice(-8).toUpperCase()}</p>
+                                            </td>
+                                            <td style={tableCellStyle}>
+                                                <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: '#E3F2FD', color: '#2196F3', textTransform: 'uppercase' }}>
+                                                    {img.category || 'General'}
+                                                </span>
+                                            </td>
+                                            <td style={tableCellStyle}>{new Date(img.createdAt || Date.now()).toLocaleDateString()}</td>
+                                            <td style={{ ...tableCellStyle, textAlign: 'right' }}>
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                    <a href={img.imageUrl} target="_blank" rel="noreferrer" style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><HiEye /></a>
+                                                    <button onClick={() => handleDelete(img._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}><HiTrash /></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    <tr>
+                                        <td colSpan="5">
+                                            {totalPages > 1 && (
+                                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginTop: '20px', padding: '15px 0', borderTop: '1px solid #eee' }}>
+                                                    <button 
+                                                        disabled={currentPage === 1}
+                                                        onClick={() => setCurrentPage(prev => prev - 1)}
+                                                        style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #ddd', backgroundColor: currentPage === 1 ? '#f5f5f5' : 'white', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontWeight: '600' }}
+                                                    >
+                                                        Previous
+                                                    </button>
+                                                    <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-navy)' }}>
+                                                        Page {currentPage} of {totalPages}
+                                                    </span>
+                                                    <button 
+                                                        disabled={currentPage === totalPages}
+                                                        onClick={() => setCurrentPage(prev => prev + 1)}
+                                                        style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #ddd', backgroundColor: currentPage === totalPages ? '#f5f5f5' : 'white', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontWeight: '600' }}
+                                                    >
+                                                        Next
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                </>
+                            )}
                         </tbody>
                     </table>
                 </div>

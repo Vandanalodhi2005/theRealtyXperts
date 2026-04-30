@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { HiHome, HiOfficeBuilding, HiLocationMarker, HiCurrencyRupee, HiFilter, HiX } from 'react-icons/hi';
 import PropTypes from 'prop-types';
 import PropertyCard from './PropertyCard';
@@ -20,11 +20,13 @@ const Properties = ({ category = 'all' }) => {
     furnishing: 'all'
   });
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => setIsMobile(window.innerWidth <= 1024);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -50,7 +52,12 @@ const Properties = ({ category = 'all' }) => {
   useEffect(() => {
     fetchData();
     window.scrollTo(0, 0);
-  }, [fetchData, category]);
+    
+    // If there's a search param, set it in filters
+    if (initialSearch) {
+      setFilters(prev => ({ ...prev, location: initialSearch }));
+    }
+  }, [fetchData, category, initialSearch]);
 
   const handleFilterChange = (e) => {
     setFilters({
@@ -114,7 +121,19 @@ const Properties = ({ category = 'all' }) => {
     if (filters.propertyType !== 'all' && property.propertyType !== filters.propertyType) return false;
     if (filters.minPrice && property.price < parseInt(filters.minPrice)) return false;
     if (filters.maxPrice && property.price > parseInt(filters.maxPrice)) return false;
-    if (filters.location && !property.location?.toLowerCase().includes(filters.location.toLowerCase())) return false;
+    
+    // Enhanced Search Logic (Matches location, city, title, or property name)
+    if (filters.location) {
+      const term = filters.location.toLowerCase();
+      const matches = (
+        property.location?.toLowerCase().includes(term) ||
+        property.city?.toLowerCase().includes(term) ||
+        property.propertyName?.toLowerCase().includes(term) ||
+        property.title?.toLowerCase().includes(term) ||
+        property.description?.toLowerCase().includes(term)
+      );
+      if (!matches) return false;
+    }
     if (filters.transaction !== 'all' && property.transaction !== filters.transaction) return false;
     if (filters.status !== 'all' && property.status !== filters.status) return false;
     if (filters.bedroom !== 'all' && property.bedroom?.toString() !== filters.bedroom) return false;
@@ -264,7 +283,7 @@ const Properties = ({ category = 'all' }) => {
 
               <input type="number" name="minPrice" placeholder="Min Price (₹)" value={filters.minPrice} onChange={handleFilterChange} style={filterInputStyle} />
               <input type="number" name="maxPrice" placeholder="Max Price (₹)" value={filters.maxPrice} onChange={handleFilterChange} style={filterInputStyle} />
-              <input type="text" name="location" placeholder="Search Location..." value={filters.location} onChange={handleFilterChange} style={filterInputStyle} />
+              <input type="text" name="location" placeholder="Search Keywords / Location..." value={filters.location} onChange={handleFilterChange} style={filterInputStyle} />
             </div>
           </div>
 
