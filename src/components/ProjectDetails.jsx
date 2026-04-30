@@ -172,7 +172,7 @@ const ProjectDetails = () => {
             </div>
 
             <h1 style={{
-              fontSize: isMobile ? '2rem' : 'clamp(2.5rem, 5vw, 4.5rem)', 
+              fontSize: isMobile ? '1.6rem' : 'clamp(2.5rem, 5vw, 4.5rem)', 
               fontWeight: '900', color: 'white',
               lineHeight: 1.1, marginBottom: '24px',
               wordBreak: 'break-word',
@@ -207,7 +207,7 @@ const ProjectDetails = () => {
 
 
       {/* Main Content */}
-      <div className="container" style={{ padding: isMobile ? '30px 15px 80px' : '60px 24px' }}>
+      <div className="container" style={{ padding: isMobile ? '25px 12px 80px' : '60px 24px' }}>
         <div className="project-layout-grid">
 
           {/* LEFT COLUMN */}
@@ -295,7 +295,7 @@ const ProjectDetails = () => {
                 <div style={{ width: '5px', height: '35px', backgroundColor: '#c69c6d', borderRadius: '10px' }}></div>
                 <h2 style={{ fontSize: isMobile ? '1.5rem' : '1.8rem', fontWeight: '900', color: '#0a1c3a', margin: 0 }}>About This Project</h2>
               </div>
-              <p style={{ color: '#4a5568', lineHeight: '1.8', fontSize: isMobile ? '1rem' : '1.1rem', margin: 0, whiteSpace: 'pre-line' }}>
+              <p style={{ color: '#4a5568', lineHeight: '1.8', fontSize: isMobile ? '0.95rem' : '1.1rem', margin: 0, whiteSpace: 'pre-line', wordBreak: 'break-word' }}>
                 {project.description || 'No description available.'}
               </p>
             </div>

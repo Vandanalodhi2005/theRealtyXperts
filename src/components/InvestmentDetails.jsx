@@ -149,7 +149,7 @@ const InvestmentDetails = () => {
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: isMobile ? '20px 15px' : '32px 16px' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: isMobile ? '15px 12px' : '32px 16px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))', gap: isMobile ? '24px' : '32px' }}>
           
           {/* Image Gallery */}
@@ -240,7 +240,7 @@ const InvestmentDetails = () => {
 
             {/* Title & Location */}
             <div style={{ marginBottom: '24px' }}>
-              <h1 style={{ fontSize: isMobile ? '24px' : '32px', fontWeight: 'bold', color: '#0f172a', marginBottom: '8px', lineHeight: '1.2' }}>{investment.title}</h1>
+              <h1 style={{ fontSize: isMobile ? '22px' : '32px', fontWeight: 'bold', color: '#0f172a', marginBottom: '8px', lineHeight: '1.2', wordBreak: 'break-word' }}>{investment.title}</h1>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#475569' }}>
                 <HiLocationMarker style={{ width: '18px', height: '18px', marginTop: '4px', flexShrink: 0, color: '#2563eb' }} />
                 <div>
@@ -341,7 +341,7 @@ const InvestmentDetails = () => {
                   <div style={{ width: '4px', height: '24px', background: '#2563eb', borderRadius: '9999px' }}></div>
                   About This Investment
                 </h3>
-                <p style={{ color: '#475569', lineHeight: '1.7', fontSize: isMobile ? '15px' : '18px', whiteSpace: 'pre-wrap' }}>
+                <p style={{ color: '#475569', lineHeight: '1.7', fontSize: isMobile ? '14px' : '18px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                   {investment.description}
                 </p>
               </div>

@@ -3,30 +3,30 @@ import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
 import { HiPlus, HiX, HiCloudUpload, HiInformationCircle, HiLocationMarker, HiViewGrid, HiCheckCircle } from 'react-icons/hi';
 
-const AddPropertyForm = ({ onCancel, onSuccess }) => {
+const AddPropertyForm = ({ onCancel, onSuccess, initialData }) => {
   const [formData, setFormData] = useState({
-    status: '',
-    propertyType: '',
-    price: '',
-    area: '',
-    plotArea: '',
-    bedroom: '',
-    transaction: '',
-    furnishing: '',
-    propertyAge: '',
-    flatNo: '',
-    propertyName: '',
-    buildingName: '',
-    street: '',
-    landmark: '',
-    pinCode: '',
-    address: '',
-    city: '',
-    location: '',
-    propertyDescription: '',
-    detailedInformation: '',
-    amenities: [],
-    youtubeUrl: '',
+    status: initialData?.status || '',
+    propertyType: initialData?.propertyType || '',
+    price: initialData?.price || '',
+    area: initialData?.area || '',
+    plotArea: initialData?.plotArea || '',
+    bedroom: initialData?.bedroom || '',
+    transaction: initialData?.transaction || '',
+    furnishing: initialData?.furnishing || '',
+    propertyAge: initialData?.propertyAge || '',
+    flatNo: initialData?.flatNo || '',
+    propertyName: initialData?.propertyName || '',
+    buildingName: initialData?.buildingName || '',
+    street: initialData?.street || '',
+    landmark: initialData?.landmark || '',
+    pinCode: initialData?.pinCode || '',
+    address: initialData?.address || '',
+    city: initialData?.city || '',
+    location: initialData?.location || '',
+    propertyDescription: initialData?.propertyDescription || '',
+    detailedInformation: initialData?.detailedInformation || '',
+    amenities: initialData?.amenities || [],
+    youtubeUrl: initialData?.youtubeUrl || '',
   });
   
   const [images, setImages] = useState([]);
@@ -67,7 +67,7 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
 
       Object.keys(formData).forEach(key => {
         if (key === 'amenities') {
-          formDataToSend.append(key, formData[key].join(','));
+          formDataToSend.append(key, Array.isArray(formData[key]) ? formData[key].join(',') : formData[key]);
         } else {
           formDataToSend.append(key, formData[key]);
         }
@@ -77,14 +77,18 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
         formDataToSend.append('images', image);
       });
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`, {
-        method: 'POST',
+      const url = initialData 
+        ? `${import.meta.env.VITE_BACKEND_URL}/api/properties/${initialData._id}`
+        : `${import.meta.env.VITE_BACKEND_URL}/api/properties`;
+        
+      const response = await fetch(url, {
+        method: initialData ? 'PUT' : 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formDataToSend,
       });
 
       if (response.ok) {
-        toast.success('Property added successfully!');
+        toast.success(`Property ${initialData ? 'updated' : 'added'} successfully!`);
         onSuccess();
       } else {
         const data = await response.json();
@@ -125,9 +129,9 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
         {error && <div style={{ background: '#FFEBEE', color: '#F44336', padding: '15px', borderRadius: '10px', fontWeight: 'bold', fontSize: '14px' }}>{error}</div>}
 
         {/* Section 1: Property Information */}
-        <div style={cardStyle}>
+        <div className="modal-content" style={cardStyle}>
           <h3 style={sectionHeaderStyle}><HiPlus color="var(--color-gold)" /> Property Information</h3>
-          <div style={formGridStyle}>
+          <div className="form-grid" style={formGridStyle}>
             <div style={inputGroupStyle}>
               <label style={labelStyle}>Status *</label>
               <select name="status" value={formData.status} onChange={handleInputChange} style={inputStyle} required>
@@ -189,9 +193,9 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
         </div>
 
         {/* Section 2: Location Information */}
-        <div style={cardStyle}>
+        <div className="modal-content" style={cardStyle}>
           <h3 style={sectionHeaderStyle}><HiLocationMarker color="#FF9800" /> Location Information</h3>
-          <div style={formGridStyle}>
+          <div className="form-grid" style={formGridStyle}>
              <div style={inputGroupStyle}><label style={labelStyle}>Flat No./Unit No.</label><input type="text" name="flatNo" value={formData.flatNo} onChange={handleInputChange} style={inputStyle} placeholder="Flat/Unit number" /></div>
              <div style={inputGroupStyle}><label style={labelStyle}>Property Name</label><input type="text" name="propertyName" value={formData.propertyName} onChange={handleInputChange} style={inputStyle} placeholder="Property name" /></div>
              <div style={inputGroupStyle}><label style={labelStyle}>Building Name</label><input type="text" name="buildingName" value={formData.buildingName} onChange={handleInputChange} style={inputStyle} placeholder="Building name" /></div>
@@ -208,7 +212,7 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
         </div>
 
         {/* Section 3: Description & Media */}
-        <div style={cardStyle}>
+        <div className="modal-content" style={cardStyle}>
           <h3 style={sectionHeaderStyle}><HiInformationCircle color="#2196F3" /> Property Details & Media</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
              <div style={inputGroupStyle}><label style={labelStyle}>Property Short Description</label><textarea name="propertyDescription" value={formData.propertyDescription} onChange={handleInputChange} style={{ ...inputStyle, minHeight: '80px' }} placeholder="Brief description of the property" /></div>
@@ -239,9 +243,9 @@ const AddPropertyForm = ({ onCancel, onSuccess }) => {
         </div>
 
         {/* Section 4: Amenities */}
-        <div style={cardStyle}>
+        <div className="modal-content" style={cardStyle}>
           <h3 style={sectionHeaderStyle}><HiViewGrid color="#9C27B0" /> Amenities</h3>
-          <div style={amenitiesGridStyle}>
+          <div className="form-grid" style={amenitiesGridStyle}>
             {amenitiesList.map((amenity) => {
               const isChecked = formData.amenities.includes(amenity);
               return (

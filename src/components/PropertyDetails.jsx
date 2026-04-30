@@ -181,11 +181,12 @@ const PropertyDetails = () => {
             </div>
 
             <h1 style={{
-              fontSize: isMobile ? '1.8rem' : '3.5rem', 
+              fontSize: isMobile ? '1.5rem' : '3.5rem', 
               fontWeight: '900', color: 'white',
               lineHeight: 1.2, marginBottom: '20px',
               textShadow: '0 4px 15px rgba(0,0,0,0.4)',
-              maxWidth: '900px'
+              maxWidth: '900px',
+              wordBreak: 'break-word'
             }}>
               {propertyTitle}
             </h1>
@@ -234,7 +235,7 @@ const PropertyDetails = () => {
       )}
 
       {/* Main Content Layout */}
-      <div className="container" style={{ padding: isMobile ? '30px 15px' : '60px 24px' }}>
+      <div className="container" style={{ padding: isMobile ? '25px 12px' : '60px 24px' }}>
         <div className="project-layout-grid">
 
           {/* LEFT COLUMN */}
@@ -319,7 +320,7 @@ const PropertyDetails = () => {
                 <div style={{ width: '5px', height: '35px', backgroundColor: '#c69c6d', borderRadius: '5px' }}></div>
                 <h2 style={{ fontSize: isMobile ? '1.4rem' : '1.8rem', fontWeight: '900', color: '#0a1c3a', margin: 0, letterSpacing: '-0.5px' }}>Property Overview</h2>
               </div>
-              <p style={{ color: '#444', lineHeight: '1.9', fontSize: isMobile ? '0.95rem' : '1.1rem', margin: 0, whiteSpace: 'pre-wrap' }}>
+              <p style={{ color: '#444', lineHeight: '1.9', fontSize: isMobile ? '0.9rem' : '1.1rem', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                 {property.propertyDescription || property.description || 'No description available.'}
               </p>
             </div>

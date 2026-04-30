@@ -3,21 +3,21 @@ import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
 import { HiPlus, HiCloudUpload, HiX } from 'react-icons/hi';
 
-const AddInvestmentForm = ({ onCancel, onSuccess }) => {
+const AddInvestmentForm = ({ onCancel, onSuccess, initialData }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    landType: '',
-    status: 'available',
-    totalPrice: '',
-    area: '',
-    areaUnit: 'sq.ft',
-    pricePerUnit: '',
-    location: '',
-    city: 'Bhopal',
-    description: '',
-    highlights: '',
-    nearbyPlaces: '',
-    mapUrl: '',
+    title: initialData?.title || '',
+    landType: initialData?.landType || '',
+    status: initialData?.status || 'available',
+    totalPrice: initialData?.totalPrice || '',
+    area: initialData?.area || '',
+    areaUnit: initialData?.areaUnit || 'sq.ft',
+    pricePerUnit: initialData?.pricePerUnit || '',
+    location: initialData?.location || '',
+    city: initialData?.city || 'Bhopal',
+    description: initialData?.description || '',
+    highlights: initialData?.highlights || '',
+    nearbyPlaces: initialData?.nearbyPlaces || '',
+    mapUrl: initialData?.mapUrl || '',
   });
   
   const [images, setImages] = useState([]);
@@ -55,14 +55,18 @@ const AddInvestmentForm = ({ onCancel, onSuccess }) => {
         formDataToSend.append('images', image);
       });
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments`, {
-        method: 'POST',
+      const url = initialData 
+        ? `${import.meta.env.VITE_BACKEND_URL}/api/investments/${initialData._id}`
+        : `${import.meta.env.VITE_BACKEND_URL}/api/investments`;
+
+      const response = await fetch(url, {
+        method: initialData ? 'PUT' : 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formDataToSend,
       });
 
       if (response.ok) {
-        toast.success('Investment added successfully!');
+        toast.success(`Investment ${initialData ? 'updated' : 'added'} successfully!`);
         onSuccess();
       } else {
         const data = await response.json();

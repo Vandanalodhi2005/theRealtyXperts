@@ -21,6 +21,7 @@ import {
   HiX,
   HiMenu,
   HiPhotograph,
+  HiPencilAlt,
 } from 'react-icons/hi';
 import AddPropertyForm from './AddPropertyForm';
 import AddInvestmentForm from './AddInvestmentForm';
@@ -36,13 +37,20 @@ const AdminDashboard = () => {
     const [showAddProperty, setShowAddProperty] = useState(false);
     const [showAddInvestment, setShowAddInvestment] = useState(false);
     const [showAddProject, setShowAddProject] = useState(false);
+    const [editProperty, setEditProperty] = useState(null);
+    const [editInvestment, setEditInvestment] = useState(null);
+    const [editProject, setEditProject] = useState(null);
+    const [selectedProperty, setSelectedProperty] = useState(null);
+    const [selectedInvestment, setSelectedInvestment] = useState(null);
+    const [selectedProject, setSelectedProject] = useState(null);
     const [properties, setProperties] = useState([]);
     const [investments, setInvestments] = useState([]);
     const [projects, setProjects] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [contacts, setContacts] = useState([]);
     const [gallery, setGallery] = useState([]);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [selectedInquiry, setSelectedInquiry] = useState(null);
     const [selectedSubmission, setSelectedSubmission] = useState(null);
     const [adminSettings, setAdminSettings] = useState({
@@ -50,6 +58,19 @@ const AdminDashboard = () => {
         newPassword: '',
         confirmPassword: ''
     });
+
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+            if (window.innerWidth >= 1024) {
+                setIsSidebarOpen(true);
+            } else {
+                setIsSidebarOpen(false);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Search and Pagination State
     const [searchTerms, setSearchTerms] = useState({
@@ -406,93 +427,155 @@ const AdminDashboard = () => {
         </div>
     );
 
+    const calculatePercentage = (count, total) => {
+        if (!total || total === 0) return 0;
+        return Math.round((count / total) * 100);
+    };
+
     const renderDashboard = () => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
-                <div style={statCardStyle('var(--color-gold)')}>
-                    <div style={{ flex: 1 }}><p style={statTitleStyle}>Total Properties</p><h3 style={statValueStyle}>{properties.length}</h3><p style={{ color: '#4CAF50', fontSize: '11px', fontWeight: 'bold', marginTop: '10px' }}>↗ Live Listings</p></div>
-                    <div style={statIconBoxStyle('#FFF8E1', 'var(--color-gold)')}><HiOfficeBuilding size={20} /></div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '35px' }}>
+            {/* Main Stats Row */}
+            <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '25px' }}>
+                <div style={premiumStatCard('linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', 'white')}>
+                    <div style={{ flex: 1 }}>
+                        <p style={premiumStatTitle}>Total Properties</p>
+                        <h3 className="premium-stat-value" style={premiumStatValue}>{properties.length}</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '10px' }}>
+                            <span style={{ fontSize: '12px', opacity: 0.8 }}>{properties.filter(p => p.status === 'available').length} Available</span>
+                        </div>
+                    </div>
+                    <div style={premiumStatIconBox('rgba(112, 109, 109, 0.86)')}><HiOfficeBuilding size={24} /></div>
                 </div>
-                <div style={statCardStyle('#2196F3')}>
-                    <div style={{ flex: 1 }}><p style={statTitleStyle}>Available Properties</p><h3 style={statValueStyle}>{properties.filter(p => p.status === 'available').length}</h3><p style={{ color: '#2196F3', fontSize: '11px', fontWeight: 'bold', marginTop: '10px' }}>↗ Ready for sale</p></div>
-                    <div style={statIconBoxStyle('#E3F2FD', '#2196F3')}><HiHome size={20} /></div>
+
+                <div style={premiumStatCard('linear-gradient(135deg, #F39C12 0%, #E67E22 100%)', 'white')}>
+                    <div style={{ flex: 1 }}>
+                        <p style={premiumStatTitle}>Total Projects</p>
+                        <h3 className="premium-stat-value" style={premiumStatValue}>{projects.length}</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '10px' }}>
+                            <span style={{ fontSize: '12px', opacity: 0.8 }}>Active Developments</span>
+                        </div>
+                    </div>
+                    <div style={premiumStatIconBox('rgba(255,255,255,0.1)')}><HiClipboardList size={24} /></div>
                 </div>
-                <div style={statCardStyle('#4CAF50')}>
-                    <div style={{ flex: 1 }}><p style={statTitleStyle}>Total Inquiries</p><h3 style={statValueStyle}>{contacts.length}</h3><p style={{ color: '#F44336', fontSize: '11px', fontWeight: 'bold', marginTop: '10px' }}>↗ {contacts.filter(c => c.status === 'unread').length} unread</p></div>
-                    <div style={statIconBoxStyle('#E8F5E9', '#4CAF50')}><HiMail size={20} /></div>
+
+                <div style={premiumStatCard('linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)', 'white')}>
+                    <div style={{ flex: 1 }}>
+                        <p style={premiumStatTitle}>Total Inquiries</p>
+                        <h3 className="premium-stat-value" style={premiumStatValue}>{contacts.length}</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '10px' }}>
+                            <span style={{ fontSize: '12px', opacity: 0.8, fontWeight: 'bold' }}>{contacts.filter(c => c.status === 'unread').length} Unread</span>
+                        </div>
+                    </div>
+                    <div style={premiumStatIconBox('rgba(255,255,255,0.1)')}><HiMail size={24} /></div>
                 </div>
-                <div style={statCardStyle('#9C27B0')}>
-                    <div style={{ flex: 1 }}><p style={statTitleStyle}>Total Projects</p><h3 style={statValueStyle}>{projects.length}</h3><p style={{ color: '#9C27B0', fontSize: '11px', fontWeight: 'bold', marginTop: '10px' }}>↗ Signature Ventures</p></div>
-                    <div style={statIconBoxStyle('#F3E5F5', '#9C27B0')}><HiClipboardList size={20} /></div>
-                </div>
-                <div style={statCardStyle('#E91E63')}>
-                    <div style={{ flex: 1 }}><p style={statTitleStyle}>Land Investments</p><h3 style={statValueStyle}>{investments.length}</h3><p style={{ color: '#E91E63', fontSize: '11px', fontWeight: 'bold', marginTop: '10px' }}>↗ Portfolio Assets</p></div>
-                    <div style={statIconBoxStyle('#FCE4EC', '#E91E63')}><HiGlobe size={20} /></div>
-                </div>
-                <div style={statCardStyle('#FF9800')}>
-                    <div style={{ flex: 1 }}><p style={statTitleStyle}>Gallery Assets</p><h3 style={statValueStyle}>{gallery.length}</h3><p style={{ color: '#FF9800', fontSize: '11px', fontWeight: 'bold', marginTop: '10px' }}>↗ Visual Media</p></div>
-                    <div style={statIconBoxStyle('#FFF3E0', '#FF9800')}><HiPhotograph size={20} /></div>
+
+                <div style={premiumStatCard('linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%)', 'white')}>
+                    <div style={{ flex: 1 }}>
+                        <p style={premiumStatTitle}>Gallery Assets</p>
+                        <h3 className="premium-stat-value" style={premiumStatValue}>{gallery.length}</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '10px' }}>
+                            <span style={{ fontSize: '12px', opacity: 0.8 }}>Visual Media</span>
+                        </div>
+                    </div>
+                    <div style={premiumStatIconBox('rgba(255,255,255,0.1)')}><HiPhotograph size={24} /></div>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
-                 <div style={mainCardStyle}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)', fontWeight: '700' }}>Recent Properties</h4>
-                        <span style={{ fontSize: '10px', backgroundColor: '#F8F9FA', padding: '4px 8px', borderRadius: '4px', color: '#666' }}>Last 5</span>
+            {/* Project Type Breakdown */}
+            <div style={{ ...mainCardStyle, padding: '30px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: '20px', color: 'var(--color-navy)', fontWeight: '800' }}>Projects Overview</h3>
+                        <p style={{ margin: '5px 0 0', fontSize: '14px', color: '#666' }}>Distribution of projects by their category</p>
                     </div>
-                    <div style={{ padding: '10px 0' }}>
-                        {properties.length === 0 ? <p style={{ color: '#90A4AE', fontSize: '14px', textAlign: 'center' }}>No properties found</p> : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                {properties.slice(0, 5).map(p => (
-                                    <div key={p._id} style={{ display: 'flex', gap: '15px', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #F8F9FA' }}>
-                                        <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#F0F4F8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                            {p.images?.[0] ? <img src={p.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} /> : <HiOfficeBuilding color="var(--color-navy)" />}
-                                        </div>
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <p style={{ fontWeight: '700', fontSize: '13px', color: 'var(--color-navy)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.propertyName}</p>
-                                            <p style={{ fontSize: '11px', color: '#607D8B', margin: '2px 0 0' }}>{p.location}</p>
-                                        </div>
-                                        <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-gold)' }}>₹{p.price?.toLocaleString()}</span>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                         {/* Optional Legend or Filter */}
+                    </div>
+                </div>
+
+                <div className="type-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                    <div style={typeBreakdownBox('#E3F2FD', '#1976D2')}>
+                        <span style={typeLabelStyle}>Residential</span>
+                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.residential || projects.filter(p => p.type === 'residential').length}</h4>
+                        <div style={progressBarContainer}><div style={progressBar('#1976D2', calculatePercentage(projects.filter(p => p.type === 'residential').length, projects.length))}></div></div>
+                    </div>
+                    <div style={typeBreakdownBox('#E8F5E9', '#388E3C')}>
+                        <span style={typeLabelStyle}>Commercial</span>
+                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.commercial || projects.filter(p => p.type === 'commercial').length}</h4>
+                        <div style={progressBarContainer}><div style={progressBar('#388E3C', calculatePercentage(projects.filter(p => p.type === 'commercial').length, projects.length))}></div></div>
+                    </div>
+                    <div style={typeBreakdownBox('#FFF3E0', '#F57C00')}>
+                        <span style={typeLabelStyle}>Investments</span>
+                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.investment || projects.filter(p => p.type === 'investment').length}</h4>
+                        <div style={progressBarContainer}><div style={progressBar('#F57C00', calculatePercentage(projects.filter(p => p.type === 'investment').length, projects.length))}></div></div>
+                    </div>
+                    <div style={typeBreakdownBox('#F3E5F5', '#7B1FA2')}>
+                        <span style={typeLabelStyle}>Plot</span>
+                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.plot || projects.filter(p => p.type === 'plot').length}</h4>
+                        <div style={progressBarContainer}><div style={progressBar('#7B1FA2', calculatePercentage(projects.filter(p => p.type === 'plot').length, projects.length))}></div></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Recent Activity Section */}
+            <div className="recent-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '30px' }}>
+                 <div style={mainCardStyle}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #F0F0F0', paddingBottom: '15px' }}>
+                        <h4 style={{ margin: 0, fontSize: '18px', color: 'var(--color-navy)', fontWeight: '700' }}>Recent Properties</h4>
+                        <Link to="#" onClick={() => setActiveTab('properties')} style={{ fontSize: '13px', color: 'var(--color-gold)', fontWeight: '700', textDecoration: 'none' }}>View All</Link>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        {properties.length === 0 ? <p style={{ color: '#90A4AE', textAlign: 'center', padding: '20px' }}>No properties found</p> : (
+                            properties.slice(0, 5).map(p => (
+                                <div key={p._id} style={recentItemRowStyle}>
+                                    <div style={recentItemImageStyle}>
+                                        {p.images?.[0] ? <img src={p.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <HiOfficeBuilding color="var(--color-navy)" />}
                                     </div>
-                                ))}
-                            </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <p style={recentItemTitleStyle}>{p.propertyName}</p>
+                                        <p style={recentItemSubTitleStyle}>{p.location}</p>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <p style={recentItemPriceStyle}>₹{p.price?.toLocaleString()}</p>
+                                        <span style={recentItemStatusStyle(p.status)}>{p.status}</span>
+                                    </div>
+                                </div>
+                            ))
                         )}
                     </div>
-                    <button onClick={() => setActiveTab('properties')} style={{ ...actionButtonStyle, backgroundColor: 'var(--color-navy)', marginTop: '10px' }}>Manage Properties</button>
                  </div>
                  
                  <div style={mainCardStyle}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)', fontWeight: '700' }}>Recent Inquiries</h4>
-                        <span style={{ fontSize: '10px', backgroundColor: '#FFEBEE', padding: '4px 8px', borderRadius: '4px', color: '#F44336', fontWeight: 'bold' }}>{contacts.filter(c => c.status === 'unread').length} New</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #F0F0F0', paddingBottom: '15px' }}>
+                        <h4 style={{ margin: 0, fontSize: '18px', color: 'var(--color-navy)', fontWeight: '700' }}>Recent Inquiries</h4>
+                        <Link to="#" onClick={() => setActiveTab('inquiries')} style={{ fontSize: '13px', color: 'var(--color-gold)', fontWeight: '700', textDecoration: 'none' }}>View All</Link>
                     </div>
-                    <div style={{ padding: '10px 0' }}>
-                        {contacts.length === 0 ? <p style={{ color: '#90A4AE', fontSize: '14px', textAlign: 'center' }}>No inquiries yet</p> : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                {contacts.slice(0, 5).map(contact => (
-                                    <div key={contact._id} style={{ display: 'flex', gap: '15px', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #F8F9FA' }}>
-                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#ECEFF1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><HiUser color="#90A4AE" /></div>
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <p style={{ fontWeight: '700', fontSize: '13px', color: 'var(--color-navy)', margin: 0 }}>{contact.name}</p>
-                                                <span style={{ fontSize: '9px', color: '#90A4AE' }}>{new Date(contact.createdAt).toLocaleDateString()}</span>
-                                            </div>
-                                            <p style={{ fontSize: '11px', color: '#607D8B', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{contact.message}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        {contacts.length === 0 ? <p style={{ color: '#90A4AE', textAlign: 'center', padding: '20px' }}>No inquiries yet</p> : (
+                            contacts.slice(0, 5).map(contact => (
+                                <div key={contact._id} style={recentItemRowStyle}>
+                                    <div style={recentItemAvatarStyle}><HiUser /></div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <p style={recentItemTitleStyle}>{contact.name}</p>
+                                            <span style={{ fontSize: '10px', color: '#90A4AE' }}>{new Date(contact.createdAt).toLocaleDateString()}</span>
                                         </div>
+                                        <p style={{ ...recentItemSubTitleStyle, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{contact.message}</p>
                                     </div>
-                                ))}
-                            </div>
+                                    <div style={{ marginLeft: '10px' }}>
+                                        <span style={inquiryBadgeStyle(contact.status)}>{contact.status}</span>
+                                    </div>
+                                </div>
+                            ))
                         )}
                     </div>
-                    <button onClick={() => setActiveTab('inquiries')} style={{ ...actionButtonStyle, backgroundColor: '#4A90E2', marginTop: '10px' }}>View All Inquiries</button>
                  </div>
             </div>
         </div>
     );
 
     const renderProperties = () => {
-        if (showAddProperty) return <AddPropertyForm onCancel={() => setShowAddProperty(false)} onSuccess={() => { setShowAddProperty(false); fetchData(); }} />;
+        if (showAddProperty || editProperty) return <AddPropertyForm initialData={editProperty} onCancel={() => { setShowAddProperty(false); setEditProperty(null); }} onSuccess={() => { setShowAddProperty(false); setEditProperty(null); fetchData(); }} />;
         
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
@@ -513,14 +596,14 @@ const AdminDashboard = () => {
                     
                     {renderSearchBar('properties', 'Search properties by name, location or status...')}
 
-                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <div className="table-container" style={{ overflowX: 'auto', width: '100%' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                             <thead>
                                 <tr style={{ backgroundColor: '#F8F9FA' }}>
                                     <th style={tableHeaderStyle}>PROPERTY</th>
-                                    <th style={tableHeaderStyle}>LOCATION</th>
+                                    <th className="mobile-hide" style={tableHeaderStyle}>LOCATION</th>
                                     <th style={tableHeaderStyle}>PRICE</th>
-                                    <th style={tableHeaderStyle}>STATUS</th>
+                                    <th className="mobile-hide" style={tableHeaderStyle}>STATUS</th>
                                     <th style={{ ...tableHeaderStyle, textAlign: 'right' }}>ACTIONS</th>
                                 </tr>
                             </thead>
@@ -546,9 +629,9 @@ const AdminDashboard = () => {
                                                             <span style={{ fontWeight: '600' }}>{p.propertyName || 'Unnamed Listing'}</span>
                                                         </div>
                                                     </td>
-                                                    <td style={tableCellStyle}>{p.location}, {p.city}</td>
+                                                    <td className="mobile-hide" style={tableCellStyle}>{p.location}, {p.city}</td>
                                                     <td style={{ ...tableCellStyle, fontWeight: '700', color: 'var(--color-gold)' }}>₹{p.price?.toLocaleString()}</td>
-                                                    <td style={tableCellStyle}>
+                                                    <td className="mobile-hide" style={tableCellStyle}>
                                                         <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: p.status === 'available' ? '#E8F5E9' : '#FFEBEE', color: p.status === 'available' ? '#4CAF50' : '#F44336', textTransform: 'uppercase' }}>
                                                             {p.status}
                                                         </span>
@@ -556,12 +639,20 @@ const AdminDashboard = () => {
                                                     <td style={{ ...tableCellStyle, textAlign: 'right' }}>
                                                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                             <button 
-                                                                onClick={() => navigate(`/property/${p._id}`)}
+                                                                onClick={() => setSelectedProperty(p)}
+                                                                title="View Details"
                                                                 style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
                                                             >
                                                                 <HiEye />
                                                             </button>
-                                                            <button onClick={() => handleDeleteProperty(p._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
+                                                            <button 
+                                                                onClick={() => setEditProperty(p)}
+                                                                title="Edit Property"
+                                                                style={{ border: 'none', background: '#FFF8E1', color: '#F39C12', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                                            >
+                                                                <HiPencilAlt />
+                                                            </button>
+                                                            <button onClick={() => handleDeleteProperty(p._id)} title="Delete" style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -583,7 +674,7 @@ const AdminDashboard = () => {
     };
 
     const renderInvestments = () => {
-        if (showAddInvestment) return <AddInvestmentForm onCancel={() => setShowAddInvestment(false)} onSuccess={() => { setShowAddInvestment(false); fetchData(); }} />;
+        if (showAddInvestment || editInvestment) return <AddInvestmentForm initialData={editInvestment} onCancel={() => { setShowAddInvestment(false); setEditInvestment(null); }} onSuccess={() => { setShowAddInvestment(false); setEditInvestment(null); fetchData(); }} />;
         
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
@@ -604,13 +695,13 @@ const AdminDashboard = () => {
 
                     {renderSearchBar('investments', 'Search investments by title, location or land type...')}
                     
-                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <div className="table-container" style={{ overflowX: 'auto', width: '100%' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                             <thead>
                                 <tr style={{ backgroundColor: '#F8F9FA' }}>
                                     <th style={tableHeaderStyle}>TITLE</th>
-                                    <th style={tableHeaderStyle}>LOCATION</th>
-                                    <th style={tableHeaderStyle}>TYPE</th>
+                                    <th className="mobile-hide" style={tableHeaderStyle}>LOCATION</th>
+                                    <th className="mobile-hide" style={tableHeaderStyle}>TYPE</th>
                                     <th style={tableHeaderStyle}>PRICE</th>
                                     <th style={tableHeaderStyle}>STATUS</th>
                                     <th style={{ ...tableHeaderStyle, textAlign: 'right' }}>ACTIONS</th>
@@ -638,8 +729,8 @@ const AdminDashboard = () => {
                                                             <span style={{ fontWeight: '600' }}>{i.title}</span>
                                                         </div>
                                                     </td>
-                                                    <td style={tableCellStyle}>{i.location}, {i.city}</td>
-                                                    <td style={{ ...tableCellStyle, textTransform: 'capitalize' }}>{i.landType}</td>
+                                                    <td className="mobile-hide" style={tableCellStyle}>{i.location}, {i.city}</td>
+                                                    <td className="mobile-hide" style={{ ...tableCellStyle, textTransform: 'capitalize' }}>{i.landType}</td>
                                                     <td style={{ ...tableCellStyle, fontWeight: '700', color: 'var(--color-gold)' }}>₹{i.totalPrice?.toLocaleString()}</td>
                                                     <td style={tableCellStyle}>
                                                         <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: i.status === 'available' ? '#E8F5E9' : i.status === 'upcoming' ? '#E3F2FD' : '#FFEBEE', color: i.status === 'available' ? '#4CAF50' : i.status === 'upcoming' ? '#2196F3' : '#F44336', textTransform: 'uppercase' }}>
@@ -649,12 +740,20 @@ const AdminDashboard = () => {
                                                     <td style={{ ...tableCellStyle, textAlign: 'right' }}>
                                                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                             <button 
-                                                                onClick={() => navigate(`/investment/${i._id}`)}
+                                                                onClick={() => setSelectedInvestment(i)}
+                                                                title="View Details"
                                                                 style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
                                                             >
                                                                 <HiEye />
                                                             </button>
-                                                            <button onClick={() => handleDeleteInvestment(i._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
+                                                            <button 
+                                                                onClick={() => setEditInvestment(i)}
+                                                                title="Edit Investment"
+                                                                style={{ border: 'none', background: '#FFF8E1', color: '#F39C12', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                                            >
+                                                                <HiPencilAlt />
+                                                            </button>
+                                                            <button onClick={() => handleDeleteInvestment(i._id)} title="Delete" style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -676,7 +775,7 @@ const AdminDashboard = () => {
     };
 
     const renderProjects = () => {
-        if (showAddProject) return <AddProjectForm onCancel={() => setShowAddProject(false)} onSuccess={() => { setShowAddProject(false); fetchData(); }} />;
+        if (showAddProject || editProject) return <AddProjectForm initialData={editProject} onCancel={() => { setShowAddProject(false); setEditProject(null); }} onSuccess={() => { setShowAddProject(false); setEditProject(null); fetchData(); }} />;
         
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
@@ -697,13 +796,13 @@ const AdminDashboard = () => {
 
                     {renderSearchBar('projects', 'Search projects by title, location or status...')}
                     
-                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <div className="table-container" style={{ overflowX: 'auto', width: '100%' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                             <thead>
                                 <tr style={{ backgroundColor: '#F8F9FA' }}>
                                     <th style={tableHeaderStyle}>TITLE</th>
-                                    <th style={tableHeaderStyle}>LOCATION</th>
-                                    <th style={tableHeaderStyle}>TYPE</th>
+                                    <th className="mobile-hide" style={tableHeaderStyle}>LOCATION</th>
+                                    <th className="mobile-hide" style={tableHeaderStyle}>TYPE</th>
                                     <th style={tableHeaderStyle}>PRICE</th>
                                     <th style={tableHeaderStyle}>STATUS</th>
                                     <th style={{ ...tableHeaderStyle, textAlign: 'right' }}>ACTIONS</th>
@@ -731,8 +830,8 @@ const AdminDashboard = () => {
                                                             <span style={{ fontWeight: '600' }}>{p.title}</span>
                                                         </div>
                                                     </td>
-                                                    <td style={tableCellStyle}>{p.location}, {p.city}</td>
-                                                    <td style={{ ...tableCellStyle, textTransform: 'capitalize' }}>{p.type}</td>
+                                                    <td className="mobile-hide" style={tableCellStyle}>{p.location}, {p.city}</td>
+                                                    <td className="mobile-hide" style={{ ...tableCellStyle, textTransform: 'capitalize' }}>{p.type}</td>
                                                     <td style={{ ...tableCellStyle, fontWeight: '700', color: 'var(--color-gold)' }}>{p.price}</td>
                                                     <td style={tableCellStyle}>
                                                         <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: p.status === 'completed' ? '#E8F5E9' : p.status === 'under-construction' ? '#FFF3E0' : '#E3F2FD', color: p.status === 'completed' ? '#4CAF50' : p.status === 'under-construction' ? '#EF6C00' : '#2196F3', textTransform: 'uppercase' }}>
@@ -742,12 +841,20 @@ const AdminDashboard = () => {
                                                     <td style={{ ...tableCellStyle, textAlign: 'right' }}>
                                                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                             <button 
-                                                                onClick={() => navigate(`/project/${p._id}`)}
+                                                                onClick={() => setSelectedProject(p)}
+                                                                title="View Details"
                                                                 style={{ border: 'none', background: '#F0F4F8', color: '#607D8B', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
                                                             >
                                                                 <HiEye />
                                                             </button>
-                                                            <button onClick={() => handleDeleteProject(p._id)} style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
+                                                            <button 
+                                                                onClick={() => setEditProject(p)}
+                                                                title="Edit Project"
+                                                                style={{ border: 'none', background: '#FFF8E1', color: '#F39C12', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                                            >
+                                                                <HiPencilAlt />
+                                                            </button>
+                                                            <button onClick={() => handleDeleteProject(p._id)} title="Delete" style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -787,15 +894,15 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Inquiry Stats */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-                    <div style={statCardStyle('var(--color-navy)')}>
-                        <div style={{ flex: 1 }}><p style={statTitleStyle}>Total Inquiries</p><h3 style={statValueStyle}>{total}</h3></div>
+                <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                    <div style={premiumStatCard('linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>Total Inquiries</p><h3 style={premiumStatValue}>{total}</h3></div>
                     </div>
-                    <div style={statCardStyle('#F44336')}>
-                        <div style={{ flex: 1 }}><p style={statTitleStyle}>Unread</p><h3 style={statValueStyle}>{unread}</h3></div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #F44336 0%, #D32F2F 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>Unread</p><h3 style={premiumStatValue}>{unread}</h3></div>
                     </div>
-                    <div style={statCardStyle('#4CAF50')}>
-                        <div style={{ flex: 1 }}><p style={statTitleStyle}>Responded</p><h3 style={statValueStyle}>{responded}</h3></div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>Responded</p><h3 style={premiumStatValue}>{responded}</h3></div>
                     </div>
                 </div>
 
@@ -820,7 +927,7 @@ const AdminDashboard = () => {
 
                 <div style={mainCardStyle}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h4 style={{ ...cardHeaderStyle, margin: 0 }}>All Inquiries</h4>
+                        <h4 style={{ ...cardHeaderStyle, marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0 }}>All Inquiries</h4>
                     </div>
 
                     {renderSearchBar('inquiries', 'Search inquiries by name, email or message...')}
@@ -843,7 +950,7 @@ const AdminDashboard = () => {
                                                     <p style={{ margin: '5px 0', fontSize: '13px', color: '#607D8B' }}>{contact.email} • {contact.phone}</p>
                                                 </div>
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                                                    <span style={{ padding: '4px 12px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', backgroundColor: contact.status === 'unread' ? '#FFEBEE' : contact.status === 'responded' ? '#E8F5E9' : '#E3F2FD', color: contact.status === 'unread' ? '#F44336' : contact.status === 'responded' ? '#4CAF50' : contact.status === '2196F3' }}>{contact.status}</span>
+                                                    <span style={inquiryBadgeStyle(contact.status)}>{contact.status}</span>
                                                     <span style={{ fontSize: '12px', color: '#90A4AE', fontWeight: '500' }}>{new Date(contact.createdAt).toLocaleDateString()}</span>
                                                 </div>
                                             </div>
@@ -892,16 +999,16 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Submission Stats */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
-                    <div style={statCardStyle('var(--color-navy)')}><div style={{ flex: 1 }}><p style={statTitleStyle}>Total</p><h3 style={statValueStyle}>{total}</h3></div></div>
-                    <div style={statCardStyle('#EF6C00')}><div style={{ flex: 1 }}><p style={statTitleStyle}>Pending</p><h3 style={statValueStyle}>{pending}</h3></div></div>
-                    <div style={statCardStyle('#4CAF50')}><div style={{ flex: 1 }}><p style={statTitleStyle}>Approved</p><h3 style={statValueStyle}>{approved}</h3></div></div>
-                    <div style={statCardStyle('#F44336')}><div style={{ flex: 1 }}><p style={statTitleStyle}>Rejected</p><h3 style={statValueStyle}>{rejected}</h3></div></div>
+                <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
+                    <div style={premiumStatCard('linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', 'white')}><div style={{ flex: 1 }}><p style={premiumStatTitle}>Total</p><h3 style={premiumStatValue}>{total}</h3></div></div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #EF6C00 0%, #E65100 100%)', 'white')}><div style={{ flex: 1 }}><p style={premiumStatTitle}>Pending</p><h3 style={premiumStatValue}>{pending}</h3></div></div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)', 'white')}><div style={{ flex: 1 }}><p style={premiumStatTitle}>Approved</p><h3 style={premiumStatValue}>{approved}</h3></div></div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #F44336 0%, #D32F2F 100%)', 'white')}><div style={{ flex: 1 }}><p style={premiumStatTitle}>Rejected</p><h3 style={premiumStatValue}>{rejected}</h3></div></div>
                 </div>
 
                 <div style={mainCardStyle}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h4 style={{ ...cardHeaderStyle, margin: 0 }}>All Submissions</h4>
+                        <h4 style={{ ...cardHeaderStyle, marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0 }}>All Submissions</h4>
                     </div>
 
                     {renderSearchBar('submissions', 'Search submissions by title, contact name or location...')}
@@ -1054,7 +1161,7 @@ const AdminDashboard = () => {
                 {/* General Settings placeholder */}
                 <div style={mainCardStyle}>
                     <h4 style={cardHeaderStyle}>General Settings</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+                    <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>Company Name</label>
                             <input type="text" defaultValue="The realty Xperts" style={{ ...inputFieldStyle }} readOnly />
@@ -1070,7 +1177,7 @@ const AdminDashboard = () => {
                 <div style={mainCardStyle}>
                     <h4 style={cardHeaderStyle}>Admin Credentials</h4>
                     <form onSubmit={handleUpdateCredentials} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <label style={{ fontSize: '13px', fontWeight: '700', color: '#607D8B' }}>New Username</label>
                                 <input 
@@ -1113,16 +1220,16 @@ const AdminDashboard = () => {
         if (!selectedSubmission) return null;
 
         return (
-            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-                <div style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+                <div className="modal-inner" style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
                     <button 
                         onClick={() => setSelectedSubmission(null)}
-                        style={{ position: 'absolute', top: '24px', right: '24px', background: '#F8F9FA', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#607D8B' }}
+                        style={{ position: 'absolute', top: '15px', right: '15px', background: '#F8F9FA', border: 'none', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#607D8B', zIndex: 10 }}
                     >
-                        <HiX size={20} />
+                        <HiX size={18} />
                     </button>
 
-                    <div style={{ padding: '40px' }}>
+                    <div className="modal-content" style={{ padding: '40px' }}>
                         <div style={{ marginBottom: '30px' }}>
                             <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '2px', display: 'block', marginBottom: '10px' }}>Property Submission</span>
                             <h3 style={{ fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800', margin: 0 }}>{selectedSubmission.title}</h3>
@@ -1200,16 +1307,16 @@ const AdminDashboard = () => {
         if (!selectedInquiry) return null;
 
         return (
-            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-                <div style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+                <div className="modal-inner" style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
                     <button 
                         onClick={() => setSelectedInquiry(null)}
-                        style={{ position: 'absolute', top: '24px', right: '24px', background: '#F8F9FA', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#607D8B' }}
+                        style={{ position: 'absolute', top: '15px', right: '15px', background: '#F8F9FA', border: 'none', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#607D8B', zIndex: 10 }}
                     >
-                        <HiX size={20} />
+                        <HiX size={18} />
                     </button>
 
-                    <div style={{ padding: '40px' }}>
+                    <div className="modal-content" style={{ padding: '40px' }}>
                         <div style={{ marginBottom: '30px' }}>
                             <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '2px', display: 'block', marginBottom: '10px' }}>Inquiry Details</span>
                             <h3 style={{ fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800', margin: 0 }}>{selectedInquiry.name}</h3>
@@ -1221,7 +1328,7 @@ const AdminDashboard = () => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+                        <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
                             <div style={{ background: '#F8F9FA', padding: '15px', borderRadius: '12px' }}>
                                 <p style={{ fontSize: '11px', color: '#90A4AE', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Email Address</p>
                                 <p style={{ margin: 0, fontWeight: '600', color: 'var(--color-navy)', wordBreak: 'break-all' }}>{selectedInquiry.email}</p>
@@ -1305,13 +1412,22 @@ const AdminDashboard = () => {
             </header>
 
             <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
+                {/* Sidebar Backdrop for Mobile */}
+                {windowWidth < 1024 && isSidebarOpen && (
+                    <div 
+                        onClick={() => setIsSidebarOpen(false)}
+                        style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 850, backdropFilter: 'blur(2px)' }} 
+                    />
+                )}
+
                 {/* Responsive Sidebar Overlay for Mobile */}
-                {!isSidebarOpen && window.innerWidth < 1024 ? null : (
-                    <aside style={{ 
+                <aside 
+                    className={`${isSidebarOpen ? 'sidebar-active' : 'sidebar-hidden'}`}
+                    style={{ 
                         width: '260px', 
                         backgroundColor: 'white', 
                         height: 'calc(100vh - 70px)', 
-                        position: window.innerWidth < 1024 ? 'fixed' : 'sticky', 
+                        position: windowWidth < 1024 ? 'fixed' : 'sticky', 
                         top: '70px', 
                         left: 0, 
                         zIndex: 900, 
@@ -1320,56 +1436,317 @@ const AdminDashboard = () => {
                         flexDirection: 'column', 
                         gap: '5px', 
                         boxShadow: '4px 0 12px rgba(0,0,0,0.03)',
-                        transition: 'transform 0.3s'
-                    }}>
-                        {sidebarItems.map(item => (
-                            <button
-                                key={item.id}
-                                onClick={() => { setActiveTab(item.id); if(window.innerWidth < 1024) setIsSidebarOpen(false); }}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 20px', border: 'none', borderRadius: '12px',
-                                    backgroundColor: activeTab === item.id ? '#FFF8E1' : 'transparent',
-                                    color: activeTab === item.id ? 'var(--color-gold)' : '#666',
-                                    fontWeight: activeTab === item.id ? '700' : '500', 
-                                    cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left', fontSize: '14px'
-                                }}
-                            >
-                                <item.icon size={18} style={{ color: activeTab === item.id ? 'var(--color-gold)' : '#90A4AE' }} />
-                                {item.label}
-                            </button>
-                        ))}
-                    </aside>
-                )}
+                        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        borderRight: '1px solid #E6E9EF'
+                    }}
+                >
+                    {sidebarItems.map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 20px', border: 'none', borderRadius: '12px',
+                                backgroundColor: activeTab === item.id ? '#FFF8E1' : 'transparent',
+                                color: activeTab === item.id ? 'var(--color-gold)' : '#666',
+                                fontWeight: activeTab === item.id ? '700' : '500', 
+                                cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left', fontSize: '14px'
+                            }}
+                        >
+                            <item.icon size={18} style={{ color: activeTab === item.id ? 'var(--color-gold)' : '#90A4AE' }} />
+                            {item.label}
+                        </button>
+                    ))}
+                </aside>
 
                 {/* Main Content Area */}
-                <main style={{ flex: 1, padding: window.innerWidth < 768 ? '20px' : '40px', backgroundColor: '#F8F9FB' }}>
+                <main className="main-content" style={{ flex: 1, backgroundColor: '#F8F9FB' }}>
                     {renderContent()}
                 </main>
             </div>
 
             {/* In-File CSS for responsiveness */}
             <style>{`
+                .main-content {
+                    padding: 40px;
+                    transition: padding 0.3s;
+                }
+
                 @media (max-width: 1023px) {
                     .lg-visible { display: none !important; }
+                    .sidebar-active { transform: translateX(0); }
+                    .sidebar-hidden { transform: translateX(-100%); }
+                    .main-content { padding: 20px; }
                 }
+
                 @media (min-width: 1024px) {
                     .md-hidden { display: none !important; }
                 }
+
+                @media (max-width: 768px) {
+                    .main-content { padding: 15px; }
+                    .stat-grid { grid-template-columns: 1fr !important; }
+                    .recent-grid { grid-template-columns: 1fr !important; }
+                    .form-grid { grid-template-columns: 1fr !important; }
+                    .modal-content { padding: 25px !important; }
+                    .type-grid { grid-template-columns: 1fr 1fr !important; }
+                    .modal-inner { width: 95% !important; margin: 10px !important; }
+                    .detail-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+                    .mobile-hide { display: none !important; }
+                }
+
+                @media (max-width: 480px) {
+                    .type-grid { grid-template-columns: 1fr !important; }
+                    .header-logo { font-size: 14px !important; }
+                    .premium-stat-value { font-size: 28px !important; }
+                    .modal-content { padding: 20px !important; }
+                    .modal-title { font-size: 20px !important; }
+                    .stat-grid { gap: 15px !important; }
+                    .card-content { padding: 15px !important; }
+                }
+
+                /* Table Responsiveness */
+                .table-container {
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                    margin-bottom: 1rem;
+                    width: 100%;
+                }
+                
+                /* Custom Scrollbar for better look */
+                ::-webkit-scrollbar {
+                    width: 6px;
+                    height: 6px;
+                }
+                ::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                }
+                ::-webkit-scrollbar-thumb {
+                    background: #ccc;
+                    borderRadius: 10px;
+                }
+                ::-webkit-scrollbar-thumb:hover {
+                    background: #999;
+                }
             `}</style>
+
+            {renderPropertyDetailModal()}
+            {renderInvestmentDetailModal()}
+            {renderProjectDetailModal()}
             {renderInquiryModal()}
             {renderSubmissionModal()}
         </div>
     );
+
+    function renderPropertyDetailModal() {
+        if (!selectedProperty) return null;
+        const p = selectedProperty;
+        return (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+                <div className="modal-inner" style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                    <button onClick={() => setSelectedProperty(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: '#F8F9FA', border: 'none', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><HiX size={18} /></button>
+                    <div className="modal-content" style={{ padding: '40px' }}>
+                        <h3 className="modal-title" style={{ fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800', marginBottom: '20px' }}>{p.propertyName}</h3>
+                        <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Price</p><p style={detailValueStyle}>₹{p.price?.toLocaleString()}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Area</p><p style={detailValueStyle}>{p.area} Sq.ft</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Location</p><p style={detailValueStyle}>{p.location}, {p.city}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Status</p><p style={{...detailValueStyle, textTransform: 'capitalize'}}>{p.status}</p></div>
+                        </div>
+                        {p.images?.length > 0 && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '15px', marginBottom: '30px' }}>
+                                {p.images.map((img, idx) => <img key={idx} src={img} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '12px' }} />)}
+                            </div>
+                        )}
+                        <div style={{ background: '#F8F9FA', padding: '25px', borderRadius: '20px', marginBottom: '30px' }}>
+                            <p style={detailLabelStyle}>Description</p>
+                            <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64' }}>{p.propertyDescription}</p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <button 
+                                onClick={() => { setEditProperty(p); setSelectedProperty(null); }}
+                                style={{ flex: 1, backgroundColor: '#F39C12', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                            >
+                                <HiPencilAlt size={18} /> Edit Property
+                            </button>
+                            <a 
+                                href={`/property/${p._id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ flex: 1, backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                            >
+                                <HiEye size={18} /> View on Site
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    function renderInvestmentDetailModal() {
+        if (!selectedInvestment) return null;
+        const i = selectedInvestment;
+        return (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+                <div className="modal-inner" style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                    <button onClick={() => setSelectedInvestment(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: '#F8F9FA', border: 'none', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><HiX size={18} /></button>
+                    <div className="modal-content" style={{ padding: '40px' }}>
+                        <h3 className="modal-title" style={{ fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800', marginBottom: '20px' }}>{i.title}</h3>
+                        <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Total Price</p><p style={detailValueStyle}>₹{i.totalPrice?.toLocaleString()}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Area</p><p style={detailValueStyle}>{i.area} {i.areaUnit}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Land Type</p><p style={{...detailValueStyle, textTransform: 'capitalize'}}>{i.landType}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Location</p><p style={detailValueStyle}>{i.location}, {i.city}</p></div>
+                        </div>
+                        {i.images?.length > 0 && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '15px', marginBottom: '30px' }}>
+                                {i.images.map((img, idx) => <img key={idx} src={img} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '12px' }} />)}
+                            </div>
+                        )}
+                        <div style={{ background: '#F8F9FA', padding: '25px', borderRadius: '20px', marginBottom: '30px' }}>
+                            <p style={detailLabelStyle}>Description</p>
+                            <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64' }}>{i.description}</p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <button 
+                                onClick={() => { setEditInvestment(i); setSelectedInvestment(null); }}
+                                style={{ flex: 1, backgroundColor: '#F39C12', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                            >
+                                <HiPencilAlt size={18} /> Edit Investment
+                            </button>
+                            <a 
+                                href={`/investment/${i._id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ flex: 1, backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                            >
+                                <HiEye size={18} /> View on Site
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    function renderProjectDetailModal() {
+        if (!selectedProject) return null;
+        const p = selectedProject;
+        return (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+                <div className="modal-inner" style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                    <button onClick={() => setSelectedProject(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: '#F8F9FA', border: 'none', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><HiX size={18} /></button>
+                    <div className="modal-content" style={{ padding: '40px' }}>
+                        <h3 className="modal-title" style={{ fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800', marginBottom: '20px' }}>{p.title}</h3>
+                        <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Price Starting</p><p style={detailValueStyle}>{p.price}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Type</p><p style={{...detailValueStyle, textTransform: 'capitalize'}}>{p.type}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Status</p><p style={{...detailValueStyle, textTransform: 'capitalize'}}>{p.status?.replace(/-/g, ' ')}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Location</p><p style={detailValueStyle}>{p.location}, {p.city}</p></div>
+                        </div>
+                        {p.images?.length > 0 && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '15px', marginBottom: '30px' }}>
+                                {p.images.map((img, idx) => <img key={idx} src={img} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '12px' }} />)}
+                            </div>
+                        )}
+                        <div style={{ background: '#F8F9FA', padding: '25px', borderRadius: '20px', marginBottom: '30px' }}>
+                            <p style={detailLabelStyle}>Description</p>
+                            <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64' }}>{p.description}</p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <button 
+                                onClick={() => { setEditProject(p); setSelectedProject(null); }}
+                                style={{ flex: 1, backgroundColor: '#F39C12', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                            >
+                                <HiPencilAlt size={18} /> Edit Project
+                            </button>
+                            <a 
+                                href={`/project/${p._id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ flex: 1, backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                            >
+                                <HiEye size={18} /> View on Site
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 };
 
-const statCardStyle = (color) => ({
-    backgroundColor: 'white', borderRadius: '15px', padding: '25px', display: 'flex', alignItems: 'flex-start',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.03)', borderLeft: `5px solid ${color}`
+
+
+// Premium Styles
+const premiumStatCard = (gradient, textColor) => ({
+    background: gradient,
+    borderRadius: '20px',
+    padding: '30px',
+    display: 'flex',
+    alignItems: 'flex-start',
+    boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
+    color: textColor,
+    position: 'relative',
+    overflow: 'hidden',
+    transition: 'transform 0.3s ease'
 });
 
-const statTitleStyle = { color: '#90A4AE', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' };
-const statValueStyle = { color: 'var(--color-navy)', fontSize: '32px', fontWeight: '800', lineHeight: 1 };
-const statIconBoxStyle = (bg, color) => ({ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: color });
+const premiumStatTitle = { fontSize: '13px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.9, marginBottom: '10px' };
+const premiumStatValue = { fontSize: '38px', fontWeight: '900', lineHeight: 1, margin: 0 };
+const premiumStatIconBox = (bg) => ({ width: '50px', height: '50px', borderRadius: '15px', backgroundColor: bg, display: 'flex', alignItems: 'center', justifyContent: 'center' });
+
+const typeBreakdownBox = (bg, accent) => ({
+    backgroundColor: bg,
+    padding: '20px',
+    borderRadius: '16px',
+    border: `1px solid ${accent}22`,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px'
+});
+
+const typeLabelStyle = { fontSize: '12px', fontWeight: '700', color: '#666', textTransform: 'uppercase' };
+const typeValueStyle = { fontSize: '24px', fontWeight: '800', color: 'var(--color-navy)', margin: 0 };
+const progressBarContainer = { width: '100%', height: '6px', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '3px', marginTop: '5px' };
+const progressBar = (color, width) => ({ height: '100%', width: `${width}%`, backgroundColor: color, borderRadius: '3px', transition: 'width 1s ease-in-out' });
+
+const recentItemRowStyle = { 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '15px', 
+    padding: '12px', 
+    borderRadius: '12px', 
+    transition: 'background 0.2s',
+    '&:hover': { background: '#F8F9FB' } 
+};
+
+const recentItemImageStyle = { width: '45px', height: '45px', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#F0F4F8', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' };
+const recentItemAvatarStyle = { width: '45px', height: '45px', borderRadius: '50%', backgroundColor: '#ECEFF1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#90A4AE', flexShrink: 0 };
+const recentItemTitleStyle = { fontWeight: '700', fontSize: '14px', color: 'var(--color-navy)', margin: 0 };
+const recentItemSubTitleStyle = { fontSize: '12px', color: '#666', margin: '2px 0 0' };
+const recentItemPriceStyle = { fontWeight: '800', fontSize: '14px', color: 'var(--color-gold)', margin: 0 };
+const recentItemStatusStyle = (status) => ({
+    fontSize: '10px',
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    color: status === 'available' ? '#27ae60' : '#e74c3c',
+    display: 'block',
+    marginTop: '2px'
+});
+
+const inquiryBadgeStyle = (status) => ({
+    padding: '4px 10px',
+    borderRadius: '6px',
+    fontSize: '10px',
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    backgroundColor: status === 'unread' ? '#FFEBEE' : status === 'responded' ? '#E8F5E9' : '#E3F2FD',
+    color: status === 'unread' ? '#F44336' : status === 'responded' ? '#4CAF50' : '#2196F3'
+});
 
 const mainCardStyle = { backgroundColor: 'white', borderRadius: '15px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column' };
 const cardHeaderStyle = { color: 'var(--color-navy)', fontSize: '16px', fontWeight: '700', marginBottom: '20px' };

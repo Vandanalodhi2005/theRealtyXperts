@@ -38,8 +38,6 @@ function Header() {
         }
     };
 
-    const isHomePage = location.pathname === '/';
-
     return (
         <>
         <div style={{ height: '80px' }}></div>
@@ -65,15 +63,13 @@ function Header() {
                 </nav>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    {isHomePage && (
-                        <button 
-                            className="nav-search-trigger" 
-                            onClick={() => setIsSearchOpen(true)}
-                            aria-label="Search"
-                        >
-                            <Search size={22} />
-                        </button>
-                    )}
+                    <button 
+                        className="nav-search-trigger" 
+                        onClick={() => setIsSearchOpen(true)}
+                        aria-label="Search"
+                    >
+                        <Search size={22} />
+                    </button>
 
                     <div className="mobile-menu-toggle" onClick={toggleMobileMenu}>
                         <i className={mobileMenuOpen ? "fas fa-times" : "fas fa-bars"}></i>

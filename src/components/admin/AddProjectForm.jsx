@@ -3,18 +3,18 @@ import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
 import { HiPlus, HiCloudUpload, HiX } from 'react-icons/hi';
 
-const AddProjectForm = ({ onCancel, onSuccess }) => {
+const AddProjectForm = ({ onCancel, onSuccess, initialData }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    type: '',
-    status: 'upcoming',
-    price: '',
-    location: '',
-    city: 'Bhopal',
-    description: '',
-    highlights: '',
-    amenities: '',
-    youtubeUrl: '',
+    title: initialData?.title || '',
+    type: initialData?.type || '',
+    status: initialData?.status || 'upcoming',
+    price: initialData?.price || '',
+    location: initialData?.location || '',
+    city: initialData?.city || 'Bhopal',
+    description: initialData?.description || '',
+    highlights: initialData?.highlights || '',
+    amenities: initialData?.amenities || '',
+    youtubeUrl: initialData?.youtubeUrl || '',
   });
   
   const [images, setImages] = useState([]);
@@ -52,14 +52,18 @@ const AddProjectForm = ({ onCancel, onSuccess }) => {
         formDataToSend.append('images', image);
       });
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects`, {
-        method: 'POST',
+      const url = initialData 
+        ? `${import.meta.env.VITE_BACKEND_URL}/api/projects/${initialData._id}`
+        : `${import.meta.env.VITE_BACKEND_URL}/api/projects`;
+
+      const response = await fetch(url, {
+        method: initialData ? 'PUT' : 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formDataToSend,
       });
 
       if (response.ok) {
-        toast.success('Project added successfully!');
+        toast.success(`Project ${initialData ? 'updated' : 'added'} successfully!`);
         onSuccess();
       } else {
         const data = await response.json();
@@ -83,10 +87,10 @@ const AddProjectForm = ({ onCancel, onSuccess }) => {
         <div style={{ height: '4px', width: '60px', backgroundColor: 'var(--color-gold)', borderRadius: '2px' }}></div>
       </div>
 
-      <form onSubmit={handleSubmit} style={cardStyle}>
+      <form onSubmit={handleSubmit} className="modal-content" style={cardStyle}>
         {error && <div style={{ background: '#FFEBEE', color: '#F44336', padding: '15px', borderRadius: '10px', fontWeight: 'bold', fontSize: '14px', marginBottom: '20px' }}>{error}</div>}
 
-        <div style={formGridStyle}>
+        <div className="form-grid" style={formGridStyle}>
           {/* Title */}
           <div style={inputGroupStyle}>
             <label style={labelStyle}>Title *</label>
@@ -102,6 +106,7 @@ const AddProjectForm = ({ onCancel, onSuccess }) => {
               <option value="commercial">Commercial</option>
               <option value="investment">Investment</option>
               <option value="mixed">Mixed-use</option>
+              <option value="plot">Plot</option>
             </select>
           </div>
 
@@ -194,7 +199,7 @@ const AddProjectForm = ({ onCancel, onSuccess }) => {
 };
 
 // Styles
-const cardStyle = { backgroundColor: 'white', borderRadius: '15px', padding: '30px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' };
+const cardStyle = { backgroundColor: 'white', borderRadius: '15px', padding: '40px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: '30px' };
 const formGridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' };
 const uploadBoxStyle = { border: '2px dashed #E6E9EF', borderRadius: '12px', backgroundColor: '#F8F9FA', padding: '30px', textAlign: 'center', cursor: 'pointer', position: 'relative' };
 const hiddenFileInputStyle = { position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' };
