@@ -27,6 +27,7 @@ import AddPropertyForm from './AddPropertyForm';
 import AddInvestmentForm from './AddInvestmentForm';
 import AddProjectForm from './AddProjectForm';
 import GalleryManagement from './GalleryManagement';
+import AddTeamMemberForm from './AddTeamMemberForm';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -37,15 +38,18 @@ const AdminDashboard = () => {
     const [showAddProperty, setShowAddProperty] = useState(false);
     const [showAddInvestment, setShowAddInvestment] = useState(false);
     const [showAddProject, setShowAddProject] = useState(false);
+    const [showAddTeamMember, setShowAddTeamMember] = useState(false);
     const [editProperty, setEditProperty] = useState(null);
     const [editInvestment, setEditInvestment] = useState(null);
     const [editProject, setEditProject] = useState(null);
+    const [editTeamMember, setEditTeamMember] = useState(null);
     const [selectedProperty, setSelectedProperty] = useState(null);
     const [selectedInvestment, setSelectedInvestment] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
     const [properties, setProperties] = useState([]);
     const [investments, setInvestments] = useState([]);
     const [projects, setProjects] = useState([]);
+    const [teamMembers, setTeamMembers] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [contacts, setContacts] = useState([]);
     const [gallery, setGallery] = useState([]);
@@ -79,7 +83,8 @@ const AdminDashboard = () => {
         projects: '',
         inquiries: '',
         submissions: '',
-        gallery: ''
+        gallery: '',
+        team: ''
     });
     const [currentPages, setCurrentPages] = useState({
         properties: 1,
@@ -87,7 +92,8 @@ const AdminDashboard = () => {
         projects: 1,
         inquiries: 1,
         submissions: 1,
-        gallery: 1
+        gallery: 1,
+        team: 1
     });
     const ITEMS_PER_PAGE = 25;
 
@@ -97,14 +103,15 @@ const AdminDashboard = () => {
             const token = localStorage.getItem('adminToken');
             const headers = { 'Authorization': `Bearer ${token}` };
             
-            const [dashRes, propRes, contactRes, investRes, projectRes, subRes, galleryRes] = await Promise.all([
+            const [dashRes, propRes, contactRes, investRes, projectRes, subRes, galleryRes, teamRes] = await Promise.all([
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/dashboard`, { headers }),
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`, { headers }),
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, { headers }),
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments`, { headers }),
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects`, { headers }),
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/submitted-properties`, { headers }),
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/gallery`, { headers })
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/gallery`, { headers }),
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/team-members`, { headers })
             ]);
 
             if (dashRes.ok) setDashboardData((await dashRes.json()).data);
@@ -117,6 +124,7 @@ const AdminDashboard = () => {
             if (projectRes.ok) setProjects(await projectRes.json());
             if (subRes.ok) setSubmissions(await subRes.json());
             if (galleryRes.ok) setGallery(await galleryRes.json());
+            if (teamRes.ok) setTeamMembers(await teamRes.json());
             
         } catch (e) {
             console.error(e);
@@ -191,6 +199,21 @@ const AdminDashboard = () => {
                 fetchData();
             }
         } catch (e) { toast.error('Error deleting project'); }
+    };
+
+    const handleDeleteTeamMember = async (id) => {
+        if (!confirm('Permanently delete this team member?')) return;
+        try {
+            const token = localStorage.getItem('adminToken');
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/team-members/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                toast.success('Team Member Deleted');
+                fetchData();
+            }
+        } catch (e) { toast.error('Error deleting team member'); }
     };
 
     const handleUpdateInquiryStatus = async (id, newStatus) => {
@@ -358,6 +381,7 @@ const AdminDashboard = () => {
         { id: 'analytics', label: 'Analytics', icon: HiChartBar },
         { id: 'settings', label: 'Settings', icon: HiCog },
         { id: 'gallery', label: 'Gallery', icon: HiPhotograph },
+        { id: 'team', label: 'Our Team', icon: HiUser },
     ];
 
     // Helper for search and pagination
@@ -875,6 +899,92 @@ const AdminDashboard = () => {
         );
     };
 
+    const renderTeamMembers = () => {
+        if (showAddTeamMember || editTeamMember) return <AddTeamMemberForm initialData={editTeamMember} onCancel={() => { setShowAddTeamMember(false); setEditTeamMember(null); }} onSuccess={() => { setShowAddTeamMember(false); setEditTeamMember(null); fetchData(); }} />;
+        
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                    <h2 style={{ color: 'var(--color-navy)', fontSize: '24px', fontWeight: 'bold' }}>Team Management</h2>
+                    <button 
+                        onClick={() => setShowAddTeamMember(true)}
+                        style={{ backgroundColor: '#F39C12', color: 'white', border: 'none', padding: '12px 25px', borderRadius: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 10px rgba(243, 156, 18, 0.2)' }}
+                    >
+                        <HiPlus /> Add Team Member
+                    </button>
+                </div>
+
+                <div style={mainCardStyle}>
+                    <div style={{ borderBottom: '1px solid #E6E9EF', paddingBottom: '15px', marginBottom: '15px' }}>
+                        <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)' }}>All Team Members</h4>
+                    </div>
+
+                    {renderSearchBar('team', 'Search by name or role...')}
+                    
+                    <div className="table-container" style={{ overflowX: 'auto', width: '100%' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+                            <thead>
+                                <tr style={{ backgroundColor: '#F8F9FA' }}>
+                                    <th style={tableHeaderStyle}>MEMBER</th>
+                                    <th style={tableHeaderStyle}>ROLE</th>
+                                    <th className="mobile-hide" style={tableHeaderStyle}>ORDER</th>
+                                    <th style={{ ...tableHeaderStyle, textAlign: 'right' }}>ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {(() => {
+                                    const { data: pagedData, totalPages } = getPaginatedData(teamMembers, 'team', ['name', 'role']);
+                                    if (pagedData.length === 0) return (
+                                        <tr>
+                                            <td colSpan="4" style={{ padding: '80px 20px', textAlign: 'center', color: '#90A4AE', fontSize: '14px' }}>
+                                                {searchTerms.team ? 'No matches found for your search.' : 'No team members found. Add your first member!'}
+                                            </td>
+                                        </tr>
+                                    );
+                                    return (
+                                        <>
+                                            {pagedData.map(m => (
+                                                <tr key={m._id} style={{ borderBottom: '1px solid #F0F0F0' }}>
+                                                    <td style={tableCellStyle}>
+                                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', backgroundColor: '#F8F9FA', border: '1px solid #EEE' }}>
+                                                                <img src={m.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={m.name} />
+                                                            </div>
+                                                            <span style={{ fontWeight: '600' }}>{m.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td style={tableCellStyle}>{m.role}</td>
+                                                    <td className="mobile-hide" style={tableCellStyle}>{m.order || 0}</td>
+                                                    <td style={{ ...tableCellStyle, textAlign: 'right' }}>
+                                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                            <button 
+                                                                onClick={() => setEditTeamMember(m)}
+                                                                title="Edit Member"
+                                                                style={{ border: 'none', background: '#FFF8E1', color: '#F39C12', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                                            >
+                                                                <HiPencilAlt />
+                                                            </button>
+                                                            <button onClick={() => handleDeleteTeamMember(m._id)} title="Delete" style={{ border: 'none', background: '#FFEBEE', color: '#F44336', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><HiTrash /></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            <tr>
+                                                <td colSpan="4">
+                                                    {renderPagination('team', totalPages)}
+                                                </td>
+                                            </tr>
+                                        </>
+                                    );
+                                })()}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderInquiries = () => {
         const total = contacts.length;
         const unread = contacts.filter(c => c.status === 'unread').length;
@@ -1379,6 +1489,7 @@ const AdminDashboard = () => {
         if (activeTab === 'analytics') return renderAnalytics();
         if (activeTab === 'settings') return renderSettings();
         if (activeTab === 'gallery') return <GalleryManagement />;
+        if (activeTab === 'team') return renderTeamMembers();
         return (
             <div style={mainCardStyle}>
                 <h2 style={cardHeaderStyle}>{activeTab.toUpperCase()} SECTION</h2>

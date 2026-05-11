@@ -3,14 +3,37 @@ import { Link } from 'react-router-dom'
 
 function About() {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+    const [teamMembers, setTeamMembers] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        
         const handleResize = () => setIsMobile(window.innerWidth <= 1024);
         window.addEventListener('resize', handleResize);
         
-        // Trigger animations on scroll
+        // Fetch Team Members
+        const fetchTeamMembers = async () => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/team-members`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setTeamMembers(data);
+                }
+            } catch (error) {
+                console.error("Error fetching team members:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTeamMembers();
+
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Trigger animations when content is loaded
+    useEffect(() => {
+        if (loading) return;
+
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -20,12 +43,11 @@ function About() {
             });
         }, observerOptions);
 
-        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-        return () => {
-            observer.disconnect();
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
+        const animatedElements = document.querySelectorAll('.animate-on-scroll');
+        animatedElements.forEach(el => observer.observe(el));
+
+        return () => observer.disconnect();
+    }, [loading, teamMembers]);
 
     return (
         <main className="about-page-wrapper">
@@ -215,181 +237,56 @@ function About() {
                         marginTop: '50px',
                         justifyContent: 'center'
                     }}>
-                        {/* Ashu Tiwari Card */}
-                        <div className="animate-on-scroll team-card" style={{ 
-                            backgroundColor: 'white', 
-                            borderRadius: 'var(--radius-lg)', 
-                            padding: '45px 30px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-                            textAlign: 'center',
-                            borderTop: '5px solid var(--color-gold)',
-                            transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}>
-                            <div className="team-image-wrapper" style={{ 
-                                width: '170px', 
-                                height: '170px', 
-                                borderRadius: '50%', 
-                                overflow: 'hidden',
-                                margin: '0 auto 25px',
-                                border: '6px solid white',
-                                boxShadow: '0 5px 20px rgba(0,0,0,0.15)',
-                                position: 'relative',
-                                background: '#f0f0f0'
-                            }}>
-                                <img 
-                                    src="/about/ashu.jpeg" 
-                                    alt="Ashu Tiwari" 
-                                    style={{ 
-                                        width: '100%', 
-                                        height: '100%', 
-                                        objectFit: 'cover',
-                                        filter: 'brightness(1.02) contrast(1.08) saturate(1.1)',
-                                        imageRendering: 'auto',
-                                        transition: 'transform 0.5s ease'
-                                    }} 
-                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                />
-                            </div>
-                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '5px', fontWeight: '800' }}>Ashu Tiwari</h3>
-                            <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>GM Sales & Marketing</p>
-                            <div style={{ height: '3px', width: '35px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
-                            <p style={{ fontSize: '0.95rem', color: 'var(--color-dark-gray)', fontStyle: 'italic', lineHeight: '1.6', maxWidth: '240px', margin: '0 auto' }}>"Driving strategic growth and market presence through leadership excellence."</p>
-                        </div>
-
-                        {/* Pragya Tiwari Card */}
-                        <div className="animate-on-scroll team-card" style={{ 
-                            backgroundColor: 'white', 
-                            borderRadius: 'var(--radius-lg)', 
-                            padding: '45px 30px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-                            textAlign: 'center',
-                            borderTop: '5px solid var(--color-gold)',
-                            transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}>
-                            <div className="team-image-wrapper" style={{ 
-                                width: '170px', 
-                                height: '170px', 
-                                borderRadius: '50%', 
-                                overflow: 'hidden',
-                                margin: '0 auto 25px',
-                                border: '6px solid white',
-                                boxShadow: '0 5px 20px rgba(0,0,0,0.15)',
-                                position: 'relative',
-                                background: '#f0f0f0'
-                            }}>
-                                <img 
-                                    src="/about/pragya.jpeg" 
-                                    alt="Pragya Tiwari" 
-                                    style={{ 
-                                        width: '100%', 
-                                        height: '100%', 
-                                        objectFit: 'cover',
-                                        filter: 'brightness(1.02) contrast(1.08) saturate(1.1)',
-                                        imageRendering: 'auto',
-                                        transition: 'transform 0.5s ease'
-                                    }} 
-                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                />
-                            </div>
-                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '5px', fontWeight: '800' }}>Pragya Tiwari</h3>
-                            <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>HR Head & Admin</p>
-                            <div style={{ height: '3px', width: '35px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
-                            <p style={{ fontSize: '0.95rem', color: 'var(--color-dark-gray)', fontStyle: 'italic', lineHeight: '1.6', maxWidth: '240px', margin: '0 auto' }}>"Fostering a culture of excellence and operational efficiency."</p>
-                        </div>
-
-                        {/* Kundan Jha Card */}
-                        <div className="animate-on-scroll team-card" style={{ 
-                            backgroundColor: 'white', 
-                            borderRadius: 'var(--radius-lg)', 
-                            padding: '45px 30px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-                            textAlign: 'center',
-                            borderTop: '5px solid var(--color-gold)',
-                            transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}>
-                            <div className="team-image-wrapper" style={{ 
-                                width: '170px', 
-                                height: '170px', 
-                                borderRadius: '50%', 
-                                overflow: 'hidden',
-                                margin: '0 auto 25px',
-                                border: '6px solid white',
-                                boxShadow: '0 5px 20px rgba(0,0,0,0.15)',
-                                position: 'relative',
-                                background: '#f0f0f0'
-                            }}>
-                                <img 
-                                    src="/about/kundan.jpeg" 
-                                    alt="Kundan Jha" 
-                                    style={{ 
-                                        width: '100%', 
-                                        height: '100%', 
-                                        objectFit: 'cover',
-                                        filter: 'brightness(1.02) contrast(1.08) saturate(1.1)',
-                                        imageRendering: 'auto',
-                                        transition: 'transform 0.5s ease'
-                                    }} 
-                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                />
-                            </div>
-                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '5px', fontWeight: '800' }}>Kundan Jha</h3>
-                            <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>GM Sales</p>
-                            <div style={{ height: '3px', width: '35px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
-                            <p style={{ fontSize: '0.95rem', color: 'var(--color-dark-gray)', fontStyle: 'italic', lineHeight: '1.6', maxWidth: '240px', margin: '0 auto' }}>"Expertise in high-value property transactions and bespoke client relations."</p>
-                        </div>
-
-                        {/* Prashant Chaudhary Card */}
-                        <div className="animate-on-scroll team-card" style={{ 
-                            backgroundColor: 'white', 
-                            borderRadius: 'var(--radius-lg)', 
-                            padding: '45px 30px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-                            textAlign: 'center',
-                            borderTop: '5px solid var(--color-gold)',
-                            transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}>
-                            <div className="team-image-wrapper" style={{ 
-                                width: '170px', 
-                                height: '170px', 
-                                borderRadius: '50%', 
-                                overflow: 'hidden',
-                                margin: '0 auto 25px',
-                                border: '6px solid white',
-                                boxShadow: '0 5px 20px rgba(0,0,0,0.15)',
-                                position: 'relative',
-                                background: '#f0f0f0'
-                            }}>
-                                <img 
-                                    src="/about/prashant.jpeg" 
-                                    alt="Prashant Chaudhary" 
-                                    style={{ 
-                                        width: '100%', 
-                                        height: '100%', 
-                                        objectFit: 'cover',
-                                        filter: 'brightness(1.02) contrast(1.08) saturate(1.1)',
-                                        imageRendering: 'auto',
-                                        transition: 'transform 0.5s ease'
-                                    }} 
-                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                />
-                            </div>
-                            <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '5px', fontWeight: '800' }}>Prashant Chaudhary</h3>
-                            <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>GM Sales</p>
-                            <div style={{ height: '3px', width: '35px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
-                            <p style={{ fontSize: '0.95rem', color: 'var(--color-dark-gray)', fontStyle: 'italic', lineHeight: '1.6', maxWidth: '240px', margin: '0 auto' }}>"Committed to delivering unparalleled real estate solutions and client satisfaction."</p>
-                        </div>
+                        {loading ? (
+                            <div style={{ textAlign: 'center', gridColumn: '1/-1', padding: '50px' }}>Loading experts...</div>
+                        ) : teamMembers.length > 0 ? (
+                            teamMembers.map((member) => (
+                                <div key={member._id} className="animate-on-scroll team-card" style={{ 
+                                    backgroundColor: 'white', 
+                                    borderRadius: 'var(--radius-lg)', 
+                                    padding: '45px 30px',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+                                    textAlign: 'center',
+                                    borderTop: '5px solid var(--color-gold)',
+                                    transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}>
+                                    <div className="team-image-wrapper" style={{ 
+                                        width: '170px', 
+                                        height: '170px', 
+                                        borderRadius: '50%', 
+                                        overflow: 'hidden',
+                                        margin: '0 auto 25px',
+                                        border: '6px solid white',
+                                        boxShadow: '0 5px 20px rgba(0,0,0,0.15)',
+                                        position: 'relative',
+                                        background: '#f0f0f0'
+                                    }}>
+                                        <img 
+                                            src={member.image} 
+                                            alt={member.name} 
+                                            style={{ 
+                                                width: '100%', 
+                                                height: '100%', 
+                                                objectFit: 'cover',
+                                                filter: 'brightness(1.02) contrast(1.08) saturate(1.1)',
+                                                imageRendering: 'auto',
+                                                transition: 'transform 0.5s ease'
+                                            }} 
+                                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                        />
+                                    </div>
+                                    <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', marginBottom: '5px', fontWeight: '800' }}>{member.name}</h3>
+                                    <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>{member.role}</p>
+                                    <div style={{ height: '3px', width: '35px', background: 'var(--color-gold)', margin: '15px auto' }}></div>
+                                    <p style={{ fontSize: '0.95rem', color: 'var(--color-dark-gray)', fontStyle: 'italic', lineHeight: '1.6', maxWidth: '240px', margin: '0 auto' }}>"{member.bio}"</p>
+                                </div>
+                            ))
+                        ) : (
+                            <div style={{ textAlign: 'center', gridColumn: '1/-1', padding: '50px' }}>No team members found.</div>
+                        )}
                     </div>
                 </div>
             </section>

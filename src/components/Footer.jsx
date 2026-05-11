@@ -86,7 +86,7 @@ function Footer() {
                     <div style={{ display: 'flex', gap: '20px' }}>
                         <Link to="/privacy" style={{ color: 'var(--color-gray)', opacity: 0.8, textDecoration: 'none', fontSize: '0.9rem' }}>Privacy Policy</Link>
                         <Link to="/terms" style={{ color: 'var(--color-gray)', opacity: 0.8, textDecoration: 'none', fontSize: '0.9rem' }}>Terms of Service</Link>
-                        <Link to="/admin/login" style={{ color: 'var(--color-gold)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 'bold' }}>Admin Login</Link>
+                        {/* <Link to="/admin/login" style={{ color: 'var(--color-gold)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 'bold' }}>Admin Login</Link> */}
                     </div>
                 </div>
             </div>
