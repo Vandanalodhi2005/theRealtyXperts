@@ -900,14 +900,14 @@ const AdminDashboard = () => {
     };
 
     const renderTeamMembers = () => {
-        if (showAddTeamMember || editTeamMember) return <AddTeamMemberForm initialData={editTeamMember} onCancel={() => { setShowAddTeamMember(false); setEditTeamMember(null); }} onSuccess={() => { setShowAddTeamMember(false); setEditTeamMember(null); fetchData(); }} />;
+        if (showAddTeamMember || editTeamMember) return <AddTeamMemberForm key={editTeamMember?._id || 'new'} initialData={editTeamMember} onCancel={() => { setShowAddTeamMember(false); setEditTeamMember(null); }} onSuccess={() => { setShowAddTeamMember(false); setEditTeamMember(null); fetchData(); }} />;
         
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                     <h2 style={{ color: 'var(--color-navy)', fontSize: '24px', fontWeight: 'bold' }}>Team Management</h2>
                     <button 
-                        onClick={() => setShowAddTeamMember(true)}
+                        onClick={() => { setEditTeamMember(null); setShowAddTeamMember(true); }}
                         style={{ backgroundColor: '#F39C12', color: 'white', border: 'none', padding: '12px 25px', borderRadius: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 10px rgba(243, 156, 18, 0.2)' }}
                     >
                         <HiPlus /> Add Team Member
