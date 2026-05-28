@@ -7,7 +7,13 @@ const Projects = ({ type = 'all' }) => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+  const [filters, setFilters] = useState({ title: '', category: '', type: '', status: '', minPrice: '', maxPrice: '', location: '', city: '' });
   const navigate = useNavigate();
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({ ...prev, [name]: value }));
+  };
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 1024);
@@ -19,6 +25,39 @@ const Projects = ({ type = 'all' }) => {
     fetchProjects();
     window.scrollTo(0, 0);
   }, [type]);
+
+  // Keywords to search for in project details (case‑insensitive)
+  const keywords = [
+    'Residential', 'Commercial', 'Investment',
+    'Retail Shops', 'Food Court', 'Gaming Zone', 'Multiplex', 'Office Space', 'Studio',
+    'All Types', 'Apartment', 'Villa', 'Plot',
+    '5 BHK', 'Penthouse'
+  ];
+
+  // Compute filtered projects based on keywords and user-defined filters
+  const filteredProjects = projects.filter((project) => {
+    const searchable = `${project.title || ''} ${project.description || ''} ${project.type || ''} ${project.category || ''}`.toLowerCase();
+    const matchesKeyword = keywords.some((kw) => searchable.includes(kw.toLowerCase()));
+    const matchesFilters =
+      (filters.title ? project.title?.toLowerCase().includes(filters.title.toLowerCase()) : true) &&
+      (filters.category ? project.category === filters.category : true) &&
+      (filters.type ? project.type === filters.type : true) &&
+      (filters.status ? project.status === filters.status : true) &&
+      (filters.minPrice ? Number(project.price) >= Number(filters.minPrice) : true) &&
+      (filters.maxPrice ? Number(project.price) <= Number(filters.maxPrice) : true) &&
+      (filters.location ? project.location?.toLowerCase().includes(filters.location.toLowerCase()) : true) &&
+      (filters.city ? project.city?.toLowerCase().includes(filters.city.toLowerCase()) : true) &&
+      (filters.description ? project.description?.toLowerCase().includes(filters.description.toLowerCase()) : true) &&
+      (filters.highlights ? (project.highlights || '').toLowerCase().includes(filters.highlights.toLowerCase()) : true) &&
+      (filters.amenities ? (project.amenities || '').toLowerCase().includes(filters.amenities.toLowerCase()) : true);
+    return matchesKeyword && matchesFilters;
+  });
+// Map each filtered project to the keywords it matches (case‑insensitive)
+const projectMatches = filteredProjects.map((project) => {
+  const searchable = `${project.title || ''} ${project.description || ''} ${project.type || ''} ${project.category || ''}`.toLowerCase();
+  const matched = keywords.filter((kw) => searchable.includes(kw.toLowerCase()));
+  return { ...project, matched };
+});
 
   const fetchProjects = async () => {
     try {
@@ -93,24 +132,76 @@ const Projects = ({ type = 'all' }) => {
             </p>
           </div>
 
-          {/* Projects Grid */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(350px, 1fr))', 
-            gap: isMobile ? '20px' : '35px' 
-          }}>
-            {projects.length > 0 ? (
-              projects.map((project) => (
-                <PropertyCard key={project._id} property={project} />
-              ))
-            ) : (
-              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 0' }}>
-                <i className="fas fa-city" style={{ fontSize: '4rem', color: '#eee', marginBottom: '25px' }}></i>
-                <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', fontWeight: '700' }}>No Projects Available Yet</h3>
-                <p style={{ color: '#888' }}>We're adding new prestigious projects soon. Please check back later.</p>
-              </div>
-            )}
-          </div>
+              {/* Filter Form */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>
+              {/* Title */}
+              <input name="title" value={filters.title} onChange={handleFilterChange} placeholder="Title" style={inputStyle} />
+                {/* Category */}
+                <select name="category" value={filters.category} onChange={handleFilterChange} style={inputStyle}>
+                  <option value="">Select Category</option>
+                  <option value="residential">Residential</option>
+                  <option value="commercial">Commercial</option>
+                  <option value="investment">Investment</option>
+                </select>
+                {/* Type */}
+                <select name="type" value={filters.type} onChange={handleFilterChange} style={inputStyle}>
+                  <option value="">All Types</option>
+                  <option value="retail_shops">Retail Shops</option>
+                  <option value="food_court">Food Court</option>
+                  <option value="gaming_zone">Gaming Zone</option>
+                  <option value="multiplex">Multiplex</option>
+                  <option value="office_space">Office Space</option>
+                  <option value="studio">Studio</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="villa">Villa</option>
+                  <option value="plot">Plot</option>
+                  <option value="5bhk">5 BHK</option>
+                  <option value="penthouse">Penthouse</option>
+                </select>
+              {/* Status */}
+              <select name="status" value={filters.status} onChange={handleFilterChange} style={inputStyle}>
+                <option value="">Any Status</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="under-construction">Under Construction</option>
+                <option value="ready-to-move">Ready to Move</option>
+                <option value="completed">Completed</option>
+              </select>
+              {/* Price range */}
+              <input name="minPrice" type="number" value={filters.minPrice} onChange={handleFilterChange} placeholder="Min Price" style={inputStyle} />
+              <input name="maxPrice" type="number" value={filters.maxPrice} onChange={handleFilterChange} placeholder="Max Price" style={inputStyle} />
+              {/* Location */}
+              <input name="location" value={filters.location} onChange={handleFilterChange} placeholder="Location/Area" style={inputStyle} />
+              {/* City */}
+              <input name="city" value={filters.city} onChange={handleFilterChange} placeholder="City" style={inputStyle} />
+              {/* Description */}
+              <input name="description" value={filters.description} onChange={handleFilterChange} placeholder="Description" style={inputStyle} />
+              {/* Highlights */}
+              <input name="highlights" value={filters.highlights} onChange={handleFilterChange} placeholder="Highlights" style={inputStyle} />
+              {/* Amenities */}
+              <input name="amenities" value={filters.amenities} onChange={handleFilterChange} placeholder="Amenities" style={inputStyle} />
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(350px, 1fr))',
+              gap: isMobile ? '20px' : '35px'
+            }}>
+              {projectMatches.length > 0 ? (
+                projectMatches.map((project) => (
+                  <div key={project._id} style={{ border: '1px solid #E6E9EF', borderRadius: '12px', padding: '20px', backgroundColor: 'white' }}>
+                    <PropertyCard property={project} />
+                    <div style={{ marginTop: '10px', fontSize: '0.85rem', color: '#555' }}>
+                      <strong>Matched Keywords:</strong> {project.matched.join(', ') || 'None'}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 0' }}>
+                  <i className="fas fa-city" style={{ fontSize: '4rem', color: '#eee', marginBottom: '25px' }}></i>
+                  <h3 style={{ fontSize: '1.5rem', color: 'var(--color-navy)', fontWeight: '700' }}>No Matching Projects Found</h3>
+                  <p style={{ color: '#888' }}>No projects contain the specified keywords.</p>
+                </div>
+              )}
+            </div>
 
           {/* CTA Section */}
           <section style={{ 

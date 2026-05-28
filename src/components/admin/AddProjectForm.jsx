@@ -5,6 +5,7 @@ import { HiPlus, HiCloudUpload, HiX } from 'react-icons/hi';
 
 const AddProjectForm = ({ onCancel, onSuccess, initialData }) => {
   const [formData, setFormData] = useState({
+    category: initialData?.category || '',
     title: initialData?.title || '',
     type: initialData?.type || '',
     status: initialData?.status || 'upcoming',
@@ -97,16 +98,44 @@ const AddProjectForm = ({ onCancel, onSuccess, initialData }) => {
             <input type="text" name="title" value={formData.title} onChange={handleInputChange} style={inputStyle} placeholder="Project Title" required />
           </div>
 
+          {/* Category */}
+          <div style={inputGroupStyle}>
+            <label style={labelStyle}>Category *</label>
+            <select name="category" value={formData.category} onChange={handleInputChange} style={inputStyle} required>
+              <option value="">Select Category</option>
+              <option value="residential">Residential</option>
+              <option value="commercial">Commercial</option>
+              <option value="investment">Investment</option>
+            </select>
+          </div>
           {/* Type */}
           <div style={inputGroupStyle}>
             <label style={labelStyle}>Type *</label>
             <select name="type" value={formData.type} onChange={handleInputChange} style={inputStyle} required>
               <option value="">Select Type</option>
-              <option value="residential">Residential</option>
-              <option value="commercial">Commercial</option>
-              <option value="investment">Investment</option>
-              <option value="mixed">Mixed-use</option>
-              <option value="plot">Plot</option>
+              {formData.category === 'residential' && (
+                <>
+                  <option value="villa">Villa</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="plot">Plot</option>
+                </>
+              )}
+              {formData.category === 'commercial' && (
+                <>
+                  <option value="retail_shops">Retail Shops</option>
+                  <option value="food_court">Food Court</option>
+                  <option value="gaming_zone">Gaming Zone</option>
+                  <option value="multiplex">Multiplex</option>
+                  <option value="office_space">Office Space</option>
+                  <option value="studio">Studio</option>
+                  <option value="all_types">All Types</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="villa">Villa</option>
+                  <option value="plot">Plot</option>
+                  <option value="5bhk">5 BHK</option>
+                  <option value="penthouse">Penthouse</option>
+                </>
+              )}
             </select>
           </div>
 

@@ -136,7 +136,7 @@ const Properties = ({ category = 'all' }) => {
     }
     if (filters.transaction !== 'all' && property.transaction !== filters.transaction) return false;
     if (filters.status !== 'all' && property.status !== filters.status) return false;
-    if (filters.bedroom !== 'all' && property.bedroom?.toString() !== filters.bedroom) return false;
+      if (filters.category !== 'commercial' && filters.bedroom !== 'all' && property.bedroom?.toString() !== filters.bedroom) return false;
     if (filters.furnishing !== 'all' && property.furnishing !== filters.furnishing) return false;
 
     return true;
