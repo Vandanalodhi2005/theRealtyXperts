@@ -246,40 +246,41 @@ const Properties = ({ category = 'all' }) => {
               gap: '15px' 
             }}>
               <select name="category" value={filters.category} onChange={handleFilterChange} style={filterInputStyle}>
-                <option value="all">All Categories</option>
                 <option value="residential">Residential</option>
                 <option value="commercial">Commercial</option>
                 <option value="investment">Investment</option>
               </select>
 
-              <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
-                <option value="all">All Types</option>
-                <option value="apartment">Apartment</option>
-                <option value="villa">Villa</option>
-                <option value="plot">Plot</option>
-                <option value="commercial">Commercial</option>
-              </select>
+              {filters.category === 'commercial' ? (
+                <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
+                  <option value="all">All Types</option>
+                  <option value="retail">Retail Shops</option>
+                  <option value="foodcourt">Food Court</option>
+                  <option value="gamingzone">Gaming Zone</option>
+                  <option value="multiplex">Multiplex</option>
+                  <option value="officespace">Office Space</option>
+                  <option value="studio">Studio</option>
+                </select>
+              ) : (
+                <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
+                  <option value="all">All Types</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="villa">Villa</option>
+                  <option value="plot">Plot</option>
+                </select>
+              )}
 
-              <select name="transaction" value={filters.transaction} onChange={handleFilterChange} style={filterInputStyle}>
-                <option value="all">Sale / Rent</option>
-                <option value="sale">For Sale</option>
-                <option value="rent">For Rent</option>
-              </select>
-
-              <select name="status" value={filters.status} onChange={handleFilterChange} style={filterInputStyle}>
-                <option value="all">Any Status</option>
-                <option value="available">Available</option>
-                <option value="sold">Sold</option>
-                <option value="rented">Rented</option>
-              </select>
-
-              <select name="bedroom" value={filters.bedroom} onChange={handleFilterChange} style={filterInputStyle} disabled={filters.category === 'commercial'}>
-                <option value="all">Bedrooms (Any)</option>
-                <option value="1">1 BHK</option>
-                <option value="2">2 BHK</option>
-                <option value="3">3 BHK</option>
-                <option value="4">4 BHK</option>
-              </select>
+              {filters.category !== 'commercial' && (
+                <select name="bedroom" value={filters.bedroom} onChange={handleFilterChange} style={filterInputStyle}>
+                  <option value="all">Bedrooms (Any)</option>
+                  <option value="1">1 BHK</option>
+                  <option value="2">2 BHK</option>
+                  <option value="3">3 BHK</option>
+                  <option value="4">4 BHK</option>
+                  <option value="5">5 BHK</option>
+                  <option value="penthouse">Penthouse</option>
+                </select>
+              )}
 
               <input type="number" name="minPrice" placeholder="Min Price (₹)" value={filters.minPrice} onChange={handleFilterChange} style={filterInputStyle} />
               <input type="number" name="maxPrice" placeholder="Max Price (₹)" value={filters.maxPrice} onChange={handleFilterChange} style={filterInputStyle} />

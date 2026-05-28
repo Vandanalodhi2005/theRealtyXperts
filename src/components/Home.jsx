@@ -150,14 +150,16 @@ function Home() {
                     <div className="category-card-grid">
                         {[
                             { id: 'residential', label: 'Residential', icon: 'fa-home', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070' },
-                            { id: 'projects', label: 'Signature Projects', icon: 'fa-building', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070' },
-                            { id: 'commercial', label: 'Commercial & Land', icon: 'fa-city', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069' },
+                            { id: 'commercial', label: 'Commercial', icon: 'fa-city', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069' },
                             { id: 'investments', label: 'Investment Assets', icon: 'fa-chart-line', img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073' }
                         ].map(cat => (
                             <div 
                                 key={cat.id} 
                                 className={`category-nav-card ${activeTab === cat.id ? 'active' : ''}`}
-                                onClick={() => setActiveTab(cat.id)}
+                                onClick={() => {
+                                  setActiveTab(cat.id);
+                                  navigate(cat.id === 'investments' ? '/investment' : `/${cat.id}`);
+                                }}
                             >
                                 <div className="cat-card-overlay"></div>
                                 <img src={cat.img} alt={cat.label} className="cat-card-img" />
@@ -197,14 +199,6 @@ function Home() {
                 link="/residential"
                 dark={true}
                 description="Discover your perfect property from our extensive collection of residential spaces defined by excellence."
-            />
-
-            <CategorySection
-                title="Upcoming Projects"
-                subtitle="Signature Portfolio"
-                data={categories.projects}
-                link="/projects"
-                description="Discover our premium residential and commercial projects elegantly designed to meet your discerning lifestyle needs."
             />
 
             {/* Commercial Section */}
