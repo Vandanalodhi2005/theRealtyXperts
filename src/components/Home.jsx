@@ -13,7 +13,8 @@ function Home() {
         residential: [],
         commercial: [],
         resale: [],
-        interior: []
+        interior: [],
+        projects: []
     });
 
     useEffect(() => {
@@ -76,7 +77,8 @@ function Home() {
                     residential: resData.slice(0, 4),
                     commercial: commData.slice(0, 4),
                     resale: resaleData.slice(0, 4),
-                    interior: interiorData.slice(0, 4)
+                    interior: interiorData.slice(0, 4),
+                    projects: projs.slice(0, 4)
                 });
             } catch (err) {
                 console.error("Home data fetch error:", err);
@@ -152,14 +154,15 @@ function Home() {
                             { id: 'residential', label: 'Residential', icon: 'fa-home', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070' },
                             { id: 'commercial', label: 'Commercial', icon: 'fa-city', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069' },
                             { id: 'resale', label: 'Resale', icon: 'fa-sync-alt', img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073' },
-                            { id: 'interior', label: 'Interior', icon: 'fa-couch', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000' }
+                            { id: 'interior', label: 'Interior', icon: 'fa-couch', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000' },
+                            { id: 'projects', label: 'Projects', icon: 'fa-building', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070' }
                         ].map(cat => (
                             <div 
                                 key={cat.id} 
                                 className={`category-nav-card ${activeTab === cat.id ? 'active' : ''}`}
                                 onClick={() => {
                                   setActiveTab(cat.id);
-                                  navigate(`/${cat.id}`);
+                                  navigate(cat.id === 'projects' ? '/properties' : `/${cat.id}`);
                                 }}
                             >
                                 <div className="cat-card-overlay"></div>
@@ -229,6 +232,15 @@ function Home() {
                 link="/interior"
                 dark={true}
                 description="Exquisite interior solutions tailored to your lifestyle, from luxury homes to commercial spaces."
+            />
+
+            {/* Featured Projects Section - Added to ensure previous data is visible */}
+            <CategorySection
+                title="Featured Projects"
+                subtitle="Our Architectural Excellence"
+                data={categories.projects}
+                link="/properties"
+                description="Browse through our diverse portfolio of successfully delivered and upcoming architectural marvels."
             />
 
             {/* About TRX Section */}
