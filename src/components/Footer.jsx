@@ -40,8 +40,8 @@ function Footer() {
                             <li><Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-chevron-right" style={{ fontSize: '10px', color: 'var(--color-gold)' }}></i> Home</Link></li>
                             <li><Link to="/about" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-chevron-right" style={{ fontSize: '10px', color: 'var(--color-gold)' }}></i> About Us</Link></li>
                             <li><Link to="/properties" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-chevron-right" style={{ fontSize: '10px', color: 'var(--color-gold)' }}></i> Properties</Link></li>
-                            <li><Link to="/services" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-chevron-right" style={{ fontSize: '10px', color: 'var(--color-gold)' }}></i> Services</Link></li>
-                            <li><Link to="/investment" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-chevron-right" style={{ fontSize: '10px', color: 'var(--color-gold)' }}></i> Investments</Link></li>
+                            <li><Link to="/resale" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-chevron-right" style={{ fontSize: '10px', color: 'var(--color-gold)' }}></i> Resale</Link></li>
+                            <li><Link to="/interior" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-chevron-right" style={{ fontSize: '10px', color: 'var(--color-gold)' }}></i> Interior</Link></li>
                         </ul>
                     </div>
 

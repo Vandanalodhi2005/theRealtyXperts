@@ -12,8 +12,8 @@ function Home() {
     const [categories, setCategories] = useState({
         residential: [],
         commercial: [],
-        projects: [],
-        investments: []
+        resale: [],
+        interior: []
     });
 
     useEffect(() => {
@@ -43,40 +43,40 @@ function Home() {
         // Fetch and categorize data from API
         const fetchData = async () => {
             try {
-                const [propsRes, projsRes, invsRes] = await Promise.all([
+                const [propsRes, projsRes] = await Promise.all([
                     fetch(`${API_URL}/api/properties`),
-                    fetch(`${API_URL}/api/projects`),
-                    fetch(`${API_URL}/api/investments`)
+                    fetch(`${API_URL}/api/projects`)
                 ]);
 
                 const props = propsRes.ok ? await propsRes.json() : [];
-                const projs = projsRes.ok ? await projsRes.json() : [];
-                const invs = invsRes.ok ? await invsRes.json() : [];
+                const projs = projsRes.ok ? (await projsRes.json()).map(p => ({ ...p, isProjectCollection: true })) : [];
 
                 // Combine Residential properties and projects
                 const resData = [
                     ...props.filter(p => p.propertyType === 'apartment' || p.propertyType === 'villa'),
-                    ...projs.filter(p => p.type === 'residential')
+                    ...projs.filter(p => p.category === 'residential' || p.type === 'residential')
                 ];
 
                 // Combine Commercial properties and projects
                 const commData = [
                     ...props.filter(p => p.propertyType === 'commercial' || p.propertyType === 'plot'),
-                    ...projs.filter(p => p.type === 'commercial')
+                    ...projs.filter(p => p.category === 'commercial' || p.type === 'commercial')
                 ];
 
-                // Combine Investment properties, projects, and investments
-                const investData = [
-                    ...props.filter(p => p.propertyType === 'investment'),
-                    ...projs.filter(p => p.type === 'investment'),
-                    ...(invs.data || invs)
+                // Resale properties and projects
+                const resaleData = [
+                    ...props.filter(p => p.transaction === 'resale'),
+                    ...projs.filter(p => p.type === 'resale' || p.category === 'resale')
                 ];
+
+                // Interior projects
+                const interiorData = projs.filter(p => p.type === 'interior' || p.category === 'interior');
 
                 setCategories({
                     residential: resData.slice(0, 4),
                     commercial: commData.slice(0, 4),
-                    investments: investData.slice(0, 4),
-                    projects: projs.slice(0, 4) // Keep general projects tab too
+                    resale: resaleData.slice(0, 4),
+                    interior: interiorData.slice(0, 4)
                 });
             } catch (err) {
                 console.error("Home data fetch error:", err);
@@ -151,14 +151,15 @@ function Home() {
                         {[
                             { id: 'residential', label: 'Residential', icon: 'fa-home', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070' },
                             { id: 'commercial', label: 'Commercial', icon: 'fa-city', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069' },
-                            { id: 'investments', label: 'Investment Assets', icon: 'fa-chart-line', img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073' }
+                            { id: 'resale', label: 'Resale', icon: 'fa-sync-alt', img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073' },
+                            { id: 'interior', label: 'Interior', icon: 'fa-couch', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000' }
                         ].map(cat => (
                             <div 
                                 key={cat.id} 
                                 className={`category-nav-card ${activeTab === cat.id ? 'active' : ''}`}
                                 onClick={() => {
                                   setActiveTab(cat.id);
-                                  navigate(cat.id === 'investments' ? '/investment' : `/${cat.id}`);
+                                  navigate(`/${cat.id}`);
                                 }}
                             >
                                 <div className="cat-card-overlay"></div>
@@ -181,7 +182,7 @@ function Home() {
 
                     <div style={{ textAlign: 'center', marginTop: '50px' }}>
                         <Link 
-                            to={activeTab === 'investments' ? '/investment' : `/${activeTab}`} 
+                            to={`/${activeTab}`} 
                             className="btn btn-primary" 
                             style={{ padding: '14px 50px', borderRadius: '50px', boxShadow: 'var(--shadow-md)' }}
                         >
@@ -211,13 +212,23 @@ function Home() {
                 description="Explore prime commercial locations and plots designed for business growth and strategic investment."
             />
 
-            {/* Investments Section */}
+            {/* Resale Section */}
             <CategorySection
-                title="Investment Opportunities"
-                subtitle="High Yield Assets"
-                data={categories.investments}
-                link="/investment"
-                description="Curated premium assets and commercial spaces designed to deliver exceptional returns and long-term capital appreciation."
+                title="Resale Properties"
+                subtitle="Best Deals"
+                data={categories.resale}
+                link="/resale"
+                description="Explore our exclusive range of resale properties offering great value and immediate possession."
+            />
+
+            {/* Interior Section */}
+            <CategorySection
+                title="Interior Designs"
+                subtitle="Transform Your Space"
+                data={categories.interior}
+                link="/interior"
+                dark={true}
+                description="Exquisite interior solutions tailored to your lifestyle, from luxury homes to commercial spaces."
             />
 
             {/* About TRX Section */}

@@ -158,7 +158,7 @@ const ProjectDetails = () => {
                 backdropFilter: 'blur(4px)'
               }}>
                 <i className="fas fa-building" style={{ marginRight: '8px' }}></i>
-                {project.type === 'residential' ? 'Residential' : 'Commercial'} Project
+                {(project.category || project.type)?.replace(/-/g, ' ')}
               </span>
               <span style={{
                 backgroundColor: statusStyle.bg, color: statusStyle.color,

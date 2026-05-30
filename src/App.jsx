@@ -18,7 +18,12 @@ import Home from './components/Home';
 import Investment from './components/Investment';
 import InvestmentDetails from './components/InvestmentDetails';
 import ProjectDetails from './components/ProjectDetails';
+import Resale from './components/Resale';
+import Interior from './components/Interior';
 import Gallery from './components/Gallery';
+import Career from './components/Career';
+import JobDetail from './components/JobDetail';
+import FloatingActions from './components/FloatingActions';
 import PropTypes from 'prop-types';
 import { Toaster } from 'react-hot-toast';
 import ScrollToTop from './components/ScrollToTop';
@@ -30,6 +35,7 @@ const UserLayout = ({ children }) => (
     <main style={{ flexGrow: 1, width: '100%', overflowX: 'hidden' }}>
       {children}
     </main>
+    <FloatingActions />
     <Footer />
   </div>
 );
@@ -62,6 +68,8 @@ function App() {
         <Route path="/properties" element={<UserLayout><Properties category="all" /></UserLayout>} />
         <Route path="/residential" element={<UserLayout><Properties category="residential" /></UserLayout>} />
         <Route path="/commercial" element={<UserLayout><Properties category="commercial" /></UserLayout>} />
+        <Route path="/resale" element={<UserLayout><Resale /></UserLayout>} />
+        <Route path="/interior" element={<UserLayout><Interior /></UserLayout>} />
         <Route path="/investment" element={<UserLayout><Investment /></UserLayout>} />
         <Route path="/investment/:id" element={<UserLayout><InvestmentDetails /></UserLayout>} />
         <Route path="/property/:id" element={<UserLayout><PropertyDetails /></UserLayout>} />
@@ -71,6 +79,8 @@ function App() {
         <Route path="/projects/investment" element={<UserLayout><Projects type="investment" /></UserLayout>} />
         <Route path="/project/:id" element={<UserLayout><ProjectDetails /></UserLayout>} />
         <Route path="/gallery" element={<UserLayout><Gallery /></UserLayout>} />
+        <Route path="/careers" element={<UserLayout><Career /></UserLayout>} />
+        <Route path="/careers/:id" element={<UserLayout><JobDetail /></UserLayout>} />
         <Route path="/submit-property" element={<UserLayout><SubmitProperty /></UserLayout>} />
         <Route path="/contact" element={<UserLayout><ContactUs /></UserLayout>} />
         <Route path="/terms" element={<UserLayout><TermsAndConditions /></UserLayout>} />

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 const PropertyCard = ({ property }) => {
   // Determine if it's a project, property, or investment
-  const isProject = property.type && !property.propertyType;
+  const isProject = property.isProjectCollection || (property.type && !property.propertyType);
   const isInvestment = property.landType || property.propertyType === 'investment';
   
   const linkBase = isInvestment ? 'investment' : isProject ? 'project' : 'property';

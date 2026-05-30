@@ -26,38 +26,32 @@ const Projects = ({ type = 'all' }) => {
     window.scrollTo(0, 0);
   }, [type]);
 
-  // Keywords to search for in project details (case‑insensitive)
-  const keywords = [
-    'Residential', 'Commercial', 'Investment',
-    'Retail Shops', 'Food Court', 'Gaming Zone', 'Multiplex', 'Office Space', 'Studio',
-    'All Types', 'Apartment', 'Villa', 'Plot',
-    '5 BHK', 'Penthouse'
-  ];
-
-  // Compute filtered projects based on keywords and user-defined filters
+  // Compute filtered projects based on user-defined filters
   const filteredProjects = projects.filter((project) => {
-    const searchable = `${project.title || ''} ${project.description || ''} ${project.type || ''} ${project.category || ''}`.toLowerCase();
-    const matchesKeyword = keywords.some((kw) => searchable.includes(kw.toLowerCase()));
+    let typeMatches = true;
+    if (filters.type) {
+       if (project.category === 'commercial') {
+           typeMatches = (project.commercialTypes && project.commercialTypes.includes(filters.type)) || project.type === filters.type;
+       } else {
+           typeMatches = project.type === filters.type;
+       }
+    }
+    
     const matchesFilters =
       (filters.title ? project.title?.toLowerCase().includes(filters.title.toLowerCase()) : true) &&
-      (filters.category ? project.category === filters.category : true) &&
-      (filters.type ? project.type === filters.type : true) &&
+      typeMatches &&
       (filters.status ? project.status === filters.status : true) &&
       (filters.minPrice ? Number(project.price) >= Number(filters.minPrice) : true) &&
       (filters.maxPrice ? Number(project.price) <= Number(filters.maxPrice) : true) &&
-      (filters.location ? project.location?.toLowerCase().includes(filters.location.toLowerCase()) : true) &&
+      (filters.location ? (project.location?.toLowerCase().includes(filters.location.toLowerCase()) || project.city?.toLowerCase().includes(filters.location.toLowerCase())) : true) &&
       (filters.city ? project.city?.toLowerCase().includes(filters.city.toLowerCase()) : true) &&
       (filters.description ? project.description?.toLowerCase().includes(filters.description.toLowerCase()) : true) &&
       (filters.highlights ? (project.highlights || '').toLowerCase().includes(filters.highlights.toLowerCase()) : true) &&
       (filters.amenities ? (project.amenities || '').toLowerCase().includes(filters.amenities.toLowerCase()) : true);
-    return matchesKeyword && matchesFilters;
+    return matchesFilters;
   });
-// Map each filtered project to the keywords it matches (case‑insensitive)
-const projectMatches = filteredProjects.map((project) => {
-  const searchable = `${project.title || ''} ${project.description || ''} ${project.type || ''} ${project.category || ''}`.toLowerCase();
-  const matched = keywords.filter((kw) => searchable.includes(kw.toLowerCase()));
-  return { ...project, matched };
-});
+
+const projectMatches = filteredProjects;
 
   const fetchProjects = async () => {
     try {
@@ -136,28 +130,38 @@ const projectMatches = filteredProjects.map((project) => {
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>
               {/* Title */}
               <input name="title" value={filters.title} onChange={handleFilterChange} placeholder="Title" style={inputStyle} />
-                {/* Category */}
-                <select name="category" value={filters.category} onChange={handleFilterChange} style={inputStyle}>
-                  <option value="">Select Category</option>
-                  <option value="residential">Residential</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="investment">Investment</option>
-                </select>
                 {/* Type */}
+                {type === 'commercial' ? (
                 <select name="type" value={filters.type} onChange={handleFilterChange} style={inputStyle}>
                   <option value="">All Types</option>
-                  <option value="retail_shops">Retail Shops</option>
-                  <option value="food_court">Food Court</option>
-                  <option value="gaming_zone">Gaming Zone</option>
-                  <option value="multiplex">Multiplex</option>
-                  <option value="office_space">Office Space</option>
-                  <option value="studio">Studio</option>
+                  <option value="Retail Shops">Retail Shops</option>
+                  <option value="Food Court">Food Court</option>
+                  <option value="Gaming Zone">Gaming Zone</option>
+                  <option value="Multiplex">Multiplex</option>
+                  <option value="Office Space">Office Space</option>
+                  <option value="Studio">Studio</option>
+                </select>
+                ) : type === 'residential' ? (
+                <select name="type" value={filters.type} onChange={handleFilterChange} style={inputStyle}>
+                  <option value="">All Types</option>
                   <option value="apartment">Apartment</option>
                   <option value="villa">Villa</option>
                   <option value="plot">Plot</option>
-                  <option value="5bhk">5 BHK</option>
-                  <option value="penthouse">Penthouse</option>
                 </select>
+                ) : (
+                <select name="type" value={filters.type} onChange={handleFilterChange} style={inputStyle}>
+                  <option value="">All Types</option>
+                  <option value="Retail Shops">Retail Shops</option>
+                  <option value="Food Court">Food Court</option>
+                  <option value="Gaming Zone">Gaming Zone</option>
+                  <option value="Multiplex">Multiplex</option>
+                  <option value="Office Space">Office Space</option>
+                  <option value="Studio">Studio</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="villa">Villa</option>
+                  <option value="plot">Plot</option>
+                </select>
+                )}
               {/* Status */}
               <select name="status" value={filters.status} onChange={handleFilterChange} style={inputStyle}>
                 <option value="">Any Status</option>
@@ -189,9 +193,6 @@ const projectMatches = filteredProjects.map((project) => {
                 projectMatches.map((project) => (
                   <div key={project._id} style={{ border: '1px solid #E6E9EF', borderRadius: '12px', padding: '20px', backgroundColor: 'white' }}>
                     <PropertyCard property={project} />
-                    <div style={{ marginTop: '10px', fontSize: '0.85rem', color: '#555' }}>
-                      <strong>Matched Keywords:</strong> {project.matched.join(', ') || 'None'}
-                    </div>
                   </div>
                 ))
               ) : (

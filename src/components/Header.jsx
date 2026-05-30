@@ -50,11 +50,11 @@ function Header() {
                     <Link to="/" className={isActive('/')}>Home</Link>
                     <Link to="/residential" className={isActive('/residential')}>Residential</Link>
                     <Link to="/commercial" className={isActive('/commercial')}>Commercial</Link>
-                    <Link to="/investment" className={isActive('/investment')}>Investment</Link>
-                    <Link to="/projects" className={isActive('/projects')}>Projects</Link>
+                    <Link to="/resale" className={isActive('/resale')}>Resale</Link>
+                    <Link to="/interior" className={isActive('/interior')}>Interior</Link>
                     <Link to="/gallery" className={isActive('/gallery')}>Gallery</Link>
                     <Link to="/about" className={isActive('/about')}>About Us</Link>
-                    <Link to="/services" className={isActive('/services')}>Services</Link>
+                    <Link to="/careers" className={isActive('/careers')}>Careers</Link>
 
                     <Link to="/contact" className="btn btn-nav-contact">
                         <PhoneCall size={18} />

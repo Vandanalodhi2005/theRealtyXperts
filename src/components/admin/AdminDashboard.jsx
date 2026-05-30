@@ -28,7 +28,7 @@ import AddInvestmentForm from './AddInvestmentForm';
 import AddProjectForm from './AddProjectForm';
 import GalleryManagement from './GalleryManagement';
 import AddTeamMemberForm from './AddTeamMemberForm';
-
+import { API_URL } from '../../apiConfig';
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useSelector((state) => state.auth);
@@ -53,10 +53,14 @@ const AdminDashboard = () => {
     const [submissions, setSubmissions] = useState([]);
     const [contacts, setContacts] = useState([]);
     const [gallery, setGallery] = useState([]);
+    const [interiorQueries, setInteriorQueries] = useState([]);
+    const [candidateApplications, setCandidateApplications] = useState([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [selectedInquiry, setSelectedInquiry] = useState(null);
     const [selectedSubmission, setSelectedSubmission] = useState(null);
+    const [selectedInteriorQuery, setSelectedInteriorQuery] = useState(null);
+    const [selectedApplication, setSelectedApplication] = useState(null);
     const [adminSettings, setAdminSettings] = useState({
         newUsername: '',
         newPassword: '',
@@ -84,7 +88,9 @@ const AdminDashboard = () => {
         inquiries: '',
         submissions: '',
         gallery: '',
-        team: ''
+        team: '',
+        interiorQueries: '',
+        candidateApplications: ''
     });
     const [currentPages, setCurrentPages] = useState({
         properties: 1,
@@ -93,7 +99,9 @@ const AdminDashboard = () => {
         inquiries: 1,
         submissions: 1,
         gallery: 1,
-        team: 1
+        team: 1,
+        interiorQueries: 1,
+        candidateApplications: 1
     });
     const ITEMS_PER_PAGE = 25;
 
@@ -103,28 +111,31 @@ const AdminDashboard = () => {
             const token = localStorage.getItem('adminToken');
             const headers = { 'Authorization': `Bearer ${token}` };
             
-            const [dashRes, propRes, contactRes, investRes, projectRes, subRes, galleryRes, teamRes] = await Promise.all([
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/dashboard`, { headers }),
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties`, { headers }),
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, { headers }),
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments`, { headers }),
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects`, { headers }),
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/submitted-properties`, { headers }),
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/gallery`, { headers }),
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/team-members`, { headers })
+            const [dashRes, propRes, contactRes, projectRes, galleryRes, teamRes, interiorRes, candidateRes] = await Promise.all([
+                fetch(`${API_URL}/api/admin/dashboard`, { headers }),
+                fetch(`${API_URL}/api/properties`, { headers }),
+                fetch(`${API_URL}/api/contact`, { headers }),
+                fetch(`${API_URL}/api/projects`, { headers }),
+                fetch(`${API_URL}/api/gallery`, { headers }),
+                fetch(`${API_URL}/api/team-members`, { headers }),
+                fetch(`${API_URL}/api/interior-queries`, { headers }),
+                fetch(`${API_URL}/api/candidates`, { headers })
             ]);
 
             if (dashRes.ok) setDashboardData((await dashRes.json()).data);
             if (propRes.ok) setProperties(await propRes.json());
             if (contactRes.ok) setContacts(await contactRes.json());
-            if (investRes.ok) {
-                const resData = await investRes.json();
-                setInvestments(resData.data || resData);
-            }
             if (projectRes.ok) setProjects(await projectRes.json());
-            if (subRes.ok) setSubmissions(await subRes.json());
             if (galleryRes.ok) setGallery(await galleryRes.json());
             if (teamRes.ok) setTeamMembers(await teamRes.json());
+            if (interiorRes.ok) {
+                const interiorData = await interiorRes.json();
+                setInteriorQueries(Array.isArray(interiorData) ? interiorData : (interiorData.data || []));
+            }
+            if (candidateRes.ok) {
+                const candidateData = await candidateRes.json();
+                setCandidateApplications(Array.isArray(candidateData) ? candidateData : (candidateData.data || []));
+            }
             
         } catch (e) {
             console.error(e);
@@ -160,7 +171,7 @@ const AdminDashboard = () => {
         if (!confirm('Permanently delete this property?')) return;
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/properties/${id}`, {
+            const res = await fetch(`${API_URL}/api/properties/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -175,7 +186,7 @@ const AdminDashboard = () => {
         if (!confirm('Permanently delete this investment?')) return;
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/investments/${id}`, {
+            const res = await fetch(`${API_URL}/api/investments/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -190,7 +201,7 @@ const AdminDashboard = () => {
         if (!confirm('Permanently delete this project?')) return;
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/projects/${id}`, {
+            const res = await fetch(`${API_URL}/api/projects/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -205,7 +216,7 @@ const AdminDashboard = () => {
         if (!confirm('Permanently delete this team member?')) return;
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/team-members/${id}`, {
+            const res = await fetch(`${API_URL}/api/team-members/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -219,7 +230,7 @@ const AdminDashboard = () => {
     const handleUpdateInquiryStatus = async (id, newStatus) => {
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact/${id}/status`, {
+            const res = await fetch(`${API_URL}/api/contact/${id}/status`, {
                 method: 'PUT',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
@@ -247,7 +258,7 @@ const AdminDashboard = () => {
     const handleUpdateSubmissionStatus = async (id, newStatus) => {
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/submitted-properties/${id}/status`, {
+            const res = await fetch(`${API_URL}/api/submitted-properties/${id}/status`, {
                 method: 'PUT',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
@@ -269,7 +280,7 @@ const AdminDashboard = () => {
         if (!confirm('Permanently delete this inquiry?')) return;
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact/${id}`, {
+            const res = await fetch(`${API_URL}/api/contact/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -285,7 +296,7 @@ const AdminDashboard = () => {
         if (!confirm('Permanently delete this submission?')) return;
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/submitted-properties/${id}`, {
+            const res = await fetch(`${API_URL}/api/submitted-properties/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -312,7 +323,7 @@ const AdminDashboard = () => {
 
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/update-settings`, {
+            const res = await fetch(`${API_URL}/api/admin/update-settings`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -374,11 +385,10 @@ const AdminDashboard = () => {
     const sidebarItems = [
         { id: 'dashboard', label: 'Dashboard', icon: HiHome },
         { id: 'properties', label: 'Properties', icon: HiOfficeBuilding },
-        { id: 'investments', label: 'Investments', icon: HiGlobe },
         { id: 'projects', label: 'Projects', icon: HiClipboardList },
-        { id: 'inquiries', label: 'Inquiries', icon: HiMail },
-        { id: 'submissions', label: 'Submissions', icon: HiDocumentText },
-        { id: 'analytics', label: 'Analytics', icon: HiChartBar },
+        { id: 'inquiries', label: 'Contact Inquiries', icon: HiMail },
+        { id: 'interiorQueries', label: 'Interior Queries', icon: HiOfficeBuilding },
+        { id: 'candidateApplications', label: 'Job Applications', icon: HiUser },
         { id: 'settings', label: 'Settings', icon: HiCog },
         { id: 'gallery', label: 'Gallery', icon: HiPhotograph },
         { id: 'team', label: 'Our Team', icon: HiUser },
@@ -386,8 +396,9 @@ const AdminDashboard = () => {
 
     // Helper for search and pagination
     const getPaginatedData = (data, type, searchFields) => {
+        const list = Array.isArray(data) ? data : [];
         const term = searchTerms[type].toLowerCase();
-        const filtered = data.filter(item => 
+        const filtered = list.filter(item => 
             searchFields.some(field => {
                 const value = field.split('.').reduce((obj, key) => obj?.[key], item);
                 return value?.toString().toLowerCase().includes(term);
@@ -520,23 +531,23 @@ const AdminDashboard = () => {
                 <div className="type-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
                     <div style={typeBreakdownBox('#E3F2FD', '#1976D2')}>
                         <span style={typeLabelStyle}>Residential</span>
-                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.residential || projects.filter(p => p.type === 'residential').length}</h4>
-                        <div style={progressBarContainer}><div style={progressBar('#1976D2', calculatePercentage(projects.filter(p => p.type === 'residential').length, projects.length))}></div></div>
+                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.residential || projects.filter(p => p.category === 'residential' || p.type === 'residential').length}</h4>
+                        <div style={progressBarContainer}><div style={progressBar('#1976D2', calculatePercentage(projects.filter(p => p.category === 'residential' || p.type === 'residential').length, projects.length))}></div></div>
                     </div>
                     <div style={typeBreakdownBox('#E8F5E9', '#388E3C')}>
                         <span style={typeLabelStyle}>Commercial</span>
-                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.commercial || projects.filter(p => p.type === 'commercial').length}</h4>
-                        <div style={progressBarContainer}><div style={progressBar('#388E3C', calculatePercentage(projects.filter(p => p.type === 'commercial').length, projects.length))}></div></div>
+                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.commercial || projects.filter(p => p.category === 'commercial' || p.type === 'commercial').length}</h4>
+                        <div style={progressBarContainer}><div style={progressBar('#388E3C', calculatePercentage(projects.filter(p => p.category === 'commercial' || p.type === 'commercial').length, projects.length))}></div></div>
                     </div>
                     <div style={typeBreakdownBox('#FFF3E0', '#F57C00')}>
                         <span style={typeLabelStyle}>Investments</span>
-                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.investment || projects.filter(p => p.type === 'investment').length}</h4>
-                        <div style={progressBarContainer}><div style={progressBar('#F57C00', calculatePercentage(projects.filter(p => p.type === 'investment').length, projects.length))}></div></div>
+                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.investment || projects.filter(p => p.category === 'investment' || p.type === 'investment').length}</h4>
+                        <div style={progressBarContainer}><div style={progressBar('#F57C00', calculatePercentage(projects.filter(p => p.category === 'investment' || p.type === 'investment').length, projects.length))}></div></div>
                     </div>
                     <div style={typeBreakdownBox('#F3E5F5', '#7B1FA2')}>
                         <span style={typeLabelStyle}>Plot</span>
-                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.plot || projects.filter(p => p.type === 'plot').length}</h4>
-                        <div style={progressBarContainer}><div style={progressBar('#7B1FA2', calculatePercentage(projects.filter(p => p.type === 'plot').length, projects.length))}></div></div>
+                        <h4 style={typeValueStyle}>{dashboardData?.projectsByType?.plot || projects.filter(p => p.category === 'plot' || p.type === 'plot').length}</h4>
+                        <div style={progressBarContainer}><div style={progressBar('#7B1FA2', calculatePercentage(projects.filter(p => p.category === 'plot' || p.type === 'plot').length, projects.length))}></div></div>
                     </div>
                 </div>
             </div>
@@ -855,7 +866,9 @@ const AdminDashboard = () => {
                                                         </div>
                                                     </td>
                                                     <td className="mobile-hide" style={tableCellStyle}>{p.location}, {p.city}</td>
-                                                    <td className="mobile-hide" style={{ ...tableCellStyle, textTransform: 'capitalize' }}>{p.type}</td>
+                                                    <td className="mobile-hide" style={{ ...tableCellStyle, textTransform: 'capitalize' }}>
+                                                        {p.category ? `${p.category}${p.type ? ` (${p.type})` : ''}` : p.type}
+                                                    </td>
                                                     <td style={{ ...tableCellStyle, fontWeight: '700', color: 'var(--color-gold)' }}>{p.price}</td>
                                                     <td style={tableCellStyle}>
                                                         <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', backgroundColor: p.status === 'completed' ? '#E8F5E9' : p.status === 'under-construction' ? '#FFF3E0' : '#E3F2FD', color: p.status === 'completed' ? '#4CAF50' : p.status === 'under-construction' ? '#EF6C00' : '#2196F3', textTransform: 'uppercase' }}>
@@ -1478,15 +1491,382 @@ const AdminDashboard = () => {
         );
     };
 
+    const renderInteriorQueries = () => {
+        const total = interiorQueries.length;
+        const newQueries = interiorQueries.filter(q => q.status === 'new').length;
+        const contacted = interiorQueries.filter(q => q.status === 'contacted').length;
+        const converted = interiorQueries.filter(q => q.status === 'converted').length;
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                <h2 style={{ color: 'var(--color-navy)', fontSize: '24px', fontWeight: 'bold' }}>Interior Queries</h2>
+
+                <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                    <div style={premiumStatCard('linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>Total Queries</p><h3 style={premiumStatValue}>{total}</h3></div>
+                    </div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #F44336 0%, #D32F2F 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>New</p><h3 style={premiumStatValue}>{newQueries}</h3></div>
+                    </div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>Contacted</p><h3 style={premiumStatValue}>{contacted}</h3></div>
+                    </div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>Converted</p><h3 style={premiumStatValue}>{converted}</h3></div>
+                    </div>
+                </div>
+
+                <div style={mainCardStyle}>
+                    <h4 style={cardHeaderStyle}>All Interior Queries</h4>
+                    {renderSearchBar('interiorQueries', 'Search by name, email, phone or service type...')}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        {(() => {
+                            const { data: pagedData, totalPages } = getPaginatedData(interiorQueries, 'interiorQueries', ['fullName', 'email', 'phone', 'serviceType', 'message', 'status']);
+                            if (pagedData.length === 0) return (
+                                <p style={{ textAlign: 'center', color: '#90A4AE', padding: '40px' }}>
+                                    {searchTerms.interiorQueries ? 'No queries match your search.' : 'No interior queries yet.'}
+                                </p>
+                            );
+                            return (
+                                <>
+                                    {pagedData.map(query => (
+                                        <div key={query._id} style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', backgroundColor: '#F8F9FA', borderRadius: '12px', border: '1px solid #E6E9EF' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                                                <div>
+                                                    <h5 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)', fontWeight: '800' }}>{query.fullName}</h5>
+                                                    <p style={{ margin: '5px 0', fontSize: '13px', color: '#607D8B' }}>{query.email} • {query.phone}</p>
+                                                    <span style={{ backgroundColor: '#E3F2FD', color: '#1976D2', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600' }}>{query.serviceType}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                                                    <span style={statusBadgeStyle(query.status)}>{query.status}</span>
+                                                    <span style={{ fontSize: '12px', color: '#90A4AE', fontWeight: '500' }}>{new Date(query.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                            <div style={{ padding: '15px', backgroundColor: 'white', borderRadius: '8px', borderLeft: '4px solid var(--color-gold)' }}>
+                                                <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64' }}>{query.message}</p>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+                                                <select
+                                                    value={query.status}
+                                                    onChange={(e) => updateInteriorQueryStatus(query._id, e.target.value)}
+                                                    style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #E6E9EF', fontSize: '12px', fontWeight: '600', color: 'var(--color-navy)', backgroundColor: 'white' }}
+                                                >
+                                                    <option value="new">New</option>
+                                                    <option value="contacted">Contacted</option>
+                                                    <option value="converted">Converted</option>
+                                                    <option value="rejected">Rejected</option>
+                                                </select>
+                                                <button
+                                                    onClick={() => deleteInteriorQuery(query._id)}
+                                                    style={{ backgroundColor: 'white', border: '1px solid #F44336', color: '#F44336', padding: '8px 15px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                                >
+                                                    <HiTrash size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={() => setSelectedInteriorQuery(query)}
+                                                    style={{ backgroundColor: 'white', border: '1px solid var(--color-gold)', color: 'var(--color-gold)', padding: '8px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                                >
+                                                    View Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {renderPagination('interiorQueries', totalPages)}
+                                </>
+                            );
+                        })()}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderCandidateApplications = () => {
+        const total = candidateApplications.length;
+        const applied = candidateApplications.filter(a => a.status === 'applied').length;
+        const shortlisted = candidateApplications.filter(a => a.status === 'shortlisted').length;
+        const hired = candidateApplications.filter(a => a.status === 'hired').length;
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                <h2 style={{ color: 'var(--color-navy)', fontSize: '24px', fontWeight: 'bold' }}>Job Applications</h2>
+
+                <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                    <div style={premiumStatCard('linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>Total Applications</p><h3 style={premiumStatValue}>{total}</h3></div>
+                    </div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #F44336 0%, #D32F2F 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>Applied</p><h3 style={premiumStatValue}>{applied}</h3></div>
+                    </div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>Shortlisted</p><h3 style={premiumStatValue}>{shortlisted}</h3></div>
+                    </div>
+                    <div style={premiumStatCard('linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)', 'white')}>
+                        <div style={{ flex: 1 }}><p style={premiumStatTitle}>Hired</p><h3 style={premiumStatValue}>{hired}</h3></div>
+                    </div>
+                </div>
+
+                <div style={mainCardStyle}>
+                    <h4 style={cardHeaderStyle}>All Applications</h4>
+                    {renderSearchBar('candidateApplications', 'Search by name, email, mobile or position...')}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        {(() => {
+                            const { data: pagedData, totalPages } = getPaginatedData(candidateApplications, 'candidateApplications', ['fullName', 'email', 'mobile', 'position', 'location', 'message', 'status']);
+                            if (pagedData.length === 0) return (
+                                <p style={{ textAlign: 'center', color: '#90A4AE', padding: '40px' }}>
+                                    {searchTerms.candidateApplications ? 'No applications match your search.' : 'No job applications yet.'}
+                                </p>
+                            );
+                            return (
+                                <>
+                                    {pagedData.map(app => (
+                                        <div key={app._id} style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', backgroundColor: '#F8F9FA', borderRadius: '12px', border: '1px solid #E6E9EF' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                                                <div>
+                                                    <h5 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)', fontWeight: '800' }}>{app.fullName}</h5>
+                                                    <p style={{ margin: '5px 0', fontSize: '13px', color: '#607D8B' }}>{app.email} • {app.mobile}</p>
+                                                    <span style={{ backgroundColor: '#E3F2FD', color: '#1976D2', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600' }}>{app.position} — {app.location}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                                                    <span style={statusBadgeStyle(app.status)}>{app.status}</span>
+                                                    <span style={{ fontSize: '12px', color: '#90A4AE', fontWeight: '500' }}>{new Date(app.appliedAt || app.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', fontSize: '13px', color: '#607D8B' }}>
+                                                <span><strong>Experience:</strong> {app.experience} years</span>
+                                            </div>
+                                            {app.message && (
+                                                <div style={{ padding: '15px', backgroundColor: 'white', borderRadius: '8px', borderLeft: '4px solid var(--color-gold)' }}>
+                                                    <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64' }}>{app.message}</p>
+                                                </div>
+                                            )}
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+                                                <select
+                                                    value={app.status}
+                                                    onChange={(e) => updateApplicationStatus(app._id, e.target.value)}
+                                                    style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #E6E9EF', fontSize: '12px', fontWeight: '600', color: 'var(--color-navy)', backgroundColor: 'white' }}
+                                                >
+                                                    <option value="applied">Applied</option>
+                                                    <option value="reviewed">Reviewed</option>
+                                                    <option value="shortlisted">Shortlisted</option>
+                                                    <option value="rejected">Rejected</option>
+                                                    <option value="hired">Hired</option>
+                                                </select>
+                                                <button
+                                                    onClick={() => deleteApplication(app._id)}
+                                                    style={{ backgroundColor: 'white', border: '1px solid #F44336', color: '#F44336', padding: '8px 15px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                                >
+                                                    <HiTrash size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={() => setSelectedApplication(app)}
+                                                    style={{ backgroundColor: 'white', border: '1px solid var(--color-gold)', color: 'var(--color-gold)', padding: '8px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                                >
+                                                    View Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {renderPagination('candidateApplications', totalPages)}
+                                </>
+                            );
+                        })()}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderInteriorQueryModal = () => {
+        if (!selectedInteriorQuery) return null;
+        const q = selectedInteriorQuery;
+
+        return (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+                <div className="modal-inner" style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+                    <button onClick={() => setSelectedInteriorQuery(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: '#F8F9FA', border: 'none', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#607D8B', zIndex: 10 }}>
+                        <HiX size={18} />
+                    </button>
+                    <div className="modal-content" style={{ padding: '40px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '2px', display: 'block', marginBottom: '10px' }}>Interior Query</span>
+                        <h3 style={{ fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800', margin: 0 }}>{q.fullName}</h3>
+                        <div style={{ display: 'flex', gap: '15px', marginTop: '10px', marginBottom: '30px' }}>
+                            <span style={statusBadgeStyle(q.status)}>{q.status}</span>
+                            <span style={{ color: '#90A4AE', fontSize: '13px' }}>{new Date(q.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Email</p><p style={detailValueStyle}>{q.email}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Phone</p><p style={detailValueStyle}>{q.phone}</p></div>
+                        </div>
+                        <div style={{ ...detailBoxStyle, marginBottom: '20px' }}>
+                            <p style={detailLabelStyle}>Service Type</p>
+                            <p style={detailValueStyle}>{q.serviceType}</p>
+                        </div>
+                        <div style={{ marginBottom: '30px' }}>
+                            <p style={detailLabelStyle}>Message</p>
+                            <div style={{ background: '#F8F9FA', padding: '24px', borderRadius: '15px', borderLeft: '4px solid var(--color-gold)', lineHeight: '1.8', color: '#455A64', fontSize: '15px' }}>{q.message}</div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <select
+                                value={q.status}
+                                onChange={(e) => { updateInteriorQueryStatus(q._id, e.target.value); setSelectedInteriorQuery({ ...q, status: e.target.value }); }}
+                                style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid #E6E9EF', fontWeight: '600' }}
+                            >
+                                <option value="new">New</option>
+                                <option value="contacted">Contacted</option>
+                                <option value="converted">Converted</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <button onClick={() => window.location.href = `mailto:${q.email}`} style={{ flex: 1, backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                                Reply via Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderApplicationModal = () => {
+        if (!selectedApplication) return null;
+        const a = selectedApplication;
+
+        return (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 22, 47, 0.7)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+                <div className="modal-inner" style={{ backgroundColor: 'white', borderRadius: '24px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+                    <button onClick={() => setSelectedApplication(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: '#F8F9FA', border: 'none', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#607D8B', zIndex: 10 }}>
+                        <HiX size={18} />
+                    </button>
+                    <div className="modal-content" style={{ padding: '40px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '2px', display: 'block', marginBottom: '10px' }}>Job Application</span>
+                        <h3 style={{ fontSize: '24px', color: 'var(--color-navy)', fontWeight: '800', margin: 0 }}>{a.fullName}</h3>
+                        <div style={{ display: 'flex', gap: '15px', marginTop: '10px', marginBottom: '30px', flexWrap: 'wrap' }}>
+                            <span style={statusBadgeStyle(a.status)}>{a.status}</span>
+                            <span style={{ backgroundColor: '#E3F2FD', color: '#1976D2', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '700' }}>{a.position}</span>
+                            <span style={{ color: '#90A4AE', fontSize: '13px' }}>{new Date(a.appliedAt || a.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Email</p><p style={{ ...detailValueStyle, wordBreak: 'break-all' }}>{a.email}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Mobile</p><p style={detailValueStyle}>{a.mobile}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Location</p><p style={detailValueStyle}>{a.location}</p></div>
+                            <div style={detailBoxStyle}><p style={detailLabelStyle}>Experience</p><p style={detailValueStyle}>{a.experience} years</p></div>
+                        </div>
+                        {a.message && (
+                            <div style={{ marginBottom: '30px' }}>
+                                <p style={detailLabelStyle}>Message</p>
+                                <div style={{ background: '#F8F9FA', padding: '24px', borderRadius: '15px', borderLeft: '4px solid var(--color-gold)', lineHeight: '1.8', color: '#455A64', fontSize: '15px' }}>{a.message}</div>
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                            <select
+                                value={a.status}
+                                onChange={(e) => { updateApplicationStatus(a._id, e.target.value); setSelectedApplication({ ...a, status: e.target.value }); }}
+                                style={{ flex: 1, minWidth: '140px', padding: '12px', borderRadius: '12px', border: '1px solid #E6E9EF', fontWeight: '600' }}
+                            >
+                                <option value="applied">Applied</option>
+                                <option value="reviewed">Reviewed</option>
+                                <option value="shortlisted">Shortlisted</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="hired">Hired</option>
+                            </select>
+                            <button onClick={() => window.location.href = `mailto:${a.email}`} style={{ flex: 1, minWidth: '140px', backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                                Reply via Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const updateInteriorQueryStatus = async (id, status) => {
+        try {
+            const token = localStorage.getItem('adminToken');
+            const response = await fetch(`${API_URL}/api/interior-queries/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status })
+            });
+            if (response.ok) {
+                toast.success('Status updated successfully');
+                fetchData();
+            }
+        } catch (error) {
+            toast.error('Error updating status');
+        }
+    };
+
+    const deleteInteriorQuery = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this query?')) return;
+        try {
+            const token = localStorage.getItem('adminToken');
+            const response = await fetch(`${API_URL}/api/interior-queries/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                toast.success('Query deleted successfully');
+                fetchData();
+            }
+        } catch (error) {
+            toast.error('Error deleting query');
+        }
+    };
+
+    const updateApplicationStatus = async (id, status) => {
+        try {
+            const token = localStorage.getItem('adminToken');
+            const response = await fetch(`${API_URL}/api/candidates/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status })
+            });
+            if (response.ok) {
+                toast.success('Status updated successfully');
+                fetchData();
+            }
+        } catch (error) {
+            toast.error('Error updating status');
+        }
+    };
+
+    const deleteApplication = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this application?')) return;
+        try {
+            const token = localStorage.getItem('adminToken');
+            const response = await fetch(`${API_URL}/api/candidates/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                toast.success('Application deleted successfully');
+                fetchData();
+            }
+        } catch (error) {
+            toast.error('Error deleting application');
+        }
+    };
+
     const renderContent = () => {
         if (loading) return <div style={{ textAlign: 'center', padding: '100px', color: '#90A4AE' }}>Loading System Data...</div>;
         if (activeTab === 'dashboard') return renderDashboard();
         if (activeTab === 'properties') return renderProperties();
-        if (activeTab === 'investments') return renderInvestments();
         if (activeTab === 'projects') return renderProjects();
         if (activeTab === 'inquiries') return renderInquiries();
-        if (activeTab === 'submissions') return renderSubmissions();
-        if (activeTab === 'analytics') return renderAnalytics();
+        if (activeTab === 'interiorQueries') return renderInteriorQueries();
+        if (activeTab === 'candidateApplications') return renderCandidateApplications();
         if (activeTab === 'settings') return renderSettings();
         if (activeTab === 'gallery') return <GalleryManagement />;
         if (activeTab === 'team') return renderTeamMembers();
@@ -1645,6 +2025,8 @@ const AdminDashboard = () => {
             {renderProjectDetailModal()}
             {renderInquiryModal()}
             {renderSubmissionModal()}
+            {renderInteriorQueryModal()}
+            {renderApplicationModal()}
         </div>
     );
 
@@ -1858,6 +2240,32 @@ const inquiryBadgeStyle = (status) => ({
     backgroundColor: status === 'unread' ? '#FFEBEE' : status === 'responded' ? '#E8F5E9' : '#E3F2FD',
     color: status === 'unread' ? '#F44336' : status === 'responded' ? '#4CAF50' : '#2196F3'
 });
+
+const statusBadgeStyle = (status) => {
+    const map = {
+        new: { bg: '#FFEBEE', color: '#F44336' },
+        contacted: { bg: '#E3F2FD', color: '#2196F3' },
+        converted: { bg: '#E8F5E9', color: '#4CAF50' },
+        rejected: { bg: '#FFF3E0', color: '#FF9800' },
+        applied: { bg: '#FFEBEE', color: '#F44336' },
+        reviewed: { bg: '#E3F2FD', color: '#2196F3' },
+        shortlisted: { bg: '#E8F5E9', color: '#4CAF50' },
+        hired: { bg: '#F3E5F5', color: '#9C27B0' },
+        unread: { bg: '#FFEBEE', color: '#F44336' },
+        responded: { bg: '#E8F5E9', color: '#4CAF50' },
+        read: { bg: '#E3F2FD', color: '#2196F3' },
+    };
+    const s = map[status] || { bg: '#ECEFF1', color: '#607D8B' };
+    return {
+        padding: '4px 10px',
+        borderRadius: '6px',
+        fontSize: '10px',
+        fontWeight: '800',
+        textTransform: 'uppercase',
+        backgroundColor: s.bg,
+        color: s.color,
+    };
+};
 
 const mainCardStyle = { backgroundColor: 'white', borderRadius: '15px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column' };
 const cardHeaderStyle = { color: 'var(--color-navy)', fontSize: '16px', fontWeight: '700', marginBottom: '20px' };

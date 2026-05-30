@@ -1,20 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { HiHome, HiOfficeBuilding, HiLocationMarker, HiCurrencyRupee, HiFilter, HiX } from 'react-icons/hi';
-import PropTypes from 'prop-types';
+import { HiHome, HiOfficeBuilding, HiLocationMarker, HiCurrencyRupee, HiFilter, HiX, HiAdjustments } from 'react-icons/hi';
 import PropertyCard from './PropertyCard';
 import { API_URL } from '../apiConfig';
 
-const Properties = ({ category = 'all' }) => {
+const Resale = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
-    category: 'all',
     propertyType: 'all',
     minPrice: '',
     maxPrice: '',
     location: '',
-    transaction: 'all',
     status: 'all',
     bedroom: 'all',
     furnishing: 'all'
@@ -35,15 +32,25 @@ const Properties = ({ category = 'all' }) => {
     try {
       const [propsRes, projsRes] = await Promise.all([
         fetch(`${API_URL}/api/properties`),
-        fetch(`${API_URL}/api/projects`)
+        fetch(`${API_URL}/api/projects?type=resale`)
       ]);
 
       const propsData = propsRes.ok ? await propsRes.json() : [];
-      const projsData = projsRes.ok ? (await projsRes.json()).map(p => ({ ...p, isProjectCollection: true })) : [];
+      const projsData = projsRes.ok ? await projsRes.json() : [];
 
-      setProperties([...propsData, ...projsData]);
+      // Filter propsData to only show resale properties
+      const resaleProperties = propsData.filter(p => p.transaction === 'resale');
+      
+      // Mark projects explicitly as resale so they render nicely
+      const resaleProjects = projsData.map(p => ({
+        ...p,
+        transaction: 'resale',
+        isProjectCollection: true
+      }));
+
+      setProperties([...resaleProperties, ...resaleProjects]);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching resale data:', error);
     } finally {
       setLoading(false);
     }
@@ -53,11 +60,10 @@ const Properties = ({ category = 'all' }) => {
     fetchData();
     window.scrollTo(0, 0);
     
-    // If there's a search param, set it in filters
     if (initialSearch) {
       setFilters(prev => ({ ...prev, location: initialSearch }));
     }
-  }, [fetchData, category, initialSearch]);
+  }, [fetchData, initialSearch]);
 
   const handleFilterChange = (e) => {
     setFilters({
@@ -68,12 +74,10 @@ const Properties = ({ category = 'all' }) => {
 
   const clearFilters = () => {
     setFilters({
-      category: 'all',
       propertyType: 'all',
       minPrice: '',
       maxPrice: '',
       location: '',
-      transaction: 'all',
       status: 'all',
       bedroom: 'all',
       furnishing: 'all'
@@ -86,53 +90,19 @@ const Properties = ({ category = 'all' }) => {
   });
 
   const filteredProperties = properties.filter(property => {
-    // Filter by route category
-    if (category === 'residential') {
-      const isResProp = ['apartment', 'villa', 'plot'].includes(property.propertyType);
-      const isResProj = property.category === 'residential' || property.type === 'residential';
-      if (!isResProp && !isResProj) return false;
-    } else if (category === 'commercial') {
-      const isCommProp = property.propertyType === 'commercial';
-      const isCommProj = property.category === 'commercial' || property.type === 'commercial';
-      if (!isCommProp && !isCommProj) return false;
-    } else if (category === 'investment') {
-      const isInvProp = property.propertyType === 'investment';
-      const isInvProj = property.category === 'investment' || property.type === 'investment';
-      if (!isInvProp && !isInvProj) return false;
-    }
-
-    // Additional User Filters
-    if (filters.category !== 'all') {
-      if (filters.category === 'residential') {
-        const isResProp = ['apartment', 'villa', 'plot'].includes(property.propertyType);
-        const isResProj = property.category === 'residential' || property.type === 'residential';
-        if (!isResProp && !isResProj) return false;
-      } else if (filters.category === 'commercial') {
-        const isCommProp = property.propertyType === 'commercial';
-        const isCommProj = property.category === 'commercial' || property.type === 'commercial';
-        if (!isCommProp && !isCommProj) return false;
-      } else if (filters.category === 'investment') {
-        const isInvProp = property.propertyType === 'investment';
-        const isInvProj = property.category === 'investment' || property.type === 'investment';
-        if (!isInvProp && !isInvProj) return false;
-      }
-    }
-
     if (filters.propertyType !== 'all') {
       let typeMatches = false;
       if (property.propertyType && property.propertyType === filters.propertyType) {
         typeMatches = true;
       } else if (property.type && property.type === filters.propertyType) {
         typeMatches = true;
-      } else if (property.commercialTypes && Array.isArray(property.commercialTypes) && property.commercialTypes.includes(filters.propertyType)) {
-        typeMatches = true;
       }
       if (!typeMatches) return false;
     }
+    
     if (filters.minPrice && property.price < parseInt(filters.minPrice)) return false;
     if (filters.maxPrice && property.price > parseInt(filters.maxPrice)) return false;
     
-    // Enhanced Search Logic (Matches location, city, title, or property name)
     if (filters.location) {
       const term = filters.location.toLowerCase();
       const matches = (
@@ -144,9 +114,9 @@ const Properties = ({ category = 'all' }) => {
       );
       if (!matches) return false;
     }
-    if (filters.transaction !== 'all' && property.transaction !== filters.transaction) return false;
+
     if (filters.status !== 'all' && property.status !== filters.status) return false;
-      if (filters.category !== 'commercial' && filters.bedroom !== 'all' && property.bedroom?.toString() !== filters.bedroom) return false;
+    if (filters.bedroom !== 'all' && property.bedroom?.toString() !== filters.bedroom) return false;
     if (filters.furnishing !== 'all' && property.furnishing !== filters.furnishing) return false;
 
     return true;
@@ -176,7 +146,7 @@ const Properties = ({ category = 'all' }) => {
               fontSize: '0.8rem', 
               marginBottom: '10px' 
             }}>
-              Real Estate Portfolio
+              Pre-owned Luxury Assets
             </span>
             <h2 style={{ 
               fontSize: isMobile ? '2rem' : '3.5rem', 
@@ -185,7 +155,7 @@ const Properties = ({ category = 'all' }) => {
               marginBottom: '15px',
               lineHeight: 1.2
             }}>
-              {category === 'residential' ? 'Residential Properties' : category === 'commercial' ? 'Commercial Properties' : 'All Properties'}
+              Resale Portfolio
             </h2>
             <div style={{ 
               height: '3px', 
@@ -201,7 +171,7 @@ const Properties = ({ category = 'all' }) => {
               margin: '0 auto',
               lineHeight: 1.6
             }}>
-              Discover your perfect property from our extensive collection of premium spaces defined by excellence.
+              Explore premium pre-owned and resale assets offering maximum value in highly developed signature locations.
             </p>
           </div>
 
@@ -241,7 +211,7 @@ const Properties = ({ category = 'all' }) => {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
               <h3 style={{ fontSize: '1.1rem', color: 'var(--color-navy)', fontWeight: '700', margin: 0 }}>
-                <i className="fas fa-filter" style={{ color: 'var(--color-gold)', marginRight: '10px' }}></i> Filter Properties
+                <HiAdjustments style={{ color: 'var(--color-gold)', marginRight: '10px', verticalAlign: 'middle', display: 'inline-block' }} /> Filter Listings
               </h3>
               {hasActiveFilters && (
                 <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}>
@@ -255,54 +225,35 @@ const Properties = ({ category = 'all' }) => {
               gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(180px, 1fr))', 
               gap: '15px' 
             }}>
+              
+              <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
+                <option value="all">All Types</option>
+                <option value="apartment">Apartment</option>
+                <option value="villa">Villa</option>
+                <option value="plot">Plot</option>
+                <option value="commercial">Commercial</option>
+                <option value="investment">Investment</option>
+              </select>
 
-              {category === 'commercial' ? (
-                <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
-                  <option value="all">All Types</option>
-                  <option value="Retail Shops">Retail Shops</option>
-                  <option value="Food Court">Food Court</option>
-                  <option value="Gaming Zone">Gaming Zone</option>
-                  <option value="Multiplex">Multiplex</option>
-                  <option value="Office Space">Office Space</option>
-                  <option value="Studio">Studio</option>
-                </select>
-              ) : category === 'residential' ? (
-                <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
-                  <option value="all">All Types</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="villa">Villa</option>
-                  <option value="plot">Plot</option>
-                </select>
-              ) : (
-                <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
-                  <option value="all">All Types</option>
-                  <option value="Retail Shops">Retail Shops</option>
-                  <option value="Food Court">Food Court</option>
-                  <option value="Gaming Zone">Gaming Zone</option>
-                  <option value="Multiplex">Multiplex</option>
-                  <option value="Office Space">Office Space</option>
-                  <option value="Studio">Studio</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="villa">Villa</option>
-                  <option value="plot">Plot</option>
-                </select>
-              )}
+              <select name="bedroom" value={filters.bedroom} onChange={handleFilterChange} style={filterInputStyle}>
+                <option value="all">Bedrooms (Any)</option>
+                <option value="1">1 BHK</option>
+                <option value="2">2 BHK</option>
+                <option value="3">3 BHK</option>
+                <option value="4">4 BHK</option>
+                <option value="5">5 BHK</option>
+              </select>
 
-              {filters.category !== 'commercial' && (
-                <select name="bedroom" value={filters.bedroom} onChange={handleFilterChange} style={filterInputStyle}>
-                  <option value="all">Bedrooms (Any)</option>
-                  <option value="1">1 BHK</option>
-                  <option value="2">2 BHK</option>
-                  <option value="3">3 BHK</option>
-                  <option value="4">4 BHK</option>
-                  <option value="5">5 BHK</option>
-                  <option value="penthouse">Penthouse</option>
-                </select>
-              )}
+              <select name="furnishing" value={filters.furnishing} onChange={handleFilterChange} style={filterInputStyle}>
+                <option value="all">Furnishing (Any)</option>
+                <option value="furnished">Furnished</option>
+                <option value="semi-furnished">Semi-Furnished</option>
+                <option value="unfurnished">Unfurnished</option>
+              </select>
 
               <input type="number" name="minPrice" placeholder="Min Price (₹)" value={filters.minPrice} onChange={handleFilterChange} style={filterInputStyle} />
               <input type="number" name="maxPrice" placeholder="Max Price (₹)" value={filters.maxPrice} onChange={handleFilterChange} style={filterInputStyle} />
-              <input type="text" name="location" placeholder="Search Keywords / Location..." value={filters.location} onChange={handleFilterChange} style={filterInputStyle} />
+              <input type="text" name="location" placeholder="Search Location / Keyword..." value={filters.location} onChange={handleFilterChange} style={filterInputStyle} />
             </div>
           </div>
 
@@ -320,8 +271,8 @@ const Properties = ({ category = 'all' }) => {
           {filteredProperties.length === 0 && (
             <div style={{ textAlign: 'center', padding: '60px 0' }}>
               <i className="fas fa-search" style={{ fontSize: '3rem', color: '#ddd', marginBottom: '20px' }}></i>
-              <h3 style={{ color: 'var(--color-navy)', fontSize: '1.4rem' }}>No properties match your criteria</h3>
-              <p style={{ color: '#888' }}>Try adjusting your filters or clearing them to see all properties.</p>
+              <h3 style={{ color: 'var(--color-navy)', fontSize: '1.4rem' }}>No resale assets match your criteria</h3>
+              <p style={{ color: '#888' }}>Try adjusting your filters or clearing them to see all resale options.</p>
             </div>
           )}
         </div>
@@ -342,8 +293,4 @@ const filterInputStyle = {
   transition: 'border-color 0.2s'
 };
 
-Properties.propTypes = {
-  category: PropTypes.string
-};
-
-export default Properties;
+export default Resale;
