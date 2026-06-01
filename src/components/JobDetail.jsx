@@ -1,113 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { HiOutlineLocationMarker, HiOutlineBriefcase, HiOutlineClock, HiOutlineArrowLeft } from 'react-icons/hi';
 import { API_URL } from '../apiConfig';
-
-const jobDescriptions = {
-  'Content Writer Intern': {
-    title: 'Content Writer Intern',
-    description: "The rapid digitisation of businesses across India, combined with Noida's emergence as a corporate and start-up hub, has opened a wide range of internship opportunities for students and fresh graduates.",
-    responsibilities: [
-      'Content Research: Conducting in-depth research on industry topics, market trends, competitor content, and audience preferences before drafting articles.',
-      'Blog & Article Writing: Writing well-structured, SEO-friendly blogs, articles, and long-form content on real estate, lifestyle, investments, and market trends.',
-      'SEO Optimisation: Implementing on-page SEO best practices including keyword integration, meta titles, meta descriptions, internal linking, and headline optimisation.',
-      'Website & Landing Page Content: Drafting compelling copy for property pages, service pages, and campaign landing pages that drive conversions.',
-      'Editing & Proofreading: Reviewing content for grammar, clarity, tone, and factual accuracy before publishing.',
-      'Collaboration: Working closely with the SEO, design, and marketing teams to align content with brand voice and campaign objectives.',
-      'Reporting: Tracking content performance metrics such as traffic, engagement, and rankings to refine future content.',
-    ],
-    skills: [
-      'Excellent written and verbal communication in English',
-      'Strong research and analytical abilities',
-      'Basic understanding of SEO principles and keyword research',
-      'Familiarity with tools like Google Docs, Grammarly, ChatGPT, and Surfer SEO/SEMrush (preferred)',
-      'Creativity, originality, and storytelling ability',
-      'Attention to detail and strong editing/proofreading skills',
-      'Time management and ability to meet deadlines',
-      'Willingness to learn and adapt to brand tone and style guides',
-    ],
-  },
-  'Sales Executive': {
-    title: 'Sales Executive',
-    description: 'Drive business growth through proactive customer engagement and sales strategy execution.',
-    responsibilities: [
-      'Identify and generate leads from various sources',
-      'Build and maintain strong customer relationships',
-      'Present property/investment opportunities effectively',
-      'Negotiate and close deals',
-      'Maintain sales pipeline and CRM data',
-      'Meet monthly and quarterly sales targets',
-    ],
-    skills: [
-      'Excellent communication skills',
-      'Negotiation and persuasion abilities',
-      'Problem-solving mindset',
-      'Customer-focused approach',
-      'Sales experience (preferred)',
-      'CRM proficiency',
-    ],
-  },
-  'Team Leader': {
-    title: 'Team Leader',
-    description: 'Lead and mentor a high-performing team while driving sales and operational excellence.',
-    responsibilities: [
-      'Lead and motivate sales team members',
-      'Set performance targets and KPIs',
-      'Conduct training and skill development sessions',
-      'Monitor team productivity and performance',
-      'Develop and implement sales strategies',
-      'Report to senior management',
-    ],
-    skills: [
-      'Leadership and team management',
-      'Sales expertise',
-      'Mentoring and coaching abilities',
-      'Strategic thinking',
-      'Customer relationship management',
-      'Decision-making skills',
-    ],
-  },
-  'Graphic Designer Intern (Male)': {
-    title: 'Graphic Designer Intern (Male)',
-    description: 'Create visually compelling designs for marketing materials and digital platforms.',
-    responsibilities: [
-      'Design marketing collateral and promotional materials',
-      'Create social media graphics and posts',
-      'Develop visual concepts for campaigns',
-      'Edit and enhance images',
-      'Maintain brand consistency',
-      'Support the creative team on various projects',
-    ],
-    skills: [
-      'Proficiency in Adobe Creative Suite',
-      'Strong visual design fundamentals',
-      'Creativity and originality',
-      'Attention to detail',
-      'Time management',
-      'Ability to take feedback',
-    ],
-  },
-  'Video Editor Intern (Male)': {
-    title: 'Video Editor Intern (Male)',
-    description: 'Edit and produce engaging video content for marketing and social media.',
-    responsibilities: [
-      'Edit raw footage into polished videos',
-      'Add graphics, transitions, and effects',
-      'Create promotional and social media videos',
-      'Maintain brand consistency in video content',
-      'Collaborate with creative and marketing teams',
-      'Optimize videos for different platforms',
-    ],
-    skills: [
-      'Proficiency in video editing software (Premiere Pro, After Effects, etc.)',
-      'Knowledge of video formats and codecs',
-      'Creative storytelling ability',
-      'Attention to detail',
-      'Time management',
-      'Ability to work in a fast-paced environment',
-    ],
-  },
-};
 
 const inputStyle = {
   width: '100%',
@@ -132,21 +26,22 @@ const labelStyle = {
 const JobDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const position = location.state?.position;
+  const { id } = useParams();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+  const [jobPosting, setJobPosting] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [fetchingJob, setFetchingJob] = useState(true);
 
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     mobile: '',
-    position: position?.title || '',
-    location: position?.location || '',
-    experience: '',
+    position: '',
+    location: '',
+    experience: 0,
     message: '',
   });
-
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -155,7 +50,27 @@ const JobDetail = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const jobInfo = jobDescriptions[formData.position] || jobDescriptions['Content Writer Intern'];
+  useEffect(() => {
+    const fetchJobPosting = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/job-postings/${id}`);
+        const data = await response.json();
+        if (data.success) {
+          setJobPosting(data.data);
+          setFormData(prev => ({
+            ...prev,
+            position: data.data.title,
+            location: data.data.location,
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching job posting:', error);
+      } finally {
+        setFetchingJob(false);
+      }
+    };
+    fetchJobPosting();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -166,20 +81,36 @@ const JobDetail = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Validate all required fields
+    if (!formData.fullName || !formData.email || !formData.mobile || !formData.position || formData.experience < 0 || !formData.location) {
+      alert('Please fill in all required fields');
+      setLoading(false);
+      return;
+    }
+
+    // Ensure experience is a number
+    const dataToSend = {
+      ...formData,
+      experience: Number(formData.experience)
+    };
+
+    console.log('Submitting form data:', dataToSend);
+
     try {
       const response = await fetch(`${API_URL}/api/candidates`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       const result = await response.json();
+      console.log('Response from server:', result);
 
       if (result.success) {
         setSubmitted(true);
         setTimeout(() => navigate('/careers'), 3000);
       } else {
-        alert('Error submitting application. Please try again.');
+        alert(`Error submitting application: ${result.message || 'Please try again.'}`);
       }
     } catch (error) {
       console.error('Error submitting application:', error);
@@ -199,6 +130,40 @@ const JobDetail = () => {
             Thank you for applying for <strong>{formData.position}</strong>. We have received your application and will review it shortly.
           </p>
           <p style={{ fontSize: '0.85rem', color: '#999' }}>Redirecting to careers page...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (fetchingJob) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#F9F9F9', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ color: '#666', fontSize: '1.1rem' }}>Loading job details...</div>
+      </div>
+    );
+  }
+
+  if (!jobPosting) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#F9F9F9', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-navy)', marginBottom: '16px' }}>Job Not Found</h2>
+          <p style={{ color: '#666', marginBottom: '24px' }}>The job posting you're looking for doesn't exist or has been closed.</p>
+          <button
+            onClick={() => navigate('/careers')}
+            style={{
+              padding: '12px 28px',
+              backgroundColor: 'var(--color-gold)',
+              color: 'var(--color-navy)',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+            }}
+          >
+            Back to Careers
+          </button>
         </div>
       </div>
     );
@@ -231,21 +196,25 @@ const JobDetail = () => {
             Job Application
           </span>
           <h1 style={{ fontSize: isMobile ? '1.75rem' : '2.5rem', fontWeight: 900, color: 'white', marginBottom: '16px', lineHeight: 1.2 }}>
-            {jobInfo.title}
+            {jobPosting.title}
           </h1>
           <div style={{ width: '50px', height: '3px', backgroundColor: 'var(--color-gold)', marginBottom: '20px' }} />
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', color: 'rgba(255,255,255,0.85)', fontSize: '0.95rem' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <HiOutlineLocationMarker style={{ color: 'var(--color-gold)' }} />
-              {position?.location || 'Multiple Locations'}
+              {jobPosting.location}
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <HiOutlineBriefcase style={{ color: 'var(--color-gold)' }} />
-              {position?.openings || 'N/A'} openings
+              {jobPosting.numberOfOpenings} openings
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <HiOutlineClock style={{ color: 'var(--color-gold)' }} />
-              {position?.experience === '0' ? 'Fresher welcome' : `${position?.experience || 'Any'} yrs experience`}
+              {jobPosting.experience}
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <HiOutlineBriefcase style={{ color: 'var(--color-gold)' }} />
+              {jobPosting.jobTiming}
             </span>
           </div>
         </div>
@@ -264,54 +233,30 @@ const JobDetail = () => {
           >
             {/* Job Details */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {jobInfo.description && (
+              {jobPosting.description && (
                 <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: isMobile ? '24px' : '32px', boxShadow: '0 4px 20px rgba(10,28,58,0.06)' }}>
                   <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-navy)', marginBottom: '16px', paddingBottom: '12px', borderBottom: '2px solid var(--color-gold)' }}>
                     About This Role
                   </h2>
-                  <p style={{ color: '#555', lineHeight: 1.8, margin: 0, fontSize: '0.95rem' }}>{jobInfo.description}</p>
+                  <p style={{ color: '#555', lineHeight: 1.8, margin: 0, fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>{jobPosting.description}</p>
                 </div>
               )}
 
-              {jobInfo.responsibilities && (
+              {jobPosting.requirements && (
                 <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: isMobile ? '24px' : '32px', boxShadow: '0 4px 20px rgba(10,28,58,0.06)' }}>
                   <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-navy)', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid var(--color-gold)' }}>
-                    Key Responsibilities
+                    Requirements
                   </h2>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {jobInfo.responsibilities.map((item, index) => (
-                      <li key={index} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', color: '#555', fontSize: '0.95rem', lineHeight: 1.7 }}>
-                        <span style={{ color: 'var(--color-gold)', fontWeight: 700, flexShrink: 0, marginTop: '2px' }}>▸</span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
+                  <p style={{ color: '#555', lineHeight: 1.8, margin: 0, fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>{jobPosting.requirements}</p>
                 </div>
               )}
 
-              {jobInfo.skills && (
+              {jobPosting.salary && (
                 <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: isMobile ? '24px' : '32px', boxShadow: '0 4px 20px rgba(10,28,58,0.06)' }}>
-                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-navy)', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid var(--color-gold)' }}>
-                    Required Skills
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-navy)', marginBottom: '16px', paddingBottom: '12px', borderBottom: '2px solid var(--color-gold)' }}>
+                    Salary
                   </h2>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                    {jobInfo.skills.map((skill, index) => (
-                      <span
-                        key={index}
-                        style={{
-                          padding: '8px 16px',
-                          backgroundColor: '#F0F4FF',
-                          color: 'var(--color-navy)',
-                          borderRadius: '20px',
-                          fontSize: '0.85rem',
-                          fontWeight: 500,
-                          border: '1px solid rgba(10,28,58,0.08)',
-                        }}
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
+                  <p style={{ color: '#555', lineHeight: 1.8, margin: 0, fontSize: '0.95rem' }}>{jobPosting.salary}</p>
                 </div>
               )}
             </div>

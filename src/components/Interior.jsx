@@ -114,7 +114,7 @@ const Interior = () => {
     { title: 'Wardrobes', img: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?q=80&w=600' },
     { title: 'False Ceiling', img: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=600' },
     { title: 'Crockery Unit', img: 'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?q=80&w=600' },
-    { title: 'TV Unit', img: 'https://images.unsplash.com/photo-1593085260707-5377ba34f9a8?q=80&w=600' },
+    { title: 'TV Unit', img: '/tvUnit.jpg' },
     { title: 'Painting', img: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?q=80&w=600' },
     { title: 'Study Table', img: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?q=80&w=600' },
     { title: 'Furniture & More', img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=600' },

@@ -60,7 +60,7 @@ const PropertyDetails = () => {
     switch(status) {
       case 'available': return { bg: '#dcfce7', color: '#16a34a', label: 'Available' };
       case 'sold': return { bg: '#fee2e2', color: '#dc2626', label: 'Sold' };
-      case 'upcoming': return { bg: '#dbeafe', color: '#0284c7', label: 'Upcoming' };
+      case 'upcoming': return { bg: '#dbeafe', color: '#0284c7', label: 'Under Construction' };
       default: return { bg: '#f3f4f6', color: '#374151', label: status };
     }
   };

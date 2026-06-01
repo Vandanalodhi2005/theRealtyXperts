@@ -58,7 +58,7 @@ const ProjectDetails = () => {
     switch (status) {
       case 'ready-to-move': return 'Ready to Move';
       case 'under-construction': return 'Under Construction';
-      case 'upcoming': return 'Upcoming';
+      case 'upcoming': return 'Under Construction';
       case 'completed': return 'Completed';
       default: return status;
     }

@@ -10,6 +10,18 @@ const Projects = ({ type = 'all' }) => {
   const [filters, setFilters] = useState({ title: '', category: '', type: '', status: '', minPrice: '', maxPrice: '', location: '', city: '' });
   const navigate = useNavigate();
 
+  // Input style for filter form
+  const inputStyle = {
+    padding: '10px 15px',
+    border: '1px solid #E0E0E0',
+    borderRadius: '6px',
+    fontSize: '0.95rem',
+    color: 'var(--color-navy)',
+    outline: 'none',
+    backgroundColor: '#FAFAFA',
+    fontFamily: 'inherit',
+  };
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
@@ -165,7 +177,6 @@ const projectMatches = filteredProjects;
               {/* Status */}
               <select name="status" value={filters.status} onChange={handleFilterChange} style={inputStyle}>
                 <option value="">Any Status</option>
-                <option value="upcoming">Upcoming</option>
                 <option value="under-construction">Under Construction</option>
                 <option value="ready-to-move">Ready to Move</option>
                 <option value="completed">Completed</option>

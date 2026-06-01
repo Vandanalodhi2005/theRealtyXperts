@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { HiOutlineLocationMarker, HiOutlineBriefcase, HiOutlineClock, HiOutlineChevronDown } from 'react-icons/hi';
-
-const positions = [
-  { id: 1, title: 'Sales Executive', location: 'Noida', openings: 10, experience: '0-2', type: 'Full-time' },
-  { id: 2, title: 'Sales Executive', location: 'Gurugram', openings: 10, experience: '0-2', type: 'Full-time' },
-  { id: 3, title: 'Team Leader', location: 'Noida', openings: 10, experience: '2-4', type: 'Full-time' },
-  { id: 4, title: 'Team Leader', location: 'Gurugram', openings: 10, experience: '2-4', type: 'Full-time' },
-  { id: 5, title: 'Graphic Designer Intern (Male)', location: 'Noida', openings: 2, experience: '0', type: 'Internship' },
-  { id: 6, title: 'Video Editor Intern (Male)', location: 'Noida', openings: 2, experience: '0', type: 'Internship' },
-  { id: 7, title: 'Content Writer Intern', location: 'Noida', openings: 5, experience: '0', type: 'Internship' },
-];
+import { API_URL } from '../apiConfig';
 
 const benefits = [
   {
@@ -21,7 +12,7 @@ const benefits = [
   {
     icon: '🌟',
     title: 'Industry Exposure',
-    description: "Collaborate with top-tier developers and serve premium buyers across Noida, Gurugram, Lucknow & Mumbai's prime real estate markets.",
+    description: "Collaborate with top-tier developers and serve premium buyers across Noida's prime real estate market.",
   },
   {
     icon: '🤝',
@@ -55,6 +46,8 @@ const Career = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
   const [openFaq, setOpenFaq] = useState(null);
   const [filter, setFilter] = useState('All');
+  const [jobPostings, setJobPostings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -63,10 +56,27 @@ const Career = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const filters = ['All', 'Full-time', 'Internship'];
+  useEffect(() => {
+    const fetchJobPostings = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/job-postings/active`);
+        const data = await response.json();
+        if (data.success) {
+          setJobPostings(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching job postings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobPostings();
+  }, []);
+
+  const filters = ['All', 'Full Time', 'Part Time', 'Contract', 'Internship'];
   const filteredPositions = filter === 'All'
-    ? positions
-    : positions.filter((p) => p.type === filter);
+    ? jobPostings
+    : jobPostings.filter((p) => p.jobTiming === filter);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F9F9F9' }}>
@@ -102,7 +112,7 @@ const Career = () => {
               marginBottom: '12px',
             }}
           >
-            Join Our Team
+            We're Hiring – Real Estate Professionals
           </span>
           <h1
             style={{
@@ -113,11 +123,11 @@ const Career = () => {
               lineHeight: 1.2,
             }}
           >
-            Build Your Career With Us
+            Join Our Growing Real Estate Team
           </h1>
           <div style={{ width: '60px', height: '4px', backgroundColor: 'var(--color-gold)', margin: '0 auto 20px' }} />
           <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: isMobile ? '1rem' : '1.15rem', maxWidth: '600px', margin: '0 auto' }}>
-            Explore open roles across sales, leadership, and creative teams. Your next chapter in real estate starts here.
+            Location: Noida, Uttar Pradesh – We are expanding our sales and leadership team and are looking for passionate, result‑driven professionals to join us in shaping the future of real estate.
           </p>
         </div>
       </section>
@@ -134,9 +144,9 @@ const Career = () => {
             }}
           >
             {[
-              { value: '7+', label: 'Open Roles' },
-              { value: '39', label: 'Total Openings' },
-              { value: '2', label: 'Office Locations' },
+              { value: jobPostings.length || '0', label: 'Open Roles' },
+              { value: jobPostings.reduce((sum, p) => sum + (p.numberOfOpenings || 0), 0) || '0', label: 'Total Openings' },
+              { value: '1', label: 'Office Locations' },
               { value: '100%', label: 'Free to Apply' },
             ].map((stat) => (
               <div key={stat.label}>
@@ -186,86 +196,92 @@ const Career = () => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {filteredPositions.map((position) => (
-              <div
-                key={position.id}
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: '12px',
-                  padding: isMobile ? '20px' : '28px 32px',
-                  boxShadow: '0 4px 20px rgba(10,28,58,0.06)',
-                  border: '1px solid rgba(10,28,58,0.06)',
-                  display: 'flex',
-                  flexDirection: isMobile ? 'column' : 'row',
-                  alignItems: isMobile ? 'flex-start' : 'center',
-                  justifyContent: 'space-between',
-                  gap: '20px',
-                  transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 8px 30px rgba(10,28,58,0.12)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(10,28,58,0.06)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
-                    <h3 style={{ fontSize: isMobile ? '1.1rem' : '1.25rem', fontWeight: 700, color: 'var(--color-navy)', margin: 0 }}>
-                      {position.title}
-                    </h3>
-                    <span
-                      style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        padding: '3px 10px',
-                        borderRadius: '20px',
-                        backgroundColor: position.type === 'Internship' ? '#E8F4FD' : '#F0F4FF',
-                        color: position.type === 'Internship' ? '#1A6FA8' : 'var(--color-navy)',
-                      }}
-                    >
-                      {position.type}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', color: '#666', fontSize: '0.9rem' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <HiOutlineLocationMarker style={{ color: 'var(--color-gold)' }} />
-                      {position.location}
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <HiOutlineBriefcase style={{ color: 'var(--color-gold)' }} />
-                      {position.openings} openings
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <HiOutlineClock style={{ color: 'var(--color-gold)' }} />
-                      {position.experience === '0' ? 'Fresher' : `${position.experience} yrs exp`}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => navigate(`/careers/${position.id}`, { state: { position } })}
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>Loading job postings...</div>
+            ) : filteredPositions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>No job postings available at the moment.</div>
+            ) : (
+              filteredPositions.map((position) => (
+                <div
+                  key={position._id}
                   style={{
-                    padding: '12px 28px',
-                    backgroundColor: 'var(--color-gold)',
-                    color: 'var(--color-navy)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontWeight: 700,
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    transition: 'background-color 0.2s ease',
-                    width: isMobile ? '100%' : 'auto',
+                    backgroundColor: 'white',
+                    borderRadius: '12px',
+                    padding: isMobile ? '20px' : '28px 32px',
+                    boxShadow: '0 4px 20px rgba(10,28,58,0.06)',
+                    border: '1px solid rgba(10,28,58,0.06)',
+                    display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    alignItems: isMobile ? 'flex-start' : 'center',
+                    justifyContent: 'space-between',
+                    gap: '20px',
+                    transition: 'box-shadow 0.2s ease, transform 0.2s ease',
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-gold-light)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-gold)'; }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 8px 30px rgba(10,28,58,0.12)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(10,28,58,0.06)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
                 >
-                  Apply Now
-                </button>
-              </div>
-            ))}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                      <h3 style={{ fontSize: isMobile ? '1.1rem' : '1.25rem', fontWeight: 700, color: 'var(--color-navy)', margin: 0 }}>
+                        {position.title}
+                      </h3>
+                      <span
+                        style={{
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          padding: '3px 10px',
+                          borderRadius: '20px',
+                          backgroundColor: position.jobTiming === 'Internship' ? '#E8F4FD' : '#F0F4FF',
+                          color: position.jobTiming === 'Internship' ? '#1A6FA8' : 'var(--color-navy)',
+                        }}
+                      >
+                        {position.jobTiming}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', color: '#666', fontSize: '0.9rem' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <HiOutlineLocationMarker style={{ color: 'var(--color-gold)' }} />
+                        {position.location}
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <HiOutlineBriefcase style={{ color: 'var(--color-gold)' }} />
+                        {position.numberOfOpenings} openings
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <HiOutlineClock style={{ color: 'var(--color-gold)' }} />
+                        {position.experience}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/careers/${position._id}`, { state: { position } })}
+                    style={{
+                      padding: '12px 28px',
+                      backgroundColor: 'var(--color-gold)',
+                      color: 'var(--color-navy)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      transition: 'background-color 0.2s ease',
+                      width: isMobile ? '100%' : 'auto',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-gold-light)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-gold)'; }}
+                  >
+                    Apply Now
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>

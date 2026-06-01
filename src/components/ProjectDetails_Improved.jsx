@@ -75,7 +75,7 @@ const ProjectDetails = () => {
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'upcoming': return { bg: '#dbeafe', color: '#0284c7', label: '🚀 Upcoming' };
+      case 'upcoming': return { bg: '#fef3c7', color: '#d97706', label: '🏗️ Under Construction' };
       case 'under-construction': return { bg: '#fef3c7', color: '#d97706', label: '🏗️ Under Construction' };
       case 'completed': return { bg: '#dcfce7', color: '#16a34a', label: '✨ Completed' };
       case 'ready-to-move': return { bg: '#e0e7ff', color: '#4f46e5', label: '🔑 Ready to Move' };

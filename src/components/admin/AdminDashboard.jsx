@@ -28,6 +28,7 @@ import AddInvestmentForm from './AddInvestmentForm';
 import AddProjectForm from './AddProjectForm';
 import GalleryManagement from './GalleryManagement';
 import AddTeamMemberForm from './AddTeamMemberForm';
+import AddJobPostingForm from './AddJobPostingForm';
 import { API_URL } from '../../apiConfig';
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -39,10 +40,12 @@ const AdminDashboard = () => {
     const [showAddInvestment, setShowAddInvestment] = useState(false);
     const [showAddProject, setShowAddProject] = useState(false);
     const [showAddTeamMember, setShowAddTeamMember] = useState(false);
+    const [showAddJobPosting, setShowAddJobPosting] = useState(false);
     const [editProperty, setEditProperty] = useState(null);
     const [editInvestment, setEditInvestment] = useState(null);
     const [editProject, setEditProject] = useState(null);
     const [editTeamMember, setEditTeamMember] = useState(null);
+    const [editJobPosting, setEditJobPosting] = useState(null);
     const [selectedProperty, setSelectedProperty] = useState(null);
     const [selectedInvestment, setSelectedInvestment] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
@@ -55,6 +58,7 @@ const AdminDashboard = () => {
     const [gallery, setGallery] = useState([]);
     const [interiorQueries, setInteriorQueries] = useState([]);
     const [candidateApplications, setCandidateApplications] = useState([]);
+    const [jobPostings, setJobPostings] = useState([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [selectedInquiry, setSelectedInquiry] = useState(null);
@@ -90,7 +94,8 @@ const AdminDashboard = () => {
         gallery: '',
         team: '',
         interiorQueries: '',
-        candidateApplications: ''
+        candidateApplications: '',
+        jobPostings: ''
     });
     const [currentPages, setCurrentPages] = useState({
         properties: 1,
@@ -101,7 +106,8 @@ const AdminDashboard = () => {
         gallery: 1,
         team: 1,
         interiorQueries: 1,
-        candidateApplications: 1
+        candidateApplications: 1,
+        jobPostings: 1
     });
     const ITEMS_PER_PAGE = 25;
 
@@ -111,7 +117,7 @@ const AdminDashboard = () => {
             const token = localStorage.getItem('adminToken');
             const headers = { 'Authorization': `Bearer ${token}` };
             
-            const [dashRes, propRes, contactRes, projectRes, galleryRes, teamRes, interiorRes, candidateRes] = await Promise.all([
+            const [dashRes, propRes, contactRes, projectRes, galleryRes, teamRes, interiorRes, candidateRes, jobPostingsRes] = await Promise.all([
                 fetch(`${API_URL}/api/admin/dashboard`, { headers }),
                 fetch(`${API_URL}/api/properties`, { headers }),
                 fetch(`${API_URL}/api/contact`, { headers }),
@@ -119,7 +125,8 @@ const AdminDashboard = () => {
                 fetch(`${API_URL}/api/gallery`, { headers }),
                 fetch(`${API_URL}/api/team-members`, { headers }),
                 fetch(`${API_URL}/api/interior-queries`, { headers }),
-                fetch(`${API_URL}/api/candidates`, { headers })
+                fetch(`${API_URL}/api/candidates`, { headers }),
+                fetch(`${API_URL}/api/job-postings`, { headers })
             ]);
 
             if (dashRes.ok) setDashboardData((await dashRes.json()).data);
@@ -135,6 +142,10 @@ const AdminDashboard = () => {
             if (candidateRes.ok) {
                 const candidateData = await candidateRes.json();
                 setCandidateApplications(Array.isArray(candidateData) ? candidateData : (candidateData.data || []));
+            }
+            if (jobPostingsRes.ok) {
+                const jobPostingsData = await jobPostingsRes.json();
+                setJobPostings(Array.isArray(jobPostingsData) ? jobPostingsData : (jobPostingsData.data || []));
             }
             
         } catch (e) {
@@ -388,6 +399,7 @@ const AdminDashboard = () => {
         { id: 'projects', label: 'Projects', icon: HiClipboardList },
         { id: 'inquiries', label: 'Contact Inquiries', icon: HiMail },
         { id: 'interiorQueries', label: 'Interior Queries', icon: HiOfficeBuilding },
+        { id: 'jobPostings', label: 'Job Postings', icon: HiClipboardList },
         { id: 'candidateApplications', label: 'Job Applications', icon: HiUser },
         { id: 'settings', label: 'Settings', icon: HiCog },
         { id: 'gallery', label: 'Gallery', icon: HiPhotograph },
@@ -1679,6 +1691,91 @@ const AdminDashboard = () => {
         );
     };
 
+    const renderJobPostings = () => {
+        if (showAddJobPosting || editJobPosting) {
+            return (
+                <AddJobPostingForm
+                    initialData={editJobPosting}
+                    onCancel={() => { setShowAddJobPosting(false); setEditJobPosting(null); }}
+                    onSuccess={() => { setShowAddJobPosting(false); setEditJobPosting(null); fetchData(); }}
+                />
+            );
+        }
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                    <h2 style={{ color: 'var(--color-navy)', fontSize: '24px', fontWeight: 'bold' }}>Job Postings Management</h2>
+                    <button
+                        onClick={() => setShowAddJobPosting(true)}
+                        style={{ backgroundColor: '#F39C12', color: 'white', border: 'none', padding: '12px 25px', borderRadius: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 10px rgba(243, 156, 18, 0.2)' }}
+                    >
+                        <HiPlus /> Add New Job Posting
+                    </button>
+                </div>
+
+                <div style={mainCardStyle}>
+                    <div style={{ borderBottom: '1px solid #E6E9EF', paddingBottom: '15px', marginBottom: '15px' }}>
+                        <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)' }}>All Job Postings</h4>
+                    </div>
+
+                    {renderSearchBar('jobPostings', 'Search job postings by title, location...')}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        {(() => {
+                            const { data: pagedData, totalPages } = getPaginatedData(jobPostings, 'jobPostings', ['title', 'location', 'experience', 'jobTiming', 'status']);
+                            if (pagedData.length === 0) return (
+                                <p style={{ textAlign: 'center', color: '#90A4AE', padding: '40px' }}>
+                                    {searchTerms.jobPostings ? 'No job postings match your search.' : 'No job postings yet.'}
+                                </p>
+                            );
+                            return (
+                                <>
+                                    {pagedData.map(posting => (
+                                        <div key={posting._id} style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', backgroundColor: '#F8F9FA', borderRadius: '12px', border: '1px solid #E6E9EF' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                                                <div>
+                                                    <h5 style={{ margin: 0, fontSize: '16px', color: 'var(--color-navy)', fontWeight: '800' }}>{posting.title}</h5>
+                                                    <p style={{ margin: '5px 0', fontSize: '13px', color: '#607D8B' }}>{posting.location} • {posting.jobTiming}</p>
+                                                    <span style={{ backgroundColor: '#E3F2FD', color: '#1976D2', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600' }}>{posting.experience} • {posting.numberOfOpenings} openings</span>
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                                                    <span style={statusBadgeStyle(posting.status)}>{posting.status}</span>
+                                                    <span style={{ fontSize: '12px', color: '#90A4AE', fontWeight: '500' }}>{new Date(posting.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', fontSize: '13px', color: '#607D8B' }}>
+                                                {posting.salary && <span><strong>Salary:</strong> {posting.salary}</span>}
+                                            </div>
+                                            <div style={{ padding: '15px', backgroundColor: 'white', borderRadius: '8px', borderLeft: '4px solid var(--color-gold)' }}>
+                                                <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#455A64', maxHeight: '100px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{posting.description}</p>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+                                                <button
+                                                    onClick={() => handleDeleteJobPosting(posting._id)}
+                                                    style={{ backgroundColor: 'white', border: '1px solid #F44336', color: '#F44336', padding: '8px 15px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                                >
+                                                    <HiTrash size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={() => { setEditJobPosting(posting); setShowAddJobPosting(true); }}
+                                                    style={{ backgroundColor: 'white', border: '1px solid var(--color-gold)', color: 'var(--color-gold)', padding: '8px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                                >
+                                                    <HiPencilAlt size={14} /> Edit
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {renderPagination('jobPostings', totalPages)}
+                                </>
+                            );
+                        })()}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderInteriorQueryModal = () => {
         if (!selectedInteriorQuery) return null;
         const q = selectedInteriorQuery;
@@ -1859,6 +1956,21 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleDeleteJobPosting = async (id) => {
+        if (!confirm('Are you sure you want to delete this job posting?')) return;
+        try {
+            const token = localStorage.getItem('adminToken');
+            const res = await fetch(`${API_URL}/api/job-postings/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                toast.success('Job posting deleted successfully');
+                fetchData();
+            }
+        } catch (e) { toast.error('Error deleting job posting'); }
+    };
+
     const renderContent = () => {
         if (loading) return <div style={{ textAlign: 'center', padding: '100px', color: '#90A4AE' }}>Loading System Data...</div>;
         if (activeTab === 'dashboard') return renderDashboard();
@@ -1866,6 +1978,7 @@ const AdminDashboard = () => {
         if (activeTab === 'projects') return renderProjects();
         if (activeTab === 'inquiries') return renderInquiries();
         if (activeTab === 'interiorQueries') return renderInteriorQueries();
+        if (activeTab === 'jobPostings') return renderJobPostings();
         if (activeTab === 'candidateApplications') return renderCandidateApplications();
         if (activeTab === 'settings') return renderSettings();
         if (activeTab === 'gallery') return <GalleryManagement />;

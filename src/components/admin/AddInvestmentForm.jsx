@@ -119,7 +119,7 @@ const AddInvestmentForm = ({ onCancel, onSuccess, initialData }) => {
             <select name="status" value={formData.status} onChange={handleInputChange} style={inputStyle} required>
               <option value="available">Available</option>
               <option value="sold">Sold</option>
-              <option value="upcoming">Upcoming</option>
+              <option value="upcoming">Under Construction</option>
             </select>
           </div>
 

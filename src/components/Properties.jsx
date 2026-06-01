@@ -257,15 +257,23 @@ const Properties = ({ category = 'all' }) => {
             }}>
 
               {category === 'commercial' ? (
-                <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
-                  <option value="all">All Types</option>
-                  <option value="Retail Shops">Retail Shops</option>
-                  <option value="Food Court">Food Court</option>
-                  <option value="Gaming Zone">Gaming Zone</option>
-                  <option value="Multiplex">Multiplex</option>
-                  <option value="Office Space">Office Space</option>
-                  <option value="Studio">Studio</option>
-                </select>
+                <>
+                  <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
+                    <option value="all">All Types</option>
+                    <option value="Retail Shops">Retail Shops</option>
+                    <option value="Food Court">Food Court</option>
+                    <option value="Gaming Zone">Gaming Zone</option>
+                    <option value="Multiplex">Multiplex</option>
+                    <option value="Office Space">Office Space</option>
+                    <option value="Studio">Studio</option>
+                  </select>
+                  <select name="status" value={filters.status} onChange={handleFilterChange} style={filterInputStyle}>
+                    <option value="all">All Status</option>
+                    <option value="upcoming">Under Construction</option>
+                    <option value="ready to move">Ready to Move</option>
+                    <option value="coming soon">Coming Soon</option>
+                  </select>
+                </>
               ) : category === 'residential' ? (
                 <select name="propertyType" value={filters.propertyType} onChange={handleFilterChange} style={filterInputStyle}>
                   <option value="all">All Types</option>
@@ -288,7 +296,7 @@ const Properties = ({ category = 'all' }) => {
                 </select>
               )}
 
-              {filters.category !== 'commercial' && (
+              {category !== 'commercial' && filters.category !== 'commercial' && (
                 <select name="bedroom" value={filters.bedroom} onChange={handleFilterChange} style={filterInputStyle}>
                   <option value="all">Bedrooms (Any)</option>
                   <option value="1">1 BHK</option>
